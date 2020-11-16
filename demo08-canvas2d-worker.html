@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoWall</title>
+  <link rel="stylesheet" href="js/three.js/editor/css/main.css">
+  <style>
+    #app {
+      position: absolute;
+      top: 0;
+      left: 0;
+      /* for 4x2 FullHD */
+      width: 7680px;
+      height: 2160px;
+      /* transform to fit screen */
+      transform: scale3d(0.2, 0.2, 1.0);
+      transform-origin: top left;
+      border: solid 1px black;
+    }
+
+    #editor-container {
+      position: absolute;
+      top: calc(2160px * 0.2);
+      transform: scale3d(0.1, 0.1, 1.0);
+      transform-origin: top left;
+      border: solid 1px red;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="c"></canvas>
+  </div>
+  <div id="editor-container">
+    <canvas id="editor-canvas"></canvas>
+  </div>
+  <script type="module">
+
+    import Stats from './stats.module.js';
+
+    const worker = new Worker('demo08-canvas2d-worker.js');
+
+    const stats = new Stats();
+    document.body.appendChild( stats.dom );
+
+    const $app = document.getElementById('app');
+
+    const sourceDimensions = {
+      width: 6000,
+      height: 6000
+    };
+
+    const screens = [
+      {
+        id: 0,
+        x: 0,
+        y: 0,
+        width: 1920,
+        height: 1080
+      },
+      {
+        id: 1,
+        x: 1920,
+        y: 0,
+        width: 1920,
+        height: 1080
+      },
+      {
+        id: 2,
+        x: 3840,
+        y: 0,
+        width: 1920,
+        height: 1080
+      },
+      {
+        id: 3,
+        x: 0,
+        y: 1080,
+        width: 1920,
+        height: 1080
+      },
+      {
+        id: 4,
+        x: 1920,
+        y: 1080,
+        width: 1920,
+        height: 1080
+      },
+      {
+        id: 5,
+        x: 3840,
+        y: 1080,
+        width: 1920,
+        height: 1080
+      },
+      {
+        id: 6,
+        x: 0,
+        y: 2160,
+        width: 1920,
+        height: 1080
+      },
+      {
+        id: 7,
+        x: 1920,
+        y: 2160,
+        width: 1920,
+        height: 1080
+      }
+    ];
+
+    const appDimensions = {
+      width: $app.offsetWidth,
+      height: $app.offsetHeight,
+      cols: 4,
+      screenWidth: 1920,
+      screenHeight: 1080
+    };
+
+    const outputCanvas = document.querySelector('#c');
+    outputCanvas.width = appDimensions.width;
+    outputCanvas.height = appDimensions.height;
+    const outputCanvasOffscreen = outputCanvas.transferControlToOffscreen();
+
+    const editorCanvas = document.querySelector('#editor-canvas');
+    editorCanvas.width = sourceDimensions.width;
+    editorCanvas.height = sourceDimensions.height;
+    const editorCanvasOffscreen = editorCanvas.transferControlToOffscreen();
+
+    let selectedScreen = false;
+    let dragStartPosition = {
+      x: 0,
+      y: 0
+    };
+    let selectedScreenDragStartPosition = {
+      x: 0,
+      y: 0
+    };
+
+    const init = () => {
+
+      worker.postMessage({
+        type: 'init',
+        outputCanvas: outputCanvasOffscreen,
+        editorCanvas: editorCanvasOffscreen,
+        appDimensions,
+        sourceDimensions,
+        screens
+      }, [outputCanvasOffscreen, editorCanvasOffscreen]);
+
+      editorCanvas.addEventListener('mousedown', dragStartHandler);
+
+      requestAnimationFrame(render);
+    };
+
+    const dragStartHandler = (event) => {
+      const x = event.offsetX;
+      const y = event.offsetY;
+      // what screen is this?
+      selectedScreen = false;
+      for (let i = 0; i < screens.length; i++) {
+        if (screens[i].x < x && screens[i].y < y && (screens[i].x + screens[i].width) > x && (screens[i].y + screens[i].height) > y) {
+          selectedScreen = screens[i];
+          break;
+        }
+      }
+      if (!selectedScreen) {
+        return;
+      }
+
+      dragStartPosition.x = x;
+      dragStartPosition.y = y;
+
+      selectedScreenDragStartPosition.x = selectedScreen.x;
+      selectedScreenDragStartPosition.y = selectedScreen.y;
+
+      window.addEventListener('mousemove', dragMoveHandler);
+      window.addEventListener('mouseup', dragEndHandler);
+    };
+
+    const dragMoveHandler = (event) => {
+      const x = event.offsetX;
+      const y = event.offsetY;
+
+      selectedScreen.x = selectedScreenDragStartPosition.x + (x - dragStartPosition.x);
+      selectedScreen.y = selectedScreenDragStartPosition.y + (y - dragStartPosition.y);
+
+      worker.postMessage({
+        type: 'updateScreen',
+        screen: selectedScreen
+      });
+    };
+
+    const dragEndHandler = (event) => {
+      const x = event.offsetX;
+      const y = event.offsetY;
+      selectedScreen = false;
+      window.removeEventListener('mousemove', dragMoveHandler);
+      window.removeEventListener('mouseup', dragEndHandler);
+    };
+
+    const render = (time) => {
+      stats.begin();
+      time *= 0.001;  // convert time to seconds
+
+	    stats.end();
+      requestAnimationFrame(render);
+    };
+
+    init();
+
+    
+  </script>
+</body>
+</html>

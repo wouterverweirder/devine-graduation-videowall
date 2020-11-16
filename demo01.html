@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoWall</title>
+  <style>
+    #app {
+      position: absolute;
+      top: 0;
+      left: 0;
+      /* for 4x2 FullHD */
+      width: 7680px;
+      height: 2160px;
+      /* transform to fit screen */
+      transform: scale3d(0.2, 0.2, 1.0);
+      transform-origin: top left;
+      background: #cccccc;
+    }
+
+    #div {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: red;
+      transform: translate3d(0, 0, 0);
+      transition: transform 1s;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="div"></div>
+  </div>
+  <script type="module">
+    const $app = document.getElementById('app');
+    const $div = document.getElementById('div');
+
+    const appDimensions = {
+      width: $app.offsetWidth,
+      height: $app.offsetHeight,
+    };
+    const divDimensions = {
+      width: $div.offsetWidth,
+      height: $div.offsetHeight,
+    };
+
+    const positions = [
+      { top: 0, left: 0 },
+      { top: 0, left: appDimensions.width - divDimensions.width },
+      { top: appDimensions.height - divDimensions.height, left: appDimensions.width - divDimensions.width },
+      { top: appDimensions.height - divDimensions.height, left: 0 }
+    ];
+
+    let currentPosition = 0;
+
+    setInterval(() => {
+      currentPosition++;
+      const index = currentPosition % positions.length;
+      $div.style.transform = `translate3d(${positions[index].left}px, ${positions[index].top}px, 0)`;
+      console.log(`translate3d(${positions[index].left}px, ${positions[index].top}px, 0)`);
+    }, 1500);
+  </script>
+</body>
+</html>

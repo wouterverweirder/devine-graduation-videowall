@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoWall</title>
+  <link rel="stylesheet" href="js/three.js/editor/css/main.css">
+  <style>
+    #app {
+      position: absolute;
+      top: 0;
+      left: 0;
+      /* for 4x2 FullHD */
+      width: 7680px;
+      height: 2160px;
+      /* transform to fit screen */
+      transform: scale3d(0.2, 0.2, 1.0);
+      transform-origin: top left;
+      background: #cccccc;
+    }
+
+    #editor-container {
+      position: absolute;
+      top: calc(2160px * 0.2);
+      transform: scale3d(0.2, 0.2, 1.0);
+      transform-origin: top left;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="c"></canvas>
+  </div>
+  <div id="editor-container">
+    <canvas id="editor-canvas"></canvas>
+  </div>
+  <script type="module">
+
+    import Stats from './stats.module.js';
+
+    const stats = new Stats();
+    document.body.appendChild( stats.dom );
+
+    const $app = document.getElementById('app');
+
+    const sourceDimensions = {
+      width: 6000,
+      height: 4000
+    };
+
+    const screens = [
+      {
+        index: 0,
+        x: 0,
+        y: 0,
+        width: 1920,
+        height: 1080
+      },
+      {
+        index: 1,
+        x: 1920,
+        y: 0,
+        width: 1920,
+        height: 1080
+      },
+      {
+        index: 2,
+        x: 3840,
+        y: 0,
+        width: 1920,
+        height: 1080
+      },
+      {
+        index: 3,
+        x: 0,
+        y: 1080,
+        width: 1920,
+        height: 1080
+      },
+      {
+        index: 4,
+        x: 1920,
+        y: 1080,
+        width: 1920,
+        height: 1080
+      },
+      {
+        index: 5,
+        x: 3840,
+        y: 1080,
+        width: 1920,
+        height: 1080
+      },
+      {
+        index: 6,
+        x: 0,
+        y: 2160,
+        width: 1920,
+        height: 1080
+      },
+      {
+        index: 7,
+        x: 1920,
+        y: 2160,
+        width: 1920,
+        height: 1080
+      }
+    ];
+
+    const outputCols = 4;
+    const outputScreenWidth = 1920;
+    const outputScreenHeight = 1080;
+
+    const appDimensions = {
+      width: $app.offsetWidth,
+      height: $app.offsetHeight,
+    };
+
+    const canvas = document.querySelector('#c');
+    canvas.width = appDimensions.width;
+    canvas.height = appDimensions.height;
+    const outputCtx = canvas.getContext('2d');
+
+    const sourceCanvas = new OffscreenCanvas(sourceDimensions.width, sourceDimensions.height);
+    const sourceCtx = sourceCanvas.getContext('2d');
+
+    const editorCanvas = document.querySelector('#editor-canvas');
+    editorCanvas.width = sourceDimensions.width;
+    editorCanvas.height = sourceDimensions.height;
+    const editorCtx = editorCanvas.getContext('2d');
+
+    const ballPos = {
+      x: 0,
+      y: 0
+    };
+
+    const ballVelocity = {
+      x: 10,
+      y: 10,
+    };
+
+    const init = () => {
+      requestAnimationFrame(render);
+    };
+
+    const render = (time) => {
+      stats.begin();
+      time *= 0.001;  // convert time to seconds
+
+      outputCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ballPos.x += ballVelocity.x;
+      ballPos.y += ballVelocity.y;
+
+      if (ballPos.x > sourceDimensions.width) {
+        ballVelocity.x = -Math.abs(ballVelocity.x);
+      } else if (ballPos.x < 0) {
+        ballVelocity.x = Math.abs(ballVelocity.x);
+      }
+
+      if (ballPos.y > sourceDimensions.height) {
+        ballVelocity.y = -Math.abs(ballVelocity.y);
+      } else if (ballPos.y < 0) {
+        ballVelocity.y = Math.abs(ballVelocity.y);
+      }
+
+      sourceCtx.clearRect(0, 0, sourceCanvas.width, sourceCanvas.height);
+      sourceCtx.save();
+      sourceCtx.fillStyle = 'red';
+      sourceCtx.beginPath();
+      sourceCtx.ellipse(ballPos.x, ballPos.y, 100, 100, 0, 0, Math.PI * 2);
+      sourceCtx.closePath();
+      sourceCtx.fill();
+      sourceCtx.restore();
+
+      const sourceBitmap = sourceCanvas.transferToImageBitmap();
+
+      editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+      editorCtx.drawImage(sourceBitmap, 0, 0);
+
+      // draw the screen positions
+      screens.forEach(screen => {
+        editorCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        editorCtx.strokeStyle = 'black';
+        editorCtx.fillRect(screen.x, screen.y, screen.width, screen.height);
+        editorCtx.strokeRect(screen.x, screen.y, screen.width, screen.height);
+        // copy the pixels to the output
+        const outputX = (screen.index % outputCols) * outputScreenWidth;
+        const outputY = Math.floor(screen.index / outputCols) * outputScreenHeight;
+        outputCtx.drawImage(sourceBitmap, screen.x, screen.y, screen.width, screen.height, outputX, outputY, outputScreenWidth, outputScreenHeight);
+      });
+
+	    stats.end();
+      requestAnimationFrame(render);
+    };
+
+    init();
+
+    
+  </script>
+</body>
+</html>
