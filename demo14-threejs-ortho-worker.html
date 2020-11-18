@@ -61,88 +61,12 @@
       height: $app.offsetHeight,
     };
 
-    const frustumSize = 10;
-    const halfFrustrumSize = 5;
-    const aspectRatio = 1920 / 1080;
-    const viewWidth = halfFrustrumSize * aspectRatio;
-
-    const installationBounds = {
-      left: -15,
-      top: 10,
-      right: 15,
-      bottom: -10
-    };
-    installationBounds.width = installationBounds.right - installationBounds.left;
-    installationBounds.height = installationBounds.top - installationBounds.bottom;
-
     const outputCanvas = document.getElementById('output-canvas');
     outputCanvas.width = appDimensions.width;
     outputCanvas.height = appDimensions.height;
 
-    const views = [
-      {
-        left: 0,
-        bottom: 0.5,
-        width: 0.25,
-        height: 0.5,
-        eye: [ -viewWidth, halfFrustrumSize, 15 ],
-      },
-      {
-        left: 0.25,
-        bottom: 0.5,
-        width: 0.25,
-        height: 0.5,
-        eye: [ 0, halfFrustrumSize, 15 ],
-      },
-      {
-        left: 0.5,
-        bottom: 0.5,
-        width: 0.25,
-        height: 0.5,
-        eye: [ viewWidth, halfFrustrumSize, 15 ],
-      },
-      {
-        left: 0.75,
-        bottom: 0.5,
-        width: 0.25,
-        height: 0.5,
-        eye: [ -viewWidth, 0, 15 ],
-      },
-      {
-        left: 0,
-        bottom: 0,
-        width: 0.25,
-        height: 0.5,
-        eye: [ 0, 0, 15 ],
-      },
-      {
-        left: 0.25,
-        bottom: 0,
-        width: 0.25,
-        height: 0.5,
-        eye: [ viewWidth, 0, 15 ],
-      },
-      {
-        left: 0.5,
-        bottom: 0,
-        width: 0.25,
-        height: 0.5,
-        eye: [ -viewWidth/2, -halfFrustrumSize, 15 ],
-      },
-      {
-        left: 0.75,
-        bottom: 0,
-        width: 0.25,
-        height: 0.5,
-        eye: [ viewWidth/2, -halfFrustrumSize, 15 ],
-      }
-    ];
-
     let renderer, scene;
     
-    let planes;
-    let transitionMesh;
-    let transitionScaleSpeed = -.01;
     let editorIsVisible = true;
     
     const $editorContainer = document.getElementById('editor-container');
@@ -207,10 +131,7 @@
       
       worker.postMessage({
         type: 'init',
-        outputCanvas: outputCanvasOffscreen,
-        views,
-        halfFrustrumSize,
-        aspectRatio
+        outputCanvas: outputCanvasOffscreen
       }, [outputCanvasOffscreen]);
 
       editor.signals.refreshSidebarObject3D.add((editorObject) => {

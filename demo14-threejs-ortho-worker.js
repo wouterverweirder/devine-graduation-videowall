@@ -1,6 +1,70 @@
 import * as THREE from './js/three.js/build/three.module.js';
 
-let outputCanvas, views, halfFrustrumSize, aspectRatio;
+const frustumSize = 10;
+const halfFrustrumSize = 5;
+const aspectRatio = 1920 / 1080;
+const viewWidth = halfFrustrumSize * aspectRatio;
+
+const views = [
+  {
+    left: 0,
+    bottom: 0.5,
+    width: 0.25,
+    height: 0.5,
+    eye: [ -viewWidth, halfFrustrumSize, 15 ],
+  },
+  {
+    left: 0.25,
+    bottom: 0.5,
+    width: 0.25,
+    height: 0.5,
+    eye: [ 0, halfFrustrumSize, 15 ],
+  },
+  {
+    left: 0.5,
+    bottom: 0.5,
+    width: 0.25,
+    height: 0.5,
+    eye: [ viewWidth, halfFrustrumSize, 15 ],
+  },
+  {
+    left: 0.75,
+    bottom: 0.5,
+    width: 0.25,
+    height: 0.5,
+    eye: [ -viewWidth, 0, 15 ],
+  },
+  {
+    left: 0,
+    bottom: 0,
+    width: 0.25,
+    height: 0.5,
+    eye: [ 0, 0, 15 ],
+  },
+  {
+    left: 0.25,
+    bottom: 0,
+    width: 0.25,
+    height: 0.5,
+    eye: [ viewWidth, 0, 15 ],
+  },
+  {
+    left: 0.5,
+    bottom: 0,
+    width: 0.25,
+    height: 0.5,
+    eye: [ -viewWidth/2, -halfFrustrumSize, 15 ],
+  },
+  {
+    left: 0.75,
+    bottom: 0,
+    width: 0.25,
+    height: 0.5,
+    eye: [ viewWidth/2, -halfFrustrumSize, 15 ],
+  }
+];
+
+let outputCanvas;
 let renderer, scene;
 let transitionMesh, planes;
 let transitionScaleSpeed = -.01;
@@ -136,6 +200,8 @@ const render = (time) => {
     });
   }
 
+  const updatedObjectsData = [];
+
   planes.forEach((plane) => {
 
     const canvasTexture = plane.material.map;
@@ -206,9 +272,6 @@ const handleUpdateObject = (message) => {
 addEventListener('message', e => {
   if (e.data.type === 'init') {
     outputCanvas = e.data.outputCanvas;
-    views = e.data.views;
-    halfFrustrumSize = e.data.halfFrustrumSize;
-    aspectRatio = e.data.aspectRatio;
     init();
   } else if (e.data.type === 'update-object') {
     handleUpdateObject(e.data);
