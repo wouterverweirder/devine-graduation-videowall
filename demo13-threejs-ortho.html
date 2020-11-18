@@ -29,7 +29,7 @@
 </head>
 <body>
   <div id="app">
-    <canvas id="c"></canvas>
+    <canvas id="output-canvas"></canvas>
   </div>
   <div id="editor-container">
     <label>
@@ -73,9 +73,9 @@
     installationBounds.width = installationBounds.right - installationBounds.left;
     installationBounds.height = installationBounds.top - installationBounds.bottom;
 
-    const canvas = document.querySelector('#c');
-    canvas.width = appDimensions.width;
-    canvas.height = appDimensions.height;
+    const outputCanvas = document.getElementById('output-canvas');
+    outputCanvas.width = appDimensions.width;
+    outputCanvas.height = appDimensions.height;
 
     const views = [
       {
@@ -145,12 +145,11 @@
     ];
     
     for ( let ii = 0; ii < views.length; ++ ii ) {
-
       const view = views[ ii ];
-      const left = Math.floor( canvas.width * view.left );
-      const bottom = Math.floor( canvas.height * view.bottom );
-      const width = Math.floor( canvas.width * view.width );
-      const height = Math.floor( canvas.height * view.height );
+      const left = Math.floor( outputCanvas.width * view.left );
+      const bottom = Math.floor( outputCanvas.height * view.bottom );
+      const width = Math.floor( outputCanvas.width * view.width );
+      const height = Math.floor( outputCanvas.height * view.height );
 
       const aspect = width / height;
       
@@ -158,23 +157,21 @@
       camera.name = `Camera ${ii}`;
       camera.position.fromArray( view.eye );
       view.camera = camera;
-
     }
 
-    const renderer = new THREE.WebGLRenderer({canvas, powerPreference: "high-performance"});
+    let renderer, scene;
 
-    const scene = new THREE.Scene();
+    renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
 
-    const light = new THREE.AmbientLight( 0xffffff );
-    scene.add(light);
-
+    scene = new THREE.Scene();
     
     let planes;
+    let transitionMesh;
     let transitionScaleSpeed = -.01;
+    let editorIsVisible = true;
     
     const $editorContainer = document.getElementById('editor-container');
     const editor = new Editor();
-    window.editor = editor;
     
     editor.camera.position.fromArray([23, 66, 37]);
     editor.camera.lookAt(0, 0, 0);
@@ -183,31 +180,35 @@
 
     const $showEditorCheckbox = document.getElementById('show-editor');
     $showEditorCheckbox.addEventListener('input', () => {
-      viewport.dom.style.display = ($showEditorCheckbox.checked) ? 'block' : 'none';
+      editorIsVisible = ($showEditorCheckbox.checked);
+      viewport.dom.style.display = editorIsVisible ? 'block' : 'none';
     });
     
     const editorRenderer = new THREE.WebGLRenderer( { antialias: false } );
     editor.signals.rendererChanged.dispatch( editorRenderer );
     editor.signals.windowResize.dispatch();
 
-    const transitionGeometry = new THREE.CircleGeometry(25, 45);
-    const transitionMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0, 0) });
-    const transitionMesh = new THREE.Mesh(transitionGeometry, transitionMaterial);
-    transitionMesh.position.z = 10;
-    scene.add(transitionMesh);
-
-    const geometry = new THREE.PlaneGeometry(halfFrustrumSize * aspectRatio, halfFrustrumSize, 1, 1);
-
     const init = () => {
+      const light = new THREE.AmbientLight( 0xffffff );
+      scene.add(light);
+
+      const transitionGeometry = new THREE.CircleGeometry(25, 45);
+      const transitionMaterial = new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 0, 0) });
+      transitionMesh = new THREE.Mesh(transitionGeometry, transitionMaterial);
+      transitionMesh.position.z = 10;
+      scene.add(transitionMesh);
+
+      const planeGeometry = new THREE.PlaneGeometry(halfFrustrumSize * aspectRatio, halfFrustrumSize, 1, 1);
+
       planes = [];
       for (let i = 0; i < views.length; i++) {
 
         const view = views[i];
 
-        const left = Math.floor( canvas.width * view.left );
-        const bottom = Math.floor( canvas.height * view.bottom );
-        const width = Math.floor( canvas.width * view.width );
-        const height = Math.floor( canvas.height * view.height );
+        const left = Math.floor( outputCanvas.width * view.left );
+        const bottom = Math.floor( outputCanvas.height * view.bottom );
+        const width = Math.floor( outputCanvas.width * view.width );
+        const height = Math.floor( outputCanvas.height * view.height );
 
         const planeCanvas = new OffscreenCanvas(width, height)
         const planeCtx = planeCanvas.getContext('2d');
@@ -220,7 +221,7 @@
         texture.minFilter = THREE.LinearFilter;
         const material = new THREE.MeshBasicMaterial( { map: texture } );
     
-        const plane = new THREE.Mesh(geometry, material);
+        const plane = new THREE.Mesh(planeGeometry, material);
         scene.add(plane);
 
         // place it on a certain views camera
@@ -337,10 +338,10 @@
         const view = views[ ii ];
         const camera = view.camera;
 
-        const left = Math.floor( canvas.width * view.left );
-        const bottom = Math.floor( canvas.height * view.bottom );
-        const width = Math.floor( canvas.width * view.width );
-        const height = Math.floor( canvas.height * view.height );
+        const left = Math.floor( outputCanvas.width * view.left );
+        const bottom = Math.floor( outputCanvas.height * view.bottom );
+        const width = Math.floor( outputCanvas.width * view.width );
+        const height = Math.floor( outputCanvas.height * view.height );
 
         renderer.setViewport( left, bottom, width, height );
         renderer.setScissor( left, bottom, width, height );
@@ -351,7 +352,10 @@
 
       }
 
-      editor.signals.applicationRendered.dispatch();
+      if (editorIsVisible) {
+        editor.signals.applicationRendered.dispatch();
+      }
+        
 
 	    stats.end();
       requestAnimationFrame(render);
