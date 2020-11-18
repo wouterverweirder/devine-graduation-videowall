@@ -209,10 +209,8 @@ const render = (time) => {
     const planeCtx = planeCanvas.getContext('2d');
     if (videoBitmap) {
       planeCtx.drawImage(videoBitmap, 0, 0);
+      canvasTexture.needsUpdate = true;
     }
-    // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
-    // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
-    canvasTexture.needsUpdate = true;
 
     plane.position.x += (plane.userData.targetX - plane.position.x) * 0.1;
     plane.position.y += (plane.userData.targetY - plane.position.y) * 0.1;
@@ -230,6 +228,11 @@ const render = (time) => {
     });
 
   });
+
+  if (videoBitmap) {
+    videoBitmap.close();
+    videoBitmap = false;
+  }
 
   transitionMesh.visible = false;
 

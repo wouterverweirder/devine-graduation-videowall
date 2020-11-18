@@ -135,7 +135,7 @@
       console.log(message.fps);
     };
 
-    const init = async () => {
+    const init = () => {
 
       video1.stream = video1.$el.captureStream();
       video1.stream.addEventListener('addtrack', e => {
@@ -210,9 +210,12 @@
 
       if (video1.imageCapture && !video1.processing) {
         video1.processing = true;
-        video1.imageCapture.grabFrame().then(imageBitmap => {
-          worker.postMessage({ type: 'video', imageBitmap }, [imageBitmap]);
-          video1.processing = false;
+        video1.$el.requestVideoFrameCallback(() => {
+          video1.imageCapture.grabFrame().then(imageBitmap => {
+            worker.postMessage({ type: 'video', imageBitmap });
+            video1.processing = false;
+            imageBitmap.close();
+          });
         });
       }
 
