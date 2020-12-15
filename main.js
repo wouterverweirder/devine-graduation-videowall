@@ -7,8 +7,12 @@ function createWindow () {
 
   // only keep 4K windows
   displays = displays.filter(o => o.bounds.height === 2160).sort();
+
+  console.log(displays);
   
-  const spannedDisplay = displays.reduce((prev, curr) => ({ bounds: { x: Math.min(prev.bounds.x, curr.bounds.x), y: Math.min(prev.bounds.y, curr.bounds.y)}, size: { width: prev.size.width + curr.size.width, height: Math.max(prev.size.height, curr.size.height)}}), { size: { width: 0, height: 0 }, bounds: { x: 0, y: 0 }});  
+  const spannedDisplay = displays.reduce((prev, curr) => ({ bounds: { x: Math.min(prev.bounds.x, curr.bounds.x), y: Math.min(prev.bounds.y, curr.bounds.y)}, size: { width: prev.size.width + curr.size.width, height: Math.max(prev.size.height, curr.size.height)}}), { size: { width: 0, height: 0 }, bounds: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }});  
+
+  console.log(spannedDisplay);
 
   // Create the window, make it span all displays
   const mainWindow = new BrowserWindow({
@@ -23,8 +27,11 @@ function createWindow () {
     }
   })
 
+  mainWindow.setSize(spannedDisplay.size.width, spannedDisplay.size.height);
+
   // and load the index.html of the app.
-  mainWindow.loadFile('demo20-threejs-8-portrait.html')
+  // mainWindow.loadFile('demo20-threejs-8-portrait.html')
+  mainWindow.loadFile('demo21-threejs-8-combo.html')
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
