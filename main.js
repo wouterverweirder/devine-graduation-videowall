@@ -1,6 +1,7 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, screen} = require('electron')
+const {app, BrowserWindow, screen, ipcMain} = require('electron')
 const path = require('path')
+const fs = require('fs')
 
 function createWindow () {
   let displays = screen.getAllDisplays()
@@ -23,6 +24,9 @@ function createWindow () {
     frame: false,
     titleBarStyle: 'customButtonsOnHover',
     webPreferences: {
+      nodeIntegration: false, // is default value after Electron v5
+      contextIsolation: true, // protect against prototype pollution
+      enableRemoteModule: false, // turn off remote
       preload: path.join(__dirname, 'preload.js')
     }
   })
@@ -59,3 +63,15 @@ app.on('window-all-closed', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+ipcMain.on("toMain", (event, args) => {
+  if (args.type === 'saveConfigs') {
+    fs.writeFileSync('config.json', JSON.stringify(args.json, null, 2));
+  }
+  console.log(args);
+  // fs.readFile("path/to/file", (error, data) => {
+  //   // Do something with file contents
+
+  //   // Send result back to renderer process
+  //   win.webContents.send("fromMain", responseObj);
+  // });
+});

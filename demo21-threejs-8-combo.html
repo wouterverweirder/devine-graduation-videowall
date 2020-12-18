@@ -21,7 +21,7 @@
 
     #editor-container {
       position: absolute;
-      top: calc(2160px * 0.2);
+      top: calc(2160px * 0.5);
       width: calc(960px + 300px);
       height: calc(540px + 32px);
     }
@@ -65,7 +65,7 @@
     };
 
     const frustumSize = 10;
-    const halfFrustrumSize = 5;
+    const halfFrustrumSize = frustumSize / 2;
     const aspectRatio = 1920 / 1080;
     const viewWidth = halfFrustrumSize * aspectRatio;
 
@@ -86,99 +86,132 @@
     const verticalScreenTopY = halfFrustrumSize * (16 / 9);
 
     const views = [
-      {
-        config: {
-          left: 0,
-          bottom: 0.5,
-          width: 0.25,
-          height: 0.5,
-          camera: {
-            position: [ -viewWidth, horizontalScreenTopY, 15 ],
-          },
-        }
-      },
-      {
-        config: {
-          left: 0.25,
-          bottom: 0.5,
-          width: 0.25,
-          height: 0.5,
-          camera: {
-            position: [ 0, verticalScreenTopY, 15 ] ,
-            rotation: -90 * Math.PI / 180
-          },
-        }
-      },
-      {
-        config: {
-          left: 0,
-          bottom: 0,
-          width: 0.25,
-          height: 0.5,
-          camera: {
-            position: [ -viewWidth, 0, 15 ] 
-          },
-        }
-      },
-      {
-        config: {
-          left: 0.25,
-          bottom: 0,
-          width: 0.25,
-          height: 0.5,
-          camera: {
-            position: [ 0, 0, 15 ]
-          },
-        }
-      },
-      //
-      {
-        config: {
-          left: 0.5,
-          bottom: 0.5,
-          width: 0.25,
-          height: 0.5,
-          camera: {
-            position: [ viewWidth, verticalScreenTopY, 15 ],
-            rotation: -90 * Math.PI / 180
-          },
-        }
-      },
-      {
-        config: {
-          left: 0.75,
-          bottom: 0.5,
-          width: 0.25,
-          height: 0.5,
-          camera: {
-            position: [ viewWidth*2, verticalScreenTopY, 15 ] ,
-            rotation: -90 * Math.PI / 180
-          },
-        }
-      },
-      {
-        config: {
-          left: 0.5,
-          bottom: 0,
-          width: 0.25,
-          height: 0.5,
-          camera: {
-            position: [ viewWidth, 0, 15 ] 
-          },
-        }
-      },
-      {
-        config: {
-          left: 0.75,
-          bottom: 0,
-          width: 0.25,
-          height: 0.5,
-          camera: {
-            position: [ viewWidth*2, 0, 15 ] 
-          },
-        }
+  {
+    "config": {
+      "left": 0,
+      "bottom": 0.5,
+      "width": 0.25,
+      "height": 0.5,
+      "camera": {
+        "position": [
+          -11.998477135861151,
+          10.93249430752706,
+          14.992235051283146
+        ],
+        "rotation": -1.5707963267948966
       }
-    ];
+    }
+  },
+  {
+    "config": {
+      "left": 0.25,
+      "bottom": 0.5,
+      "width": 0.25,
+      "height": 0.5,
+      "camera": {
+        "position": [
+          -4.390505168454377,
+          10.942559481067061,
+          15
+        ],
+        "rotation": -1.5707963267948966
+      }
+    }
+  },
+  {
+    "config": {
+      "left": 0,
+      "bottom": 0,
+      "width": 0.25,
+      "height": 0.5,
+      "camera": {
+        "position": [
+          -8.88888888888889,
+          0,
+          15
+        ]
+      }
+    }
+  },
+  {
+    "config": {
+      "left": 0.25,
+      "bottom": 0,
+      "width": 0.25,
+      "height": 0.5,
+      "camera": {
+        "position": [
+          4.737614817178227,
+          9.671684181873207,
+          15
+        ]
+      }
+    }
+  },
+  {
+    "config": {
+      "left": 0.5,
+      "bottom": 0.5,
+      "width": 0.25,
+      "height": 0.5,
+      "camera": {
+        "position": [
+          16.22869717354464,
+          10.205918493844358,
+          15
+        ]
+      }
+    }
+  },
+  {
+    "config": {
+      "left": 0.75,
+      "bottom": 0.5,
+      "width": 0.25,
+      "height": 0.5,
+      "camera": {
+        "position": [
+          25.486041355178482,
+          12.921358805865474,
+          15
+        ],
+        "rotation": -1.5707963267948966
+      }
+    }
+  },
+  {
+    "config": {
+      "left": 0.5,
+      "bottom": 0,
+      "width": 0.25,
+      "height": 0.5,
+      "camera": {
+        "position": [
+          4.68294002344393,
+          0.7595670240281551,
+          15
+        ],
+        "rotation": -1.5707963267948966
+      }
+    }
+  },
+  {
+    "config": {
+      "left": 0.75,
+      "bottom": 0,
+      "width": 0.25,
+      "height": 0.5,
+      "camera": {
+        "position": [
+          21.14138418041043,
+          1.2723243041441457,
+          15
+        ],
+        "rotation": -1.5707963267948966
+      }
+    }
+  }
+];
     
     for ( let ii = 0; ii < views.length; ++ ii ) {
       const view = views[ ii ];
@@ -355,6 +388,10 @@
         const cameraHelper = editor.helpers[clonedCamera.id];
 
         const onChange = () => {
+          // update the config
+          view.config.camera.position[0] = clonedCamera.position.x;
+          view.config.camera.position[1] = clonedCamera.position.y;
+          view.config.camera.position[2] = clonedCamera.position.z;
           view.camera.position.copy(clonedCamera.position);
           view.camera.quaternion.copy(clonedCamera.quaternion);
           view.camera.updateProjectionMatrix();
@@ -368,13 +405,27 @@
         if (!object.userData.onChange) {
           return;
         }
+        // trigger the onChange
         object.userData.onChange();
+        // save the config
+        saveConfigs();
       });
 
       requestAnimationFrame(render);
     };
 
     let numFrames = 0;
+
+    const saveConfigs = () => {
+      const json = [];
+      views.forEach(view => {
+        const config = {...view.config};
+        json.push({ config });
+      });
+      if (window.api && window.api.send) {
+        window.api.send("toMain", { type: 'saveConfigs', json });
+      }
+    };
 
     const render = (time) => {
       stats.begin();
@@ -458,8 +509,6 @@
 	    stats.end();
       requestAnimationFrame(render);
     };
-
-    
 
     init();
 
