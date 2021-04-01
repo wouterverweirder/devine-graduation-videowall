@@ -43,6 +43,8 @@ const createPlaneForScreen = async (planeConfig, screen, appConfig) => {
   texture.offset.x = (1 - texture.repeat.x) / 2;
 
   plane.userData.planeConfig = planeConfig;
+  plane.userData.planeConfigJSON = JSON.stringify(planeConfig);
+  plane.userData.screen = screen;
 
   return plane;
 };
