@@ -32,6 +32,7 @@
   <script type="module">
 
     import * as THREE from './js/three.js/build/three.module.js';
+    import loadImage from './js/functions/loadImage.js';
 
     let config;
 
@@ -104,6 +105,19 @@
       scene.add(light);
 
       planes = [];
+
+      // quick setup asset to a certain screen
+      const assetsPerScreen = [
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' }
+      ];
+
       for (let i = 0; i < config.views.length; i++) {
 
         const view = config.views[i];
@@ -114,16 +128,20 @@
         const height = Math.floor( config.appDimensions.height * view.config.height );
 
         let texture;
-        let textureType = (i % 3 === 0) ? 'video' : (i % 3 === 1) ? 'image' : 'canvas';
+        let textureType = assetsPerScreen[i].type;
 
         if (textureType === 'video') {
           texture = new THREE.VideoTexture(video1.$video);
         } else if (textureType === 'image') {
-          let imagePath = `assets/photo-0${i+1}.jpg`;
-          if (i === 0) {
-            imagePath = `assets/debug-image.png`;
-          }
-          texture = new THREE.TextureLoader().load( imagePath );
+          // texture = new THREE.TextureLoader().load( assetsPerScreen[i].url );
+          const planeCanvas = new OffscreenCanvas(width, height)
+          const planeCtx = planeCanvas.getContext('2d');
+          // draw the image in the center of the plane
+          const image = await loadImage(assetsPerScreen[i].url);
+          const offsetX = (width - image.width) / 2;
+          const offsetY =(height - image.height) / 2;
+          planeCtx.drawImage(image, offsetX, offsetY);
+          texture = new THREE.CanvasTexture(planeCanvas);
         } else {
           const planeCanvas = new OffscreenCanvas(width, height)
           const planeCtx = planeCanvas.getContext('2d');

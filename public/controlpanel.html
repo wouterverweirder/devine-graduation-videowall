@@ -92,6 +92,7 @@
       editor = new Editor();
       editor.camera.position.fromArray([23, 66, 37]);
       editor.camera.lookAt(0, 0, 0);
+
       const viewport = new Viewport( editor );
       $editorContainer.appendChild( viewport.dom );
       
@@ -135,9 +136,7 @@
           texture = new THREE.CanvasTexture(planeCanvas);
         }
         const material = new THREE.MeshBasicMaterial( { map: texture } );
-
         const planeGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
-    
         const plane = new THREE.Mesh(planeGeometry, material);
         scene.add(plane);
 
@@ -145,7 +144,6 @@
         const targetView = config.views[i];
         plane.position.x = targetView.camera.position.x;
         plane.position.y = targetView.camera.position.y;
-      
         plane.position.z = i;
 
         let rotation = 0;
@@ -158,8 +156,6 @@
         const textureAspectRatio = scaleForRotation.x / scaleForRotation.y;
         texture.repeat.x = textureAspectRatio / config.aspectRatio;
         texture.offset.x = (1 - texture.repeat.x) / 2;
-
-        // console.log(plane.geometry.width, plane.geometry.height, plane.geometry.parameters.width, plane.geometry.parameters.height);
 
         plane.userData.textureType = textureType;
         plane.userData.targetX = plane.position.x;
@@ -210,6 +206,15 @@
         clonedCamera.userData.onChange = onChange;
         onChange();
       }
+      editor.signals.objectSelected.add((object) => {
+        if (!object) {
+          return;
+        }
+        if (!object.userData.onChange) {
+          return;
+        }
+        console.log(object);
+      });
       editor.signals.refreshSidebarObject3D.add((object) => {
         if (!object.userData.onChange) {
           return;
@@ -219,6 +224,13 @@
         // save the config
         saveConfigs();
       });
+
+      function onWindowResize() {
+        editor.signals.windowResize.dispatch();
+      }
+      
+      window.addEventListener( 'resize', onWindowResize, false );
+      onWindowResize();
 
       requestAnimationFrame(render);
     };
@@ -241,26 +253,6 @@
 
     const render = (time) => {
       numFrames++;
-
-      // if (numFrames % 120 === 0) {
-      //   const viewsCopy = config.views.concat().sort(() => (Math.random() < .5) ? -1 : 1);
-      //   planes.forEach((plane, i) => {
-      //     const targetView = viewsCopy[i];
-      //     plane.userData.targetX = targetView.camera.position.x;
-      //     plane.userData.targetY = targetView.camera.position.y;
-      //     let rotation = 0;
-      //     if (targetView.config.camera.rotation) {
-      //       rotation = targetView.config.camera.rotation;
-      //     }
-      //     const scaleForRotation = getScaleForRotation(plane, rotation);
-      //     plane.userData.targetScaleX = scaleForRotation.x;
-      //     plane.userData.targetScaleY = scaleForRotation.y;
-
-      //     const textureAspectRatio = scaleForRotation.x / scaleForRotation.y;
-      //     plane.userData.targetTextureRepeatX = textureAspectRatio / config.aspectRatio;
-      //     plane.userData.targetTextureOffsetX = (1 - plane.userData.targetTextureRepeatX) / 2;
-      //   });
-      // }
  
       planes.forEach((plane) => {
 
