@@ -25,7 +25,7 @@
 
     import * as THREE from './js/three.js/build/three.module.js';
     import createCamerasForConfig from './js/functions/createCamerasForConfig.js';
-    import createPlaneForView from './js/functions/createPlaneForView.js';
+    import createPlaneForScreen from './js/functions/createPlaneForScreen.js';
 
     import { Editor } from './js/three.js/editor/js/Editor.js';
     import { Viewport } from './js/three.js/editor/js/Viewport.js';
@@ -75,21 +75,21 @@
       });
 
       // cameras
-      for ( let ii = 0; ii < config.views.length; ++ ii ) {
+      for ( let ii = 0; ii < config.screens.length; ++ ii ) {
         // camera
-        const view = config.views[ ii ];
-        const clonedCamera = view.camera.clone();
+        const screen = config.screens[ ii ];
+        const clonedCamera = screen.camera.clone();
         editor.addObject(clonedCamera);
         const cameraHelper = editor.helpers[clonedCamera.id];
 
         const onChange = () => {
           // update the config
-          view.config.camera.position[0] = clonedCamera.position.x;
-          view.config.camera.position[1] = clonedCamera.position.y;
-          view.config.camera.position[2] = clonedCamera.position.z;
-          view.camera.position.copy(clonedCamera.position);
-          view.camera.quaternion.copy(clonedCamera.quaternion);
-          view.camera.updateProjectionMatrix();
+          screen.config.camera.position[0] = clonedCamera.position.x;
+          screen.config.camera.position[1] = clonedCamera.position.y;
+          screen.config.camera.position[2] = clonedCamera.position.z;
+          screen.camera.position.copy(clonedCamera.position);
+          screen.camera.quaternion.copy(clonedCamera.quaternion);
+          screen.camera.updateProjectionMatrix();
           clonedCamera.updateProjectionMatrix();
           cameraHelper.update();
         };
@@ -184,11 +184,11 @@
     };
 
     const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
-      const view = config.views.find(view => view.config.id === screenId);
-      if (!view) {
+      const screen = config.screens.find(screen => screen.config.id === screenId);
+      if (!screen) {
         return;
       }
-      const plane = await createPlaneForView(planeConfig, view, config);
+      const plane = await createPlaneForScreen(planeConfig, screen, config);
       scene.add(plane);
       planes.push(plane);
       addChildToEditor(plane);
@@ -210,20 +210,20 @@
     };
 
     const saveConfigs = () => {
-      // config.views contains other, non-json properties now
+      // config.screens contains other, non-json properties now
       // just keep the json properties
       const json = {...config};
-      json.views = [];
-      config.views.forEach(view => {
-        const config = {...view.config};
-        json.views.push({ config });
+      json.screens = [];
+      config.screens.forEach(screen => {
+        const config = {...screen.config};
+        json.screens.push({ config });
       });
       if (window.api && window.api.send) {
         window.api.send("toMain", { type: 'saveConfigs', json });
       }
     };
 
-    const updateViews = () => {
+    const updatePlanes = () => {
       planes.forEach((plane) => {
         if (plane.userData.planeConfig.type === 'canvas') {
           const canvasTexture = plane.material.map;
@@ -238,26 +238,26 @@
     };
 
     const renderCameras = () => {
-      for ( let ii = 0; ii < config.views.length; ++ ii ) {
-        const view = config.views[ ii ];
+      for ( let ii = 0; ii < config.screens.length; ++ ii ) {
+        const screen = config.screens[ ii ];
 
-        const left = Math.floor( config.appDimensions.width * view.config.output.left );
-        const bottom = Math.floor( config.appDimensions.height * view.config.output.bottom );
-        const width = Math.floor( config.appDimensions.width * view.config.output.width );
-        const height = Math.floor( config.appDimensions.height * view.config.output.height );
+        const left = Math.floor( config.appDimensions.width * screen.config.output.left );
+        const bottom = Math.floor( config.appDimensions.height * screen.config.output.bottom );
+        const width = Math.floor( config.appDimensions.width * screen.config.output.width );
+        const height = Math.floor( config.appDimensions.height * screen.config.output.height );
 
         renderer.setViewport( left, bottom, width, height );
         renderer.setScissor( left, bottom, width, height );
         renderer.setScissorTest( true );
-        renderer.setClearColor( view.background );
+        renderer.setClearColor( screen.background );
 
-        renderer.render( scene, view.camera );
+        renderer.render( scene, screen.camera );
       }
     };
 
     const render = (time) => {
  
-      updateViews();
+      updatePlanes();
       renderCameras();
 
       editor.signals.applicationRendered.dispatch();
