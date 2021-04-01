@@ -125,7 +125,7 @@
       client = new WebSocket("ws://127.0.0.1");
 
       client.onopen = () => {
-        // send a request to create a plane on a screen
+        requestClearScene();
         requestCreatePlaneOnScreen('screen-0', { type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen('screen-1', { type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen('screen-2', { type: 'image', url: 'assets/2532.png' });
@@ -142,6 +142,8 @@
           if (parsedMessage.type) {
             if (parsedMessage.type === 'create-plane-on-screen') {
               onRequestCreatePlaneOnScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig);
+            } else if (parsedMessage.type === 'clear-scene') {
+              onRequestClearScene();
             }
           }
         } catch (e) {
@@ -151,14 +153,34 @@
       requestAnimationFrame(render);
     };
 
+    const sendRequest = (object) => {
+      client.send(JSON.stringify(object));
+    };
+
+    const requestClearScene = () => {
+      sendRequest({
+        type: 'clear-scene',
+      });
+    };
+
     const requestCreatePlaneOnScreen = (screenId, planeConfig) => {
-      client.send(JSON.stringify({
+      sendRequest({
         type: 'create-plane-on-screen',
         data: {
           screenId,
           planeConfig
         }
-      }));
+      });
+    };
+
+    const onRequestClearScene = () => {
+      planes.forEach(plane => {
+        scene.remove(plane);
+        if (plane.child.editorChild) {
+          editor.removeObject(plane.child.editorChild);
+        }
+      });
+      planes = [];
     };
 
     const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
