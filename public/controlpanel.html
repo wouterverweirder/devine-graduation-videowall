@@ -37,10 +37,11 @@
     
     let config;
     let renderer, scene;
-    const planes = [];
+    let planes = [];
     let editor;
 
     let client;
+    let messageQueue = Promise.resolve();
 
     const loadConfig = async () => {
       return await (await fetch('config.json')).json();
@@ -134,28 +135,38 @@
         requestCreatePlaneOnScreen('screen-5', { type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen('screen-6', { type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen('screen-7', { type: 'image', url: 'assets/2532.png' });
+        // test remove
+        requestRemovePlaneFromScreen('screen-0', { type: 'image', url: 'assets/2532.png' });
       };
 
       client.onmessage = (message) => {
         try {
           const parsedMessage = JSON.parse(message.data);
-          if (parsedMessage.type) {
-            if (parsedMessage.type === 'create-plane-on-screen') {
-              onRequestCreatePlaneOnScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig);
-            } else if (parsedMessage.type === 'clear-scene') {
-              onRequestClearScene();
-            }
-          }
+          queueReceivedMessage(parsedMessage);
         } catch (e) {
+          console.error(e);
         }
       };
 
       requestAnimationFrame(render);
     };
 
+    const queueReceivedMessage = (parsedMessage) => {
+      if (parsedMessage.type) {
+        if (parsedMessage.type === 'create-plane-on-screen') {
+          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig));
+        } else if (parsedMessage.type === 'clear-scene') {
+          messageQueue = messageQueue.then(() => onRequestClearScene());
+        } else if (parsedMessage.type === 'remove-plane-from-screen') {
+          messageQueue = messageQueue.then(() => onRequestRemovePlaneFromScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig));
+        }
+      }
+    }
+
     const sendRequest = (object) => {
       client.send(JSON.stringify(object));
     };
+    window.sendRequest = sendRequest; // expose sendRequest to window for debugging
 
     const requestClearScene = () => {
       sendRequest({
@@ -173,17 +184,29 @@
       });
     };
 
+    const requestRemovePlaneFromScreen = (screenId, planeConfig = false) => {
+      sendRequest({
+        type: 'remove-plane-from-screen',
+        data: {
+          screenId,
+          planeConfig
+        }
+      });
+    };
+
     const onRequestClearScene = () => {
+      console.log('on request clear scene');
       planes.forEach(plane => {
         scene.remove(plane);
-        if (plane.child.editorChild) {
-          editor.removeObject(plane.child.editorChild);
+        if (plane.userData.editorChild) {
+          editor.removeObject(plane.userData.editorChild);
         }
       });
       planes = [];
     };
 
     const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
+      console.log('on request create plane on screen');
       const screen = config.screens.find(screen => screen.config.id === screenId);
       if (!screen) {
         return;
@@ -192,6 +215,30 @@
       scene.add(plane);
       planes.push(plane);
       addChildToEditor(plane);
+    };
+
+    const onRequestRemovePlaneFromScreen = async (screenId, planeConfig = false) => {
+      const screen = config.screens.find(screen => screen.config.id === screenId);
+      if (!screen) {
+        return;
+      }
+      let applicablePlanes = planes.filter(plane => {
+        return plane.userData.screen === screen
+      });
+      if (planeConfig) {
+        const planeConfigJSON = JSON.stringify(planeConfig);
+        applicablePlanes = applicablePlanes.filter(plane => plane.userData.planeConfigJSON === planeConfigJSON);
+      }
+      applicablePlanes.forEach(plane => {
+        scene.remove(plane);
+        const index = planes.indexOf(plane);
+        if (index > -1) {
+          planes.splice(index, 1);
+        }
+        if (plane.userData.editorChild) {
+          editor.removeObject(plane.userData.editorChild);
+        }
+      });
     };
 
     const addChildToEditor = (child) => {
