@@ -3,7 +3,7 @@
     "width": 7680,
     "height": 2160
   },
-  "views": [
+  "screens": [
     {
       "config": {
         "id": "screen-0",

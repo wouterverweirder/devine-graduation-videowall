@@ -1,17 +1,17 @@
 import * as THREE from '../three.js/build/three.module.js';
 
 const createCamerasForConfig = (config) => {
-  for ( let ii = 0; ii < config.views.length; ++ ii ) {
-    const view = config.views[ ii ];
+  for ( let ii = 0; ii < config.screens.length; ++ ii ) {
+    const screen = config.screens[ ii ];
 
-    const size = view.config.camera.size;
+    const size = screen.config.camera.size;
 
     const halfFrustrumSize = size.width / 2;
     const aspect = size.width / size.height;
 
     let rotation = 0;
-    if (view.config.camera.rotation) {
-      rotation = view.config.camera.rotation;
+    if (screen.config.camera.rotation) {
+      rotation = screen.config.camera.rotation;
     }
 
     const left = 0.5 * halfFrustrumSize * aspect / - 1;
@@ -23,11 +23,11 @@ const createCamerasForConfig = (config) => {
     
     const camera = new THREE.OrthographicCamera( left, right, top, bottom, near, far );
     camera.name = `Camera ${ii}`;
-    camera.position.fromArray( view.config.camera.position );
+    camera.position.fromArray( screen.config.camera.position );
     camera.rotation.z = rotation;
-    view.camera = camera;
+    screen.camera = camera;
 
-    view.background = new THREE.Color(1, 1, 1);
+    screen.background = new THREE.Color(1, 1, 1);
   }
 };
 

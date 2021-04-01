@@ -29,7 +29,7 @@
 
     import * as THREE from './js/three.js/build/three.module.js';
     import createCamerasForConfig from './js/functions/createCamerasForConfig.js';
-    import createPlaneForView from './js/functions/createPlaneForView.js';
+    import createPlaneForScreen from './js/functions/createPlaneForScreen.js';
 
     let config;
     const outputCanvas = document.getElementById('output-canvas');
@@ -77,11 +77,11 @@
     };
 
     const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
-      const view = config.views.find(view => view.config.id === screenId);
-      if (!view) {
+      const screen = config.screens.find(screen => screen.config.id === screenId);
+      if (!screen) {
         return;
       }
-      const plane = await createPlaneForView(planeConfig, view, config);
+      const plane = await createPlaneForScreen(planeConfig, screen, config);
       scene.add(plane);
       planes.push(plane);
     };
@@ -93,7 +93,7 @@
       planes = [];
     };
 
-    const updateViews = () => {
+    const updatePlanes = () => {
       planes.forEach((plane) => {
 
         if (plane.userData.planeConfig.type === 'canvas') {
@@ -108,26 +108,26 @@
     };
 
     const renderCameras = () => {
-      for ( let ii = 0; ii < config.views.length; ++ ii ) {
-        const view = config.views[ ii ];
+      for ( let ii = 0; ii < config.screens.length; ++ ii ) {
+        const screen = config.screens[ ii ];
 
-        const left = Math.floor( config.appDimensions.width * view.config.output.left );
-        const bottom = Math.floor( config.appDimensions.height * view.config.output.bottom );
-        const width = Math.floor( config.appDimensions.width * view.config.output.width );
-        const height = Math.floor( config.appDimensions.height * view.config.output.height );
+        const left = Math.floor( config.appDimensions.width * screen.config.output.left );
+        const bottom = Math.floor( config.appDimensions.height * screen.config.output.bottom );
+        const width = Math.floor( config.appDimensions.width * screen.config.output.width );
+        const height = Math.floor( config.appDimensions.height * screen.config.output.height );
 
         renderer.setViewport( left, bottom, width, height );
         renderer.setScissor( left, bottom, width, height );
         renderer.setScissorTest( true );
-        renderer.setClearColor( view.background );
+        renderer.setClearColor( screen.background );
 
-        renderer.render( scene, view.camera );
+        renderer.render( scene, screen.camera );
       }
     };
 
     const render = (time) => {
  
-      updateViews();
+      updatePlanes();
       renderCameras();
         
       requestAnimationFrame(render);

@@ -2,9 +2,9 @@ import * as THREE from '../three.js/build/three.module.js';
 import calculateScaleForView from './calculateScaleForView.js';
 import loadImage from './loadImage.js';
 
-const createTextureForPlane = async (planeConfig, view, appConfig) => {
-  const width = Math.floor( appConfig.appDimensions.width * view.config.output.width );
-  const height = Math.floor( appConfig.appDimensions.height * view.config.output.height );
+const createTextureForPlane = async (planeConfig, screen, appConfig) => {
+  const width = Math.floor( appConfig.appDimensions.width * screen.config.output.width );
+  const height = Math.floor( appConfig.appDimensions.height * screen.config.output.height );
   if (planeConfig.type === 'video') {
     return new THREE.VideoTexture(video);
   }
@@ -23,22 +23,22 @@ const createTextureForPlane = async (planeConfig, view, appConfig) => {
   return new THREE.CanvasTexture(planeCanvas);
 };
 
-const createPlaneForView = async (planeConfig, view, appConfig) => {
+const createPlaneForScreen = async (planeConfig, screen, appConfig) => {
 
-  const texture = await createTextureForPlane(planeConfig, view, appConfig);
+  const texture = await createTextureForPlane(planeConfig, screen, appConfig);
   const material = new THREE.MeshBasicMaterial( { map: texture } );
   const planeGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
   const plane = new THREE.Mesh(planeGeometry, material);
 
-  // place it on a certain config.views camera
-  plane.position.x = view.camera.position.x;
-  plane.position.y = view.camera.position.y;
+  // place it on a certain config.screens camera
+  plane.position.x = screen.camera.position.x;
+  plane.position.y = screen.camera.position.y;
 
-  const scale = calculateScaleForView(view);
+  const scale = calculateScaleForView(screen);
   plane.scale.set(scale.x, scale.y);
 
   const textureAspectRatio = scale.x / scale.y;
-  const outputAspectRatio = view.config.camera.size.width / view.config.camera.size.height;
+  const outputAspectRatio = screen.config.camera.size.width / screen.config.camera.size.height;
   texture.repeat.x = textureAspectRatio / outputAspectRatio;
   texture.offset.x = (1 - texture.repeat.x) / 2;
 
@@ -47,4 +47,4 @@ const createPlaneForView = async (planeConfig, view, appConfig) => {
   return plane;
 };
 
-export default createPlaneForView;
+export default createPlaneForScreen;
