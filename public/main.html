@@ -19,16 +19,12 @@
       background: #cccccc;
     }
 
-    video {
-      display: none;
-    }
   </style>
 </head>
 <body>
   <div id="app">
     <canvas id="output-canvas"></canvas>
   </div>
-  <video id="video-1" muted loop></video>
   <script type="module">
 
     import * as THREE from './js/three.js/build/three.module.js';
@@ -36,15 +32,12 @@
     import createPlaneForView from './js/functions/createPlaneForView.js';
 
     let config;
-
     const outputCanvas = document.getElementById('output-canvas');
     
     let renderer, scene;
     const planes = [];
 
-    const video1 = {
-      $video: document.getElementById('video-1'),
-    };
+    let client;
 
     const loadConfig = async () => {
       return await (await fetch('config.json')).json();
@@ -62,33 +55,33 @@
       renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
       scene = new THREE.Scene();
 
-      video1.$video.src = 'assets/devine_reel_2020.mp4';
-      video1.$video.play();
-
       const light = new THREE.AmbientLight( 0xffffff );
       scene.add(light);
 
-      // quick setup asset to a certain screen
-      const assetsPerScreen = [
-        { type: 'image', url: 'assets/2532.png' },
-        { type: 'image', url: 'assets/2532.png' },
-        { type: 'image', url: 'assets/2532.png' },
-        { type: 'image', url: 'assets/2532.png' },
-        { type: 'image', url: 'assets/2532.png' },
-        { type: 'image', url: 'assets/2532.png' },
-        { type: 'image', url: 'assets/2532.png' },
-        { type: 'image', url: 'assets/2532.png' }
-      ];
-
-      for (let i = 0; i < config.views.length; i++) {
-        const view = config.views[i];
-        const plane = await createPlaneForView(assetsPerScreen[i], view, config);
-        plane.position.z = i;
-        scene.add(plane);
-        planes.push(plane);
-      }
+      client = new WebSocket("ws://127.0.0.1");
+      client.onmessage = (message) => {
+        try {
+          const parsedMessage = JSON.parse(message.data);
+          if (parsedMessage.type) {
+            if (parsedMessage.type === 'create-plane-on-screen') {
+              onRequestCreatePlaneOnScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig);
+            }
+          }
+        } catch (e) {
+        }
+      };
 
       requestAnimationFrame(render);
+    };
+
+    const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
+      const view = config.views.find(view => view.config.id === screenId);
+      if (!view) {
+        return;
+      }
+      const plane = await createPlaneForView(planeConfig, view, config);
+      scene.add(plane);
+      planes.push(plane);
     };
 
     const updateViews = () => {
@@ -102,18 +95,6 @@
           // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
           canvasTexture.needsUpdate = true;
         }
-
-        const moveSpeed = 0.2;
-
-        plane.position.x += (plane.userData.targetX - plane.position.x) * moveSpeed;
-        plane.position.y += (plane.userData.targetY - plane.position.y) * moveSpeed;
-
-        plane.scale.x += (plane.userData.targetScaleX - plane.scale.x) * moveSpeed;
-        plane.scale.y += (plane.userData.targetScaleY - plane.scale.y) * moveSpeed;
-
-        plane.material.map.repeat.x += (plane.userData.targetTextureRepeatX - plane.material.map.repeat.x) * moveSpeed;
-        plane.material.map.offset.x += (plane.userData.targetTextureOffsetX - plane.material.map.offset.x) * moveSpeed;
-
       });
     };
 
