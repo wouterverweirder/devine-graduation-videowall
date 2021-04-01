@@ -43,12 +43,6 @@ const createPlaneForView = async (planeConfig, view, appConfig) => {
   texture.offset.x = (1 - texture.repeat.x) / 2;
 
   plane.userData.planeConfig = planeConfig;
-  plane.userData.targetX = plane.position.x;
-  plane.userData.targetY = plane.position.y;
-  plane.userData.targetScaleX = plane.scale.x;
-  plane.userData.targetScaleY = plane.scale.y;
-  plane.userData.targetTextureRepeatX = texture.repeat.x;
-  plane.userData.targetTextureOffsetX = texture.offset.x;
 
   return plane;
 };
