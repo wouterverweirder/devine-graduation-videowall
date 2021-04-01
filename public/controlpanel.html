@@ -30,6 +30,8 @@
 
     import * as THREE from './js/three.js/build/three.module.js';
     import loadImage from './js/functions/loadImage.js';
+    import calculateScaleForView from './js/functions/calculateScaleForView.js';
+    import createCamerasForConfig from './js/functions/createCamerasForConfig.js';
 
     import { Editor } from './js/three.js/editor/js/Editor.js';
     import { Viewport } from './js/three.js/editor/js/Viewport.js';
@@ -47,68 +49,16 @@
     const video1 = {
       $video: document.getElementById('video-1'),
     };
-    
-    const getPlaneScale = (plane, view) => {
-      let rotation = 0;
-      if (view.config.camera.rotation) {
-        rotation = view.config.camera.rotation;
-      }
-      const size = view.config.camera.size;
-      const halfFrustrumSize = size.width / 2;
-      const aspect = size.width / size.height;
-      // dirty fix, just assume 90 degrees when non-zero
-      if (rotation === 0) {
-        return {
-          x: halfFrustrumSize * config.aspectRatio,
-          y: halfFrustrumSize
-        }
-      }
-      return {
-        y: halfFrustrumSize * config.aspectRatio,
-        x: halfFrustrumSize
-      }
-    };
 
     const loadConfig = async () => {
       return await (await fetch('config.json')).json();
-    };
-
-    const initCameras = () => {
-      for ( let ii = 0; ii < config.views.length; ++ ii ) {
-        const view = config.views[ ii ];
-
-        const size = view.config.camera.size;
-
-        const halfFrustrumSize = size.width / 2;
-        const aspect = size.width / size.height;
-
-        let rotation = 0;
-        if (view.config.camera.rotation) {
-          rotation = view.config.camera.rotation;
-        }
-
-        const left = 0.5 * halfFrustrumSize * aspect / - 1;
-        const right = 0.5 * halfFrustrumSize * aspect;
-        const top = halfFrustrumSize / 2;
-        const bottom = halfFrustrumSize / - 2;
-        const near = 1;
-        const far = 30;
-        
-        const camera = new THREE.OrthographicCamera( left, right, top, bottom, near, far );
-        camera.name = `Camera ${ii}`;
-        camera.position.fromArray( view.config.camera.position );
-        camera.rotation.z = rotation;
-        view.camera = camera;
-
-        view.background = new THREE.Color(1, 1, 1);
-      }
     };
 
     const init = async () => {
 
       config = await loadConfig();
 
-      initCameras();
+      createCamerasForConfig(config);
 
       renderer = new THREE.WebGLRenderer({powerPreference: "high-performance"});
       scene = new THREE.Scene();
@@ -183,7 +133,7 @@
         plane.position.y = targetView.camera.position.y;
         plane.position.z = i;
 
-        const scale = getPlaneScale(plane, view);
+        const scale = calculateScaleForView(view);
         plane.scale.set(scale.x, scale.y);
         
         const textureAspectRatio = scale.x / scale.y;
