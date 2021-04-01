@@ -94,7 +94,7 @@
     const updateViews = () => {
       planes.forEach((plane) => {
 
-        if (plane.userData.textureType === 'canvas') {
+        if (plane.userData.planeConfig.type === 'canvas') {
           const canvasTexture = plane.material.map;
           const planeCanvas = canvasTexture.image;
           const planeCtx = planeCanvas.getContext('2d');

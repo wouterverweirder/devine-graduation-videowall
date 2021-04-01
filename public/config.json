@@ -6,6 +6,7 @@
   "views": [
     {
       "config": {
+        "id": "screen-0",
         "output": {
           "left": 0,
           "bottom": 0.5,
@@ -28,6 +29,7 @@
     },
     {
       "config": {
+        "id": "screen-1",
         "output": {
           "left": 0.25,
           "bottom": 0.5,
@@ -50,6 +52,7 @@
     },
     {
       "config": {
+        "id": "screen-2",
         "output": {
           "left": 0,
           "bottom": 0,
@@ -71,6 +74,7 @@
     },
     {
       "config": {
+        "id": "screen-3",
         "output": {
           "left": 0.25,
           "bottom": 0,
@@ -92,6 +96,7 @@
     },
     {
       "config": {
+        "id": "screen-4",
         "output": {
           "left": 0.5,
           "bottom": 0.5,
@@ -113,6 +118,7 @@
     },
     {
       "config": {
+        "id": "screen-5",
         "output": {
           "left": 0.75,
           "bottom": 0.5,
@@ -135,6 +141,7 @@
     },
     {
       "config": {
+        "id": "screen-6",
         "output": {
           "left": 0.5,
           "bottom": 0,
@@ -157,6 +164,7 @@
     },
     {
       "config": {
+        "id": "screen-7",
         "output": {
           "left": 0.75,
           "bottom": 0,
