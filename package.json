@@ -18,5 +18,9 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^10.1.5"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "websocket": "^1.0.33"
   }
 }

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VideoWall</title>
+  <link rel="stylesheet" href="js/three.js/editor/css/main.css">
+  <style>
+
+    video {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="editor-container">
+  </div>
+  <video id="video-1" muted loop></video>
+  <script src="js/three.js/editor/js/libs/signals.min.js"></script>
+  <script type="module">
+
+    import * as THREE from './js/three.js/build/three.module.js';
+
+    import { Editor } from './js/three.js/editor/js/Editor.js';
+    import { Viewport } from './js/three.js/editor/js/Viewport.js';
+    Number.prototype.format = function () {
+      return this.toString().replace( /(\d)(?=(\d{3})+(?!\d))/g, "$1," );
+    };
+
+    let config;
+
+    const loadConfig = async () => {
+      return await (await fetch('config.json')).json();
+    };
+
+    const $editorContainer = document.getElementById('editor-container');
+    
+    let renderer, scene;
+    let planes;
+    let editor;
+
+    const video1 = {
+      $video: document.getElementById('video-1'),
+    };
+    
+    const getScaleForRotation = (plane, rotation) => {
+      const halfFrustrumSize = config.frustumSize / 2;
+      // dirty fix, just assume 90 degrees when non-zero
+      if (rotation === 0) {
+        return {
+          x: halfFrustrumSize * config.aspectRatio,
+          y: halfFrustrumSize
+        }
+      }
+      return {
+        y: halfFrustrumSize * config.aspectRatio,
+        x: halfFrustrumSize
+      }
+    };
+
+    const init = async () => {
+
+      config = await loadConfig();
+
+      for ( let ii = 0; ii < config.views.length; ++ ii ) {
+        const view = config.views[ ii ];
+        const left = Math.floor( config.appDimensions.width * view.config.left );
+        const bottom = Math.floor( config.appDimensions.height * view.config.bottom );
+        const width = Math.floor( config.appDimensions.width * view.config.width );
+        const height = Math.floor( config.appDimensions.height * view.config.height );
+        const halfFrustrumSize = config.frustumSize / 2;
+
+        let rotation = 0;
+        if (view.config.camera.rotation) {
+          rotation = view.config.camera.rotation;
+        }
+
+        const aspect = width / height;
+        
+        const camera = new THREE.OrthographicCamera( 0.5 * halfFrustrumSize * aspect / - 1, 0.5 * halfFrustrumSize * aspect, halfFrustrumSize / 2, halfFrustrumSize / - 2, 1, 30 );
+        camera.name = `Camera ${ii}`;
+        camera.position.fromArray( view.config.camera.position );
+        camera.rotation.z = rotation;
+        view.camera = camera;
+
+        view.background = new THREE.Color(1, 1, 1);
+      }
+
+      renderer = new THREE.WebGLRenderer({powerPreference: "high-performance"});
+      scene = new THREE.Scene();
+
+      editor = new Editor();
+      editor.camera.position.fromArray([23, 66, 37]);
+      editor.camera.lookAt(0, 0, 0);
+      const viewport = new Viewport( editor );
+      $editorContainer.appendChild( viewport.dom );
+      
+      const editorRenderer = new THREE.WebGLRenderer( { antialias: false } );
+      editor.signals.rendererChanged.dispatch( editorRenderer );
+      editor.signals.windowResize.dispatch();
+
+      video1.$video.src = 'assets/devine_reel_2020.mp4';
+      video1.$video.play();
+
+      const light = new THREE.AmbientLight( 0xffffff );
+      scene.add(light);
+
+
+      planes = [];
+      for (let i = 0; i < config.views.length; i++) {
+
+        const view = config.views[i];
+
+        const left = Math.floor( config.appDimensions.width * view.config.left );
+        const bottom = Math.floor( config.appDimensions.height * view.config.bottom );
+        const width = Math.floor( config.appDimensions.width * view.config.width );
+        const height = Math.floor( config.appDimensions.height * view.config.height );
+
+        let texture;
+        let textureType = (i % 3 === 0) ? 'video' : (i % 3 === 1) ? 'image' : 'canvas';
+
+        if (textureType === 'video') {
+          texture = new THREE.VideoTexture(video1.$video);
+        } else if (textureType === 'image') {
+          let imagePath = `assets/photo-0${i+1}.jpg`;
+          if (i === 0) {
+            imagePath = `assets/debug-image.png`;
+          }
+          texture = new THREE.TextureLoader().load( imagePath );
+        } else {
+          const planeCanvas = new OffscreenCanvas(width, height)
+          const planeCtx = planeCanvas.getContext('2d');
+          planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
+          planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
+          texture = new THREE.CanvasTexture(planeCanvas);
+        }
+        const material = new THREE.MeshBasicMaterial( { map: texture } );
+
+        const planeGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
+    
+        const plane = new THREE.Mesh(planeGeometry, material);
+        scene.add(plane);
+
+        // place it on a certain config.views camera
+        const targetView = config.views[i];
+        plane.position.x = targetView.camera.position.x;
+        plane.position.y = targetView.camera.position.y;
+      
+        plane.position.z = i;
+
+        let rotation = 0;
+        if (view.config.camera.rotation) {
+          rotation = view.config.camera.rotation;
+        }
+        const scaleForRotation = getScaleForRotation(plane, rotation);
+        plane.scale.set(scaleForRotation.x, scaleForRotation.y);
+        
+        const textureAspectRatio = scaleForRotation.x / scaleForRotation.y;
+        texture.repeat.x = textureAspectRatio / config.aspectRatio;
+        texture.offset.x = (1 - texture.repeat.x) / 2;
+
+        // console.log(plane.geometry.width, plane.geometry.height, plane.geometry.parameters.width, plane.geometry.parameters.height);
+
+        plane.userData.textureType = textureType;
+        plane.userData.targetX = plane.position.x;
+        plane.userData.targetY = plane.position.y;
+        plane.userData.targetScaleX = plane.scale.x;
+        plane.userData.targetScaleY = plane.scale.y;
+        plane.userData.targetTextureRepeatX = texture.repeat.x;
+        plane.userData.targetTextureOffsetX = texture.offset.x;
+
+        planes.push(plane);
+      }
+
+      // clone children into the editor and link it together
+      scene.children.forEach(child => {
+        const clonedChild = child.clone();
+        clonedChild.userData.onChange = () => {
+          child.position.copy(clonedChild.position);
+          child.quaternion.copy(clonedChild.quaternion);
+        }
+        child.userData.editorChild = clonedChild;
+        child.userData.onChange = () => {
+          clonedChild.position.copy(child.position);
+          clonedChild.quaternion.copy(child.quaternion);
+          clonedChild.scale.copy(child.scale);
+        };
+        editor.addObject(clonedChild);
+      });
+
+      // cameras
+      for ( let ii = 0; ii < config.views.length; ++ ii ) {
+        // camera
+        const view = config.views[ ii ];
+        const clonedCamera = view.camera.clone();
+        editor.addObject(clonedCamera);
+        const cameraHelper = editor.helpers[clonedCamera.id];
+
+        const onChange = () => {
+          // update the config
+          view.config.camera.position[0] = clonedCamera.position.x;
+          view.config.camera.position[1] = clonedCamera.position.y;
+          view.config.camera.position[2] = clonedCamera.position.z;
+          view.camera.position.copy(clonedCamera.position);
+          view.camera.quaternion.copy(clonedCamera.quaternion);
+          view.camera.updateProjectionMatrix();
+          clonedCamera.updateProjectionMatrix();
+          cameraHelper.update();
+        };
+        clonedCamera.userData.onChange = onChange;
+        onChange();
+      }
+      editor.signals.refreshSidebarObject3D.add((object) => {
+        if (!object.userData.onChange) {
+          return;
+        }
+        // trigger the onChange
+        object.userData.onChange();
+        // save the config
+        saveConfigs();
+      });
+
+      requestAnimationFrame(render);
+    };
+
+    let numFrames = 0;
+
+    const saveConfigs = () => {
+      // config.views contains other, non-json properties now
+      // just keep the json properties
+      const json = {...config};
+      json.views = [];
+      config.views.forEach(view => {
+        const config = {...view.config};
+        json.views.push({ config });
+      });
+      if (window.api && window.api.send) {
+        window.api.send("toMain", { type: 'saveConfigs', json });
+      }
+    };
+
+    const render = (time) => {
+      numFrames++;
+
+      // if (numFrames % 120 === 0) {
+      //   const viewsCopy = config.views.concat().sort(() => (Math.random() < .5) ? -1 : 1);
+      //   planes.forEach((plane, i) => {
+      //     const targetView = viewsCopy[i];
+      //     plane.userData.targetX = targetView.camera.position.x;
+      //     plane.userData.targetY = targetView.camera.position.y;
+      //     let rotation = 0;
+      //     if (targetView.config.camera.rotation) {
+      //       rotation = targetView.config.camera.rotation;
+      //     }
+      //     const scaleForRotation = getScaleForRotation(plane, rotation);
+      //     plane.userData.targetScaleX = scaleForRotation.x;
+      //     plane.userData.targetScaleY = scaleForRotation.y;
+
+      //     const textureAspectRatio = scaleForRotation.x / scaleForRotation.y;
+      //     plane.userData.targetTextureRepeatX = textureAspectRatio / config.aspectRatio;
+      //     plane.userData.targetTextureOffsetX = (1 - plane.userData.targetTextureRepeatX) / 2;
+      //   });
+      // }
+ 
+      planes.forEach((plane) => {
+
+        if (plane.userData.textureType === 'canvas') {
+          const canvasTexture = plane.material.map;
+          const planeCanvas = canvasTexture.image;
+          const planeCtx = planeCanvas.getContext('2d');
+          // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
+          // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
+          canvasTexture.needsUpdate = true;
+        }
+
+        const moveSpeed = 0.2;
+
+        plane.position.x += (plane.userData.targetX - plane.position.x) * moveSpeed;
+        plane.position.y += (plane.userData.targetY - plane.position.y) * moveSpeed;
+
+        plane.scale.x += (plane.userData.targetScaleX - plane.scale.x) * moveSpeed;
+        plane.scale.y += (plane.userData.targetScaleY - plane.scale.y) * moveSpeed;
+
+        plane.material.map.repeat.x += (plane.userData.targetTextureRepeatX - plane.material.map.repeat.x) * moveSpeed;
+        plane.material.map.offset.x += (plane.userData.targetTextureOffsetX - plane.material.map.offset.x) * moveSpeed;
+
+        plane.userData.onChange();
+
+      });
+
+      for ( let ii = 0; ii < config.views.length; ++ ii ) {
+
+        const view = config.views[ ii ];
+        const camera = view.camera;
+
+        let rotation = 0;
+        if (view.config.camera.rotation) {
+          rotation = view.config.camera.rotation;
+        }
+
+        const left = Math.floor( config.appDimensions.width * view.config.left );
+        const bottom = Math.floor( config.appDimensions.height * view.config.bottom );
+        const width = Math.floor( config.appDimensions.width * view.config.width );
+        const height = Math.floor( config.appDimensions.height * view.config.height );
+
+        renderer.setViewport( left, bottom, width, height );
+        renderer.setScissor( left, bottom, width, height );
+        renderer.setScissorTest( true );
+        renderer.setClearColor( view.background );
+
+        renderer.render( scene, camera );
+
+      }
+
+      editor.signals.applicationRendered.dispatch();
+        
+      requestAnimationFrame(render);
+    };
+
+    init();
+
+    
+  </script>
+</body>
+</html>
