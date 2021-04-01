@@ -7,6 +7,14 @@
   <link rel="stylesheet" href="js/three.js/editor/css/main.css">
   <style>
 
+    #editor-container, #viewport {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+    }
+
     video {
       display: none;
     }
@@ -15,26 +23,23 @@
 <body>
   <div id="editor-container">
   </div>
+  <div id="sidebar-container"></div>
   <video id="video-1" muted loop></video>
   <script src="js/three.js/editor/js/libs/signals.min.js"></script>
   <script type="module">
 
     import * as THREE from './js/three.js/build/three.module.js';
+    import loadImage from './js/functions/loadImage.js';
 
     import { Editor } from './js/three.js/editor/js/Editor.js';
     import { Viewport } from './js/three.js/editor/js/Viewport.js';
     Number.prototype.format = function () {
       return this.toString().replace( /(\d)(?=(\d{3})+(?!\d))/g, "$1," );
     };
-
-    let config;
-
-    const loadConfig = async () => {
-      return await (await fetch('config.json')).json();
-    };
-
+    
     const $editorContainer = document.getElementById('editor-container');
     
+    let config;
     let renderer, scene;
     let planes;
     let editor;
@@ -43,8 +48,14 @@
       $video: document.getElementById('video-1'),
     };
     
-    const getScaleForRotation = (plane, rotation) => {
-      const halfFrustrumSize = config.frustumSize / 2;
+    const getPlaneScale = (plane, view) => {
+      let rotation = 0;
+      if (view.config.camera.rotation) {
+        rotation = view.config.camera.rotation;
+      }
+      const size = view.config.camera.size;
+      const halfFrustrumSize = size.width / 2;
+      const aspect = size.width / size.height;
       // dirty fix, just assume 90 degrees when non-zero
       if (rotation === 0) {
         return {
@@ -58,26 +69,32 @@
       }
     };
 
-    const init = async () => {
+    const loadConfig = async () => {
+      return await (await fetch('config.json')).json();
+    };
 
-      config = await loadConfig();
-
+    const initCameras = () => {
       for ( let ii = 0; ii < config.views.length; ++ ii ) {
         const view = config.views[ ii ];
-        const left = Math.floor( config.appDimensions.width * view.config.left );
-        const bottom = Math.floor( config.appDimensions.height * view.config.bottom );
-        const width = Math.floor( config.appDimensions.width * view.config.width );
-        const height = Math.floor( config.appDimensions.height * view.config.height );
-        const halfFrustrumSize = config.frustumSize / 2;
+
+        const size = view.config.camera.size;
+
+        const halfFrustrumSize = size.width / 2;
+        const aspect = size.width / size.height;
 
         let rotation = 0;
         if (view.config.camera.rotation) {
           rotation = view.config.camera.rotation;
         }
 
-        const aspect = width / height;
+        const left = 0.5 * halfFrustrumSize * aspect / - 1;
+        const right = 0.5 * halfFrustrumSize * aspect;
+        const top = halfFrustrumSize / 2;
+        const bottom = halfFrustrumSize / - 2;
+        const near = 1;
+        const far = 30;
         
-        const camera = new THREE.OrthographicCamera( 0.5 * halfFrustrumSize * aspect / - 1, 0.5 * halfFrustrumSize * aspect, halfFrustrumSize / 2, halfFrustrumSize / - 2, 1, 30 );
+        const camera = new THREE.OrthographicCamera( left, right, top, bottom, near, far );
         camera.name = `Camera ${ii}`;
         camera.position.fromArray( view.config.camera.position );
         camera.rotation.z = rotation;
@@ -85,6 +102,13 @@
 
         view.background = new THREE.Color(1, 1, 1);
       }
+    };
+
+    const init = async () => {
+
+      config = await loadConfig();
+
+      initCameras();
 
       renderer = new THREE.WebGLRenderer({powerPreference: "high-performance"});
       scene = new THREE.Scene();
@@ -106,28 +130,41 @@
       const light = new THREE.AmbientLight( 0xffffff );
       scene.add(light);
 
+      // quick setup asset to a certain screen
+      const assetsPerScreen = [
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' },
+        { type: 'image', url: 'assets/2532.png' }
+      ];
 
       planes = [];
       for (let i = 0; i < config.views.length; i++) {
 
         const view = config.views[i];
 
-        const left = Math.floor( config.appDimensions.width * view.config.left );
-        const bottom = Math.floor( config.appDimensions.height * view.config.bottom );
-        const width = Math.floor( config.appDimensions.width * view.config.width );
-        const height = Math.floor( config.appDimensions.height * view.config.height );
+        const width = Math.floor( config.appDimensions.width * view.config.output.width );
+        const height = Math.floor( config.appDimensions.height * view.config.output.height );
 
         let texture;
-        let textureType = (i % 3 === 0) ? 'video' : (i % 3 === 1) ? 'image' : 'canvas';
+        let textureType = assetsPerScreen[i].type;
 
         if (textureType === 'video') {
           texture = new THREE.VideoTexture(video1.$video);
         } else if (textureType === 'image') {
-          let imagePath = `assets/photo-0${i+1}.jpg`;
-          if (i === 0) {
-            imagePath = `assets/debug-image.png`;
-          }
-          texture = new THREE.TextureLoader().load( imagePath );
+          // texture = new THREE.TextureLoader().load( assetsPerScreen[i].url );
+          const planeCanvas = new OffscreenCanvas(width, height)
+          const planeCtx = planeCanvas.getContext('2d');
+          // draw the image in the center of the plane
+          const image = await loadImage(assetsPerScreen[i].url);
+          const offsetX = (width - image.width) / 2;
+          const offsetY =(height - image.height) / 2;
+          planeCtx.drawImage(image, offsetX, offsetY);
+          texture = new THREE.CanvasTexture(planeCanvas);
         } else {
           const planeCanvas = new OffscreenCanvas(width, height)
           const planeCtx = planeCanvas.getContext('2d');
@@ -146,14 +183,10 @@
         plane.position.y = targetView.camera.position.y;
         plane.position.z = i;
 
-        let rotation = 0;
-        if (view.config.camera.rotation) {
-          rotation = view.config.camera.rotation;
-        }
-        const scaleForRotation = getScaleForRotation(plane, rotation);
-        plane.scale.set(scaleForRotation.x, scaleForRotation.y);
+        const scale = getPlaneScale(plane, view);
+        plane.scale.set(scale.x, scale.y);
         
-        const textureAspectRatio = scaleForRotation.x / scaleForRotation.y;
+        const textureAspectRatio = scale.x / scale.y;
         texture.repeat.x = textureAspectRatio / config.aspectRatio;
         texture.offset.x = (1 - texture.repeat.x) / 2;
 
@@ -235,8 +268,6 @@
       requestAnimationFrame(render);
     };
 
-    let numFrames = 0;
-
     const saveConfigs = () => {
       // config.views contains other, non-json properties now
       // just keep the json properties
@@ -251,9 +282,7 @@
       }
     };
 
-    const render = (time) => {
-      numFrames++;
- 
+    const updateViews = () => {
       planes.forEach((plane) => {
 
         if (plane.userData.textureType === 'canvas') {
@@ -279,30 +308,30 @@
         plane.userData.onChange();
 
       });
+    };
 
+    const renderCameras = () => {
       for ( let ii = 0; ii < config.views.length; ++ ii ) {
-
         const view = config.views[ ii ];
-        const camera = view.camera;
 
-        let rotation = 0;
-        if (view.config.camera.rotation) {
-          rotation = view.config.camera.rotation;
-        }
-
-        const left = Math.floor( config.appDimensions.width * view.config.left );
-        const bottom = Math.floor( config.appDimensions.height * view.config.bottom );
-        const width = Math.floor( config.appDimensions.width * view.config.width );
-        const height = Math.floor( config.appDimensions.height * view.config.height );
+        const left = Math.floor( config.appDimensions.width * view.config.output.left );
+        const bottom = Math.floor( config.appDimensions.height * view.config.output.bottom );
+        const width = Math.floor( config.appDimensions.width * view.config.output.width );
+        const height = Math.floor( config.appDimensions.height * view.config.output.height );
 
         renderer.setViewport( left, bottom, width, height );
         renderer.setScissor( left, bottom, width, height );
         renderer.setScissorTest( true );
         renderer.setClearColor( view.background );
 
-        renderer.render( scene, camera );
-
+        renderer.render( scene, view.camera );
       }
+    };
+
+    const render = (time) => {
+ 
+      updateViews();
+      renderCameras();
 
       editor.signals.applicationRendered.dispatch();
         

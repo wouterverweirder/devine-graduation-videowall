@@ -61,30 +61,30 @@ function createWindows () {
 
   console.log(spannedDisplay);
 
-  // Create the output window, make it span all displays
-  const mainWindow = new BrowserWindow({
-    x: spannedDisplay.bounds.x,
-    y: spannedDisplay.bounds.y,
-    width: spannedDisplay.size.width,
-    height: spannedDisplay.size.height,
-    frame: false,
-    titleBarStyle: 'customButtonsOnHover',
-    webPreferences: {
-      nodeIntegration: false, // is default value after Electron v5
-      contextIsolation: true, // protect against prototype pollution
-      enableRemoteModule: false, // turn off remote
-      preload: path.join(__dirname, 'preload.js')
-    }
-  })
+  // // Create the output window, make it span all displays
+  // const mainWindow = new BrowserWindow({
+  //   x: spannedDisplay.bounds.x,
+  //   y: spannedDisplay.bounds.y,
+  //   width: spannedDisplay.size.width,
+  //   height: spannedDisplay.size.height,
+  //   frame: false,
+  //   titleBarStyle: 'customButtonsOnHover',
+  //   webPreferences: {
+  //     nodeIntegration: false, // is default value after Electron v5
+  //     contextIsolation: true, // protect against prototype pollution
+  //     enableRemoteModule: false, // turn off remote
+  //     preload: path.join(__dirname, 'preload.js')
+  //   }
+  // })
 
-  mainWindow.setSize(spannedDisplay.size.width, spannedDisplay.size.height);
+  // mainWindow.setSize(spannedDisplay.size.width, spannedDisplay.size.height);
 
-  // and load the index.html of the app.
-  // mainWindow.loadFile('demo20-threejs-8-portrait.html')
-  mainWindow.loadFile('public/main.html')
+  // // and load the index.html of the app.
+  // // mainWindow.loadFile('demo20-threejs-8-portrait.html')
+  // mainWindow.loadFile('public/main.html')
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // // Open the DevTools.
+  // mainWindow.webContents.openDevTools()
 
   const controlPanelWindow = new BrowserWindow({
     webPreferences: {
