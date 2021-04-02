@@ -29,20 +29,9 @@ function SidebarObject( editor ) {
   var outliner = new UIOutliner( editor );
   outliner.setId( 'outliner' );
   outliner.onChange( function () {
-
     console.log(outliner.getValue());
-
-    // ignoreObjectSelectedSignal = true;
-
-    // editor.selectById( parseInt( outliner.getValue() ) );
-
-    // ignoreObjectSelectedSignal = false;
-
   } );
   outliner.onDblClick( function () {
-
-    // editor.focusById( parseInt( outliner.getValue() ) );
-
   } );
   container.add( outliner );
 
@@ -76,13 +65,20 @@ function SidebarObject( editor ) {
       object.userData.planes.forEach(planeConfig => {
 
         var option = document.createElement( 'div' );
+        option.style.display = 'flex';
+        option.style.alignItems = 'center';
         option.draggable = false;
 
-        var html = `<span class="type"></span> ${planeConfig.url ? planeConfig.url : planeConfig.id}`;
+        var html = `<span class="type"></span> <span>${planeConfig.url ? planeConfig.url : planeConfig.id}</span>`;
+        html += `<button style="margin-left: auto;">remove</button>`;
         option.innerHTML = html;
         option.value = planeConfig.id;
 
-        // option.style.paddingLeft = ( pad * 18 ) + 'px';
+        var removeButton = option.querySelector('button');
+        removeButton.addEventListener('click', () => {
+          editor.signals.requestRemovePlaneFromScreen.dispatch(planeConfig);
+        });
+
         options.push( option );
       });
     }

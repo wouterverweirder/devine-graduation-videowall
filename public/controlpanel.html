@@ -69,6 +69,8 @@
       editor.camera.position.fromArray([23, 66, 37]);
       editor.camera.lookAt(0, 0, 0);
 
+      const Signal = signals.Signal;
+
       const viewport = new Viewport( editor );
       $editorContainer.appendChild( viewport.dom );
 
@@ -76,7 +78,11 @@
 			document.body.appendChild( sidebar.dom );
       
       const editorRenderer = new THREE.WebGLRenderer( { antialias: false } );
-      editor.signals.configChanged = new signals.Signal();
+      editor.signals.configChanged = new Signal();
+      // 
+      // request signals
+      editor.signals.requestRemovePlaneFromScreen = new Signal();
+      //
       editor.signals.rendererChanged.dispatch( editorRenderer );
       editor.signals.windowResize.dispatch();
 
@@ -132,6 +138,11 @@
         object.userData.onChange();
         editor.signals.configChanged.dispatch();
       });
+      // request signals
+      editor.signals.requestRemovePlaneFromScreen.add((planeConfig) => {
+        console.log('requestRemovePlaneFromScreen', planeConfig);
+        requestRemovePlaneFromScreen(planeConfig);
+      });
 
       function onWindowResize() {
         editor.signals.windowResize.dispatch();
@@ -145,9 +156,7 @@
       client.onopen = () => {
         requestClearScene();
 
-        const planeConfig = { id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'image', url: 'assets/2532.png' };
-
-        requestCreatePlaneOnScreen(planeConfig);
+        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'image', url: 'assets/2532.png' });
@@ -155,8 +164,6 @@
         requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'image', url: 'assets/2532.png' });
         requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'image', url: 'assets/2532.png' });
-        // test remove
-        requestRemovePlaneFromScreen(planeConfig);
       };
 
       client.onmessage = (message) => {
@@ -257,6 +264,7 @@
           if (index > -1) {
             editorCamera.userData.planes.splice(index, 1);
           }
+          editor.signals.objectChanged.dispatch(editor.selected);
         }
       });
     };
