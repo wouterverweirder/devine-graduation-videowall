@@ -7,13 +7,13 @@
   <link rel="stylesheet" href="js/three.js/editor/css/main.css">
   <style>
 
-    #editor-container, #viewport {
+    /* #editor-container, #viewport {
       position: absolute;
       left: 0;
       top: 0;
       right: 0;
       bottom: 0;
-    }
+    } */
   </style>
 </head>
 <body>
@@ -28,6 +28,7 @@
     import createPlaneForScreen from './js/functions/createPlaneForScreen.js';
 
     import { Editor } from './js/three.js/editor/js/Editor.js';
+    import { Sidebar } from './js/classes/Sidebar.js';
     import { Viewport } from './js/three.js/editor/js/Viewport.js';
     Number.prototype.format = function () {
       return this.toString().replace( /(\d)(?=(\d{3})+(?!\d))/g, "$1," );
@@ -62,10 +63,18 @@
 
       const viewport = new Viewport( editor );
       $editorContainer.appendChild( viewport.dom );
+
+      const sidebar = new Sidebar( editor );
+			document.body.appendChild( sidebar.dom );
       
       const editorRenderer = new THREE.WebGLRenderer( { antialias: false } );
+      editor.signals.configChanged = new signals.Signal();
       editor.signals.rendererChanged.dispatch( editorRenderer );
       editor.signals.windowResize.dispatch();
+
+      editor.signals.configChanged.add(() => {
+        saveConfigs();
+      });
 
       const light = new THREE.AmbientLight( 0xffffff );
       scene.add(light);
@@ -112,8 +121,7 @@
         }
         // trigger the onChange
         object.userData.onChange();
-        // save the config
-        saveConfigs();
+        editor.signals.configChanged.dispatch();
       });
 
       function onWindowResize() {
@@ -257,6 +265,7 @@
     };
 
     const saveConfigs = () => {
+      console.log('save config');
       // config.screens contains other, non-json properties now
       // just keep the json properties
       const json = {...config};

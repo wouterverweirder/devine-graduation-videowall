@@ -27,6 +27,8 @@ const createCamerasForConfig = (config) => {
     camera.rotation.z = rotation;
     screen.camera = camera;
 
+    camera.userData.id = screen.config.id;
+
     screen.background = new THREE.Color(1, 1, 1);
   }
 };
