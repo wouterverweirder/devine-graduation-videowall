@@ -51,7 +51,7 @@
     const init = async () => {
 
       config = await loadConfig();
-      config.screens.forEach(screen => screensById[screen.config.id] = screen);
+      config.screens.forEach(screen => screensById[screen.id] = screen);
 
       outputCanvas.width = config.appDimensions.width;
       outputCanvas.height = config.appDimensions.height;
@@ -100,12 +100,8 @@
     };
 
     const onRequestRemovePlaneFromScreen = async (screenId, planeConfig = false) => {
-      const screen = config.screens.find(screen => screen.config.id === screenId);
-      if (!screen) {
-        return;
-      }
       let applicablePlanes = planes.filter(plane => {
-        return plane.userData.screen === screen
+        return plane.userData.screenId === screenId
       });
       if (planeConfig) {
         const planeConfigJSON = JSON.stringify(planeConfig);
@@ -145,10 +141,10 @@
       cameras.forEach(camera => {
         const screen = screensById[camera.userData.id];
 
-        const left = Math.floor( config.appDimensions.width * screen.config.output.left );
-        const bottom = Math.floor( config.appDimensions.height * screen.config.output.bottom );
-        const width = Math.floor( config.appDimensions.width * screen.config.output.width );
-        const height = Math.floor( config.appDimensions.height * screen.config.output.height );
+        const left = Math.floor( config.appDimensions.width * screen.output.left );
+        const bottom = Math.floor( config.appDimensions.height * screen.output.bottom );
+        const width = Math.floor( config.appDimensions.width * screen.output.width );
+        const height = Math.floor( config.appDimensions.height * screen.output.height );
 
         renderer.setViewport( left, bottom, width, height );
         renderer.setScissor( left, bottom, width, height );
