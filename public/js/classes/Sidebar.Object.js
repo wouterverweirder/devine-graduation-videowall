@@ -27,24 +27,24 @@ function SidebarObject( editor ) {
   container.add( new UIBreak() );
 
   var outliner = new UIOutliner( editor );
-	outliner.setId( 'outliner' );
-	outliner.onChange( function () {
+  outliner.setId( 'outliner' );
+  outliner.onChange( function () {
 
     console.log(outliner.getValue());
 
-		// ignoreObjectSelectedSignal = true;
+    // ignoreObjectSelectedSignal = true;
 
-		// editor.selectById( parseInt( outliner.getValue() ) );
+    // editor.selectById( parseInt( outliner.getValue() ) );
 
-		// ignoreObjectSelectedSignal = false;
+    // ignoreObjectSelectedSignal = false;
 
-	} );
-	outliner.onDblClick( function () {
+  } );
+  outliner.onDblClick( function () {
 
-		// editor.focusById( parseInt( outliner.getValue() ) );
+    // editor.focusById( parseInt( outliner.getValue() ) );
 
-	} );
-	container.add( outliner );
+  } );
+  container.add( outliner );
 
   function update() {
 
@@ -72,7 +72,20 @@ function SidebarObject( editor ) {
 
     var options = [];
 
-    console.log(object.userData);
+    if (object.userData.planes) {
+      object.userData.planes.forEach(planeConfig => {
+
+        var option = document.createElement( 'div' );
+        option.draggable = false;
+
+        var html = `<span class="type"></span> ${planeConfig.url ? planeConfig.url : planeConfig.id}`;
+        option.innerHTML = html;
+        option.value = planeConfig.id;
+
+        // option.style.paddingLeft = ( pad * 18 ) + 'px';
+        options.push( option );
+      });
+    }
 
     outliner.setOptions(options);
   }

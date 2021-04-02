@@ -34,11 +34,12 @@
     const BLACK = new THREE.Color(1, 1, 1);
 
     let config;
-    const screensById = {};
     const outputCanvas = document.getElementById('output-canvas');
     
     let renderer, scene;
     let cameras;
+    const screensById = {};
+    const camerasById = {};
     let planes = [];
 
     let client;
@@ -57,6 +58,7 @@
       outputCanvas.height = config.appDimensions.height;
 
       cameras = createCamerasForConfig(config);
+      cameras.forEach(camera => camerasById[camera.userData.id] = camera);
 
       renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
       scene = new THREE.Scene();
@@ -80,38 +82,37 @@
     const queueReceivedMessage = (parsedMessage) => {
       if (parsedMessage.type) {
         if (parsedMessage.type === 'create-plane-on-screen') {
-          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig));
+          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.planeConfig));
         } else if (parsedMessage.type === 'clear-scene') {
           messageQueue = messageQueue.then(() => onRequestClearScene());
         } else if (parsedMessage.type === 'remove-plane-from-screen') {
-          messageQueue = messageQueue.then(() => onRequestRemovePlaneFromScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig));
+          messageQueue = messageQueue.then(() => onRequestRemovePlaneFromScreen(parsedMessage.planeConfig));
         }
       }
     }
 
-    const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
-      const screen = screensById[screenId];
+    const onRequestCreatePlaneOnScreen = async (planeConfig) => {
+      const screen = screensById[planeConfig.screenId];
       if (!screen) {
         return;
       }
-      const plane = await createPlaneForScreen(planeConfig, screen, config);
+      const plane = await createPlaneForScreen({planeConfig, screen, appConfig: config});
       scene.add(plane);
       planes.push(plane);
     };
 
-    const onRequestRemovePlaneFromScreen = async (screenId, planeConfig = false) => {
+    const onRequestRemovePlaneFromScreen = async (planeConfig) => {
       let applicablePlanes = planes.filter(plane => {
-        return plane.userData.screenId === screenId
+        return plane.userData.planeConfig.id === planeConfig.id
       });
-      if (planeConfig) {
-        const planeConfigJSON = JSON.stringify(planeConfig);
-        applicablePlanes = applicablePlanes.filter(plane => plane.userData.planeConfigJSON === planeConfigJSON);
-      }
       applicablePlanes.forEach(plane => {
         scene.remove(plane);
-        const index = planes.indexOf(plane);
+        let index = planes.indexOf(plane);
         if (index > -1) {
           planes.splice(index, 1);
+        }
+        if (plane.userData.editorChild) {
+          editor.removeObject(plane.userData.editorChild);
         }
       });
     };

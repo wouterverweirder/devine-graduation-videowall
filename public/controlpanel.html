@@ -39,11 +39,13 @@
     const BLACK = new THREE.Color(1, 1, 1);
     
     let config;
-    const screensById = {};
     let renderer, scene;
     let cameras;
+    const screensById = {};
+    const camerasById = {};
     let planes = [];
     let editor;
+    const editorCamerasById = {};
 
     let client;
     let messageQueue = Promise.resolve();
@@ -58,6 +60,7 @@
       config.screens.forEach(screen => screensById[screen.id] = screen);
 
       cameras = createCamerasForConfig(config);
+      cameras.forEach(camera => camerasById[camera.userData.id] = camera);
 
       renderer = new THREE.WebGLRenderer({powerPreference: "high-performance"});
       scene = new THREE.Scene();
@@ -94,6 +97,7 @@
         const screen = screensById[camera.userData.id];
         
         const clonedCamera = camera.clone();
+        editorCamerasById[camera.userData.id] = clonedCamera;
         editor.addObject(clonedCamera);
         const cameraHelper = editor.helpers[clonedCamera.id];
 
@@ -140,16 +144,19 @@
 
       client.onopen = () => {
         requestClearScene();
-        requestCreatePlaneOnScreen('screen-0', { type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen('screen-1', { type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen('screen-2', { type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen('screen-3', { type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen('screen-4', { type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen('screen-5', { type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen('screen-6', { type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen('screen-7', { type: 'image', url: 'assets/2532.png' });
+
+        const planeConfig = { id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'image', url: 'assets/2532.png' };
+
+        requestCreatePlaneOnScreen(planeConfig);
+        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'image', url: 'assets/2532.png' });
+        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'image', url: 'assets/2532.png' });
+        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'image', url: 'assets/2532.png' });
+        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-4', type: 'image', url: 'assets/2532.png' });
+        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'image', url: 'assets/2532.png' });
+        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'image', url: 'assets/2532.png' });
+        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'image', url: 'assets/2532.png' });
         // test remove
-        requestRemovePlaneFromScreen('screen-0', { type: 'image', url: 'assets/2532.png' });
+        requestRemovePlaneFromScreen(planeConfig);
       };
 
       client.onmessage = (message) => {
@@ -167,11 +174,11 @@
     const queueReceivedMessage = (parsedMessage) => {
       if (parsedMessage.type) {
         if (parsedMessage.type === 'create-plane-on-screen') {
-          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig));
+          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.planeConfig));
         } else if (parsedMessage.type === 'clear-scene') {
           messageQueue = messageQueue.then(() => onRequestClearScene());
         } else if (parsedMessage.type === 'remove-plane-from-screen') {
-          messageQueue = messageQueue.then(() => onRequestRemovePlaneFromScreen(parsedMessage.data.screenId, parsedMessage.data.planeConfig));
+          messageQueue = messageQueue.then(() => onRequestRemovePlaneFromScreen(parsedMessage.planeConfig));
         }
       }
     }
@@ -187,23 +194,17 @@
       });
     };
 
-    const requestCreatePlaneOnScreen = (screenId, planeConfig) => {
+    const requestCreatePlaneOnScreen = (planeConfig) => {
       sendRequest({
         type: 'create-plane-on-screen',
-        data: {
-          screenId,
-          planeConfig
-        }
+        planeConfig
       });
     };
 
-    const requestRemovePlaneFromScreen = (screenId, planeConfig = false) => {
+    const requestRemovePlaneFromScreen = (planeConfig) => {
       sendRequest({
         type: 'remove-plane-from-screen',
-        data: {
-          screenId,
-          planeConfig
-        }
+        planeConfig
       });
     };
 
@@ -218,34 +219,44 @@
       planes = [];
     };
 
-    const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
+    const onRequestCreatePlaneOnScreen = async (planeConfig) => {
       console.log('on request create plane on screen');
-      const screen = screensById[screenId];
+      const screen = screensById[planeConfig.screenId];
       if (!screen) {
         return;
       }
-      const plane = await createPlaneForScreen(planeConfig, screen, config);
+      const plane = await createPlaneForScreen({planeConfig, screen, appConfig: config});
+      console.log(plane);
       scene.add(plane);
       planes.push(plane);
       addChildToEditor(plane);
+      // link to editor camera
+      const editorCamera = editorCamerasById[planeConfig.screenId];
+      if (editorCamera) {
+        editorCamera.userData.planes.push(planeConfig);
+      }
     };
 
-    const onRequestRemovePlaneFromScreen = async (screenId, planeConfig = false) => {
+    const onRequestRemovePlaneFromScreen = async (planeConfig) => {
       let applicablePlanes = planes.filter(plane => {
-        return plane.userData.screenId === screenId
+        return plane.userData.planeConfig.id === planeConfig.id
       });
-      if (planeConfig) {
-        const planeConfigJSON = JSON.stringify(planeConfig);
-        applicablePlanes = applicablePlanes.filter(plane => plane.userData.planeConfigJSON === planeConfigJSON);
-      }
       applicablePlanes.forEach(plane => {
         scene.remove(plane);
-        const index = planes.indexOf(plane);
+        let index = planes.indexOf(plane);
         if (index > -1) {
           planes.splice(index, 1);
         }
         if (plane.userData.editorChild) {
           editor.removeObject(plane.userData.editorChild);
+        }
+        // remove from editor camera
+        const editorCamera = editorCamerasById[planeConfig.screenId];
+        if (editorCamera) {
+          index = editorCamera.userData.planes.findIndex((o) => o.id === planeConfig.id);
+          if (index > -1) {
+            editorCamera.userData.planes.splice(index, 1);
+          }
         }
       });
     };

@@ -23,7 +23,7 @@ const createTextureForPlane = async (planeConfig, screen, appConfig) => {
   return new THREE.CanvasTexture(planeCanvas);
 };
 
-const createPlaneForScreen = async (planeConfig, screen, appConfig) => {
+const createPlaneForScreen = async ({planeConfig, screen, appConfig}) => {
 
   const texture = await createTextureForPlane(planeConfig, screen, appConfig);
   const material = new THREE.MeshBasicMaterial( { map: texture } );
@@ -43,8 +43,6 @@ const createPlaneForScreen = async (planeConfig, screen, appConfig) => {
   texture.offset.x = (1 - texture.repeat.x) / 2;
 
   plane.userData.planeConfig = planeConfig;
-  plane.userData.planeConfigJSON = JSON.stringify(planeConfig);
-  plane.userData.screenId = screen.id;
 
   return plane;
 };
