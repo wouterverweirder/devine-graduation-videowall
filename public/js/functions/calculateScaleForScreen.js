@@ -1,9 +1,9 @@
-const calculateScaleForView = (view) => {
+const calculateScaleForScreen = (screen) => {
   let rotation = 0;
-  if (view.config.camera.rotation) {
-    rotation = view.config.camera.rotation;
+  if (screen.camera.rotation) {
+    rotation = screen.camera.rotation;
   }
-  const size = view.config.camera.size;
+  const size = screen.camera.size;
   const halfFrustrumSize = size.width / 2;
   const aspect = size.width / size.height;
 
@@ -28,4 +28,4 @@ const calculateScaleForView = (view) => {
   }
 };
 
-export default calculateScaleForView;
+export default calculateScaleForScreen;

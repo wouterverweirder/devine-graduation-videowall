@@ -35,9 +35,13 @@
     };
     
     const $editorContainer = document.getElementById('editor-container');
+
+    const BLACK = new THREE.Color(1, 1, 1);
     
     let config;
+    const screensById = {};
     let renderer, scene;
+    let cameras;
     let planes = [];
     let editor;
 
@@ -51,8 +55,9 @@
     const init = async () => {
 
       config = await loadConfig();
+      config.screens.forEach(screen => screensById[screen.id] = screen);
 
-      createCamerasForConfig(config);
+      cameras = createCamerasForConfig(config);
 
       renderer = new THREE.WebGLRenderer({powerPreference: "high-performance"});
       scene = new THREE.Scene();
@@ -85,27 +90,27 @@
       });
 
       // cameras
-      for ( let ii = 0; ii < config.screens.length; ++ ii ) {
-        // camera
-        const screen = config.screens[ ii ];
-        const clonedCamera = screen.camera.clone();
+      cameras.forEach(camera => {
+        const screen = screensById[camera.userData.id];
+        
+        const clonedCamera = camera.clone();
         editor.addObject(clonedCamera);
         const cameraHelper = editor.helpers[clonedCamera.id];
 
         const onChange = () => {
           // update the config
-          screen.config.camera.position[0] = clonedCamera.position.x;
-          screen.config.camera.position[1] = clonedCamera.position.y;
-          screen.config.camera.position[2] = clonedCamera.position.z;
-          screen.camera.position.copy(clonedCamera.position);
-          screen.camera.quaternion.copy(clonedCamera.quaternion);
-          screen.camera.updateProjectionMatrix();
+          screen.camera.position[0] = clonedCamera.position.x;
+          screen.camera.position[1] = clonedCamera.position.y;
+          screen.camera.position[2] = clonedCamera.position.z;
+          camera.position.copy(clonedCamera.position);
+          camera.quaternion.copy(clonedCamera.quaternion);
+          camera.updateProjectionMatrix();
           clonedCamera.updateProjectionMatrix();
           cameraHelper.update();
         };
         clonedCamera.userData.onChange = onChange;
         onChange();
-      }
+      });
       editor.signals.objectSelected.add((object) => {
         if (!object) {
           return;
@@ -215,7 +220,7 @@
 
     const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
       console.log('on request create plane on screen');
-      const screen = config.screens.find(screen => screen.config.id === screenId);
+      const screen = screensById[screenId];
       if (!screen) {
         return;
       }
@@ -226,12 +231,8 @@
     };
 
     const onRequestRemovePlaneFromScreen = async (screenId, planeConfig = false) => {
-      const screen = config.screens.find(screen => screen.config.id === screenId);
-      if (!screen) {
-        return;
-      }
       let applicablePlanes = planes.filter(plane => {
-        return plane.userData.screen === screen
+        return plane.userData.screenId === screenId
       });
       if (planeConfig) {
         const planeConfigJSON = JSON.stringify(planeConfig);
@@ -266,14 +267,7 @@
 
     const saveConfigs = () => {
       console.log('save config');
-      // config.screens contains other, non-json properties now
-      // just keep the json properties
       const json = {...config};
-      json.screens = [];
-      config.screens.forEach(screen => {
-        const config = {...screen.config};
-        json.screens.push({ config });
-      });
       if (window.api && window.api.send) {
         window.api.send("toMain", { type: 'saveConfigs', json });
       }
@@ -294,21 +288,21 @@
     };
 
     const renderCameras = () => {
-      for ( let ii = 0; ii < config.screens.length; ++ ii ) {
-        const screen = config.screens[ ii ];
+      cameras.forEach(camera => {
+        const screen = screensById[camera.userData.id];
 
-        const left = Math.floor( config.appDimensions.width * screen.config.output.left );
-        const bottom = Math.floor( config.appDimensions.height * screen.config.output.bottom );
-        const width = Math.floor( config.appDimensions.width * screen.config.output.width );
-        const height = Math.floor( config.appDimensions.height * screen.config.output.height );
+        const left = Math.floor( config.appDimensions.width * screen.output.left );
+        const bottom = Math.floor( config.appDimensions.height * screen.output.bottom );
+        const width = Math.floor( config.appDimensions.width * screen.output.width );
+        const height = Math.floor( config.appDimensions.height * screen.output.height );
 
         renderer.setViewport( left, bottom, width, height );
         renderer.setScissor( left, bottom, width, height );
         renderer.setScissorTest( true );
-        renderer.setClearColor( screen.background );
+        renderer.setClearColor( BLACK );
 
-        renderer.render( scene, screen.camera );
-      }
+        renderer.render( scene, camera );
+      })
     };
 
     const render = (time) => {

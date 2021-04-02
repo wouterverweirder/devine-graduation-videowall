@@ -1,10 +1,10 @@
 import * as THREE from '../three.js/build/three.module.js';
-import calculateScaleForView from './calculateScaleForView.js';
+import calculateScaleForScreen from './calculateScaleForScreen.js';
 import loadImage from './loadImage.js';
 
 const createTextureForPlane = async (planeConfig, screen, appConfig) => {
-  const width = Math.floor( appConfig.appDimensions.width * screen.config.output.width );
-  const height = Math.floor( appConfig.appDimensions.height * screen.config.output.height );
+  const width = Math.floor( appConfig.appDimensions.width * screen.output.width );
+  const height = Math.floor( appConfig.appDimensions.height * screen.output.height );
   if (planeConfig.type === 'video') {
     return new THREE.VideoTexture(video);
   }
@@ -31,20 +31,20 @@ const createPlaneForScreen = async (planeConfig, screen, appConfig) => {
   const plane = new THREE.Mesh(planeGeometry, material);
 
   // place it on a certain config.screens camera
-  plane.position.x = screen.camera.position.x;
-  plane.position.y = screen.camera.position.y;
+  plane.position.x = screen.camera.position[0];
+  plane.position.y = screen.camera.position[1];
 
-  const scale = calculateScaleForView(screen);
+  const scale = calculateScaleForScreen(screen);
   plane.scale.set(scale.x, scale.y);
 
   const textureAspectRatio = scale.x / scale.y;
-  const outputAspectRatio = screen.config.camera.size.width / screen.config.camera.size.height;
+  const outputAspectRatio = screen.camera.size.width / screen.camera.size.height;
   texture.repeat.x = textureAspectRatio / outputAspectRatio;
   texture.offset.x = (1 - texture.repeat.x) / 2;
 
   plane.userData.planeConfig = planeConfig;
   plane.userData.planeConfigJSON = JSON.stringify(planeConfig);
-  plane.userData.screen = screen;
+  plane.userData.screenId = screen.id;
 
   return plane;
 };

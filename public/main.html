@@ -31,10 +31,14 @@
     import createCamerasForConfig from './js/functions/createCamerasForConfig.js';
     import createPlaneForScreen from './js/functions/createPlaneForScreen.js';
 
+    const BLACK = new THREE.Color(1, 1, 1);
+
     let config;
+    const screensById = {};
     const outputCanvas = document.getElementById('output-canvas');
     
     let renderer, scene;
+    let cameras;
     let planes = [];
 
     let client;
@@ -47,11 +51,12 @@
     const init = async () => {
 
       config = await loadConfig();
+      config.screens.forEach(screen => screensById[screen.config.id] = screen);
 
       outputCanvas.width = config.appDimensions.width;
       outputCanvas.height = config.appDimensions.height;
 
-      createCamerasForConfig(config);
+      cameras = createCamerasForConfig(config);
 
       renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
       scene = new THREE.Scene();
@@ -85,7 +90,7 @@
     }
 
     const onRequestCreatePlaneOnScreen = async (screenId, planeConfig) => {
-      const screen = config.screens.find(screen => screen.config.id === screenId);
+      const screen = screensById[screenId];
       if (!screen) {
         return;
       }
@@ -137,8 +142,8 @@
     };
 
     const renderCameras = () => {
-      for ( let ii = 0; ii < config.screens.length; ++ ii ) {
-        const screen = config.screens[ ii ];
+      cameras.forEach(camera => {
+        const screen = screensById[camera.userData.id];
 
         const left = Math.floor( config.appDimensions.width * screen.config.output.left );
         const bottom = Math.floor( config.appDimensions.height * screen.config.output.bottom );
@@ -148,10 +153,10 @@
         renderer.setViewport( left, bottom, width, height );
         renderer.setScissor( left, bottom, width, height );
         renderer.setScissorTest( true );
-        renderer.setClearColor( screen.background );
+        renderer.setClearColor( BLACK );
 
-        renderer.render( scene, screen.camera );
-      }
+        renderer.render( scene, camera );
+      })
     };
 
     const render = (time) => {
