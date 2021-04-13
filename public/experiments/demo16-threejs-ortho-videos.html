@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VideoWall</title>
-  <link rel="stylesheet" href="js/three.js/editor/css/main.css">
+  <link rel="stylesheet" href="../js/three.js/editor/css/main.css">
   <style>
     #app {
       position: absolute;
@@ -42,14 +42,14 @@
     </label>
   </div>
   <video id="video-1" muted loop></video>
-  <script src="js/three.js/editor/js/libs/signals.min.js"></script>
+  <script src="../js/three.js/editor/js/libs/signals.min.js"></script>
   <script type="module">
 
-    import * as THREE from './js/three.js/build/three.module.js';
-    import Stats from './stats.module.js';
+    import * as THREE from '../js/three.js/build/three.module.js';
+    import Stats from '../js/stats.module.js';
 
-    import { Editor } from './js/three.js/editor/js/Editor.js';
-    import { Viewport } from './js/three.js/editor/js/Viewport.js';
+    import { Editor } from '../js/three.js/editor/js/Editor.js';
+    import { Viewport } from '../js/three.js/editor/js/Viewport.js';
     Number.prototype.format = function () {
       return this.toString().replace( /(\d)(?=(\d{3})+(?!\d))/g, "$1," );
     };
@@ -197,7 +197,7 @@
 
     const init = () => {
 
-      video1.$video.src = 'assets/devine_reel_2020.mp4';
+      video1.$video.src = '../assets/devine_reel_2020.mp4';
       video1.$video.play();
 
       const light = new THREE.AmbientLight( 0xffffff );
@@ -221,7 +221,7 @@
         if (textureType === 'video') {
           texture = new THREE.VideoTexture(video1.$video);
         } else if (textureType === 'image') {
-          texture = new THREE.TextureLoader().load( `assets/photo-0${i+1}.jpg` );
+          texture = new THREE.TextureLoader().load( `../assets/photo-0${i+1}.jpg` );
         } else {
           const planeCanvas = new OffscreenCanvas(width, height)
           const planeCtx = planeCanvas.getContext('2d');

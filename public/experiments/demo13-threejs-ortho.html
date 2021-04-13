@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VideoWall</title>
-  <link rel="stylesheet" href="js/three.js/editor/css/main.css">
+  <link rel="stylesheet" href="../js/three.js/editor/css/main.css">
   <style>
     #app {
       position: absolute;
@@ -37,14 +37,14 @@
       Show Editor
     </label>
   </div>
-  <script src="js/three.js/editor/js/libs/signals.min.js"></script>
+  <script src="../js/three.js/editor/js/libs/signals.min.js"></script>
   <script type="module">
 
-    import * as THREE from './js/three.js/build/three.module.js';
-    import Stats from './stats.module.js';
+    import * as THREE from '../js/three.js/build/three.module.js';
+    import Stats from '../js/stats.module.js';
 
-    import { Editor } from './js/three.js/editor/js/Editor.js';
-    import { Viewport } from './js/three.js/editor/js/Viewport.js';
+    import { Editor } from '../js/three.js/editor/js/Editor.js';
+    import { Viewport } from '../js/three.js/editor/js/Viewport.js';
     Number.prototype.format = function () {
       return this.toString().replace( /(\d)(?=(\d{3})+(?!\d))/g, "$1," );
     };
@@ -215,7 +215,7 @@
         planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
         planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
 
-        // const texture = new THREE.TextureLoader().load( `assets/photo-0${i+1}.jpg` );
+        // const texture = new THREE.TextureLoader().load( `../assets/photo-0${i+1}.jpg` );
         const texture = new THREE.CanvasTexture(planeCanvas);
         texture.generateMipmaps = false;
         texture.minFilter = THREE.LinearFilter;

@@ -1,4 +1,4 @@
-import * as THREE from './js/three.js/build/three.module.js';
+import * as THREE from '../js/three.js/build/three.module.js';
 
 const frustumSize = 10;
 const halfFrustrumSize = 5;
@@ -138,7 +138,7 @@ const init = () => {
     planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
     planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
 
-    // const texture = new THREE.TextureLoader().load( `assets/photo-0${i+1}.jpg` );
+    // const texture = new THREE.TextureLoader().load( `../assets/photo-0${i+1}.jpg` );
     const texture = new THREE.CanvasTexture(planeCanvas);
     texture.generateMipmaps = false;
     texture.minFilter = THREE.LinearFilter;
