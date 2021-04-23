@@ -28,6 +28,7 @@
   <script type="module">
 
     import * as THREE from './js/three.js/build/three.module.js';
+    import { ServerConnection } from './js/classes/ServerConnection.js';
     import createCamerasForConfig from './js/functions/createCamerasForConfig.js';
     import createPlaneForScreen from './js/functions/createPlaneForScreen.js';
 
@@ -42,8 +43,7 @@
     const camerasById = {};
     let objects = [];
 
-    let client;
-    let messageQueue = Promise.resolve();
+    const serverConnection = new ServerConnection();
 
     const loadConfig = async () => {
       return await (await fetch('config.json')).json();
@@ -66,11 +66,20 @@
       // const light = new THREE.AmbientLight( 0xffffff );
       // scene.add(light);
 
-      client = new WebSocket("ws://127.0.0.1");
-      client.onmessage = (message) => {
+      serverConnection.connect('127.0.0.1');
+
+      serverConnection.onmessage = async (message) => {
         try {
           const parsedMessage = JSON.parse(message.data);
-          queueReceivedMessage(parsedMessage);
+          if (parsedMessage.type) {
+            if (parsedMessage.type === 'create-plane-on-screen') {
+              await onRequestCreatePlaneOnScreen(parsedMessage.userData);
+            } else if (parsedMessage.type === 'clear-scene') {
+              await onRequestClearScene();
+            } else if (parsedMessage.type === 'remove-object') {
+              await onRequestRemoveObject(parsedMessage.userData);
+            }
+          }
         } catch (e) {
           console.error(e);
         }
@@ -78,18 +87,6 @@
 
       requestAnimationFrame(render);
     };
-
-    const queueReceivedMessage = (parsedMessage) => {
-      if (parsedMessage.type) {
-        if (parsedMessage.type === 'create-plane-on-screen') {
-          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.userData));
-        } else if (parsedMessage.type === 'clear-scene') {
-          messageQueue = messageQueue.then(() => onRequestClearScene());
-        } else if (parsedMessage.type === 'remove-object') {
-          messageQueue = messageQueue.then(() => onRequestRemoveObject(parsedMessage.userData));
-        }
-      }
-    }
 
     const onRequestCreatePlaneOnScreen = async (userData) => {
       const screen = screensById[userData.screenId];

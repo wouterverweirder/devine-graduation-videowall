@@ -50,7 +50,6 @@
     const editorCamerasById = {};
     
     const serverConnection = new ServerConnection();
-    let messageQueue = Promise.resolve();
 
     const loadConfig = async () => {
       return await (await fetch('config.json')).json();
@@ -157,7 +156,9 @@
       serverConnection.onopen = () => {
         serverConnection.requestClearScene();
 
-        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'image', url: 'assets/2532.png' });
+        const id = THREE.MathUtils.generateUUID();
+
+        serverConnection.requestCreatePlaneOnScreen({ id, screenId: 'screen-0', type: 'image', url: 'assets/2532.png' });
         serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'image', url: 'assets/2532.png' });
         serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'image', url: 'assets/2532.png' });
         serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'image', url: 'assets/2532.png' });
@@ -165,14 +166,23 @@
         serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'image', url: 'assets/2532.png' });
         serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'image', url: 'assets/2532.png' });
         serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestRemoveObject({ id });
       };
 
       serverConnection.connect(serverAddress);
 
-      serverConnection.onmessage = (message) => {
+      serverConnection.onmessage = async (message) => {
         try {
           const parsedMessage = JSON.parse(message.data);
-          queueReceivedMessage(parsedMessage);
+          if (parsedMessage.type) {
+            if (parsedMessage.type === 'create-plane-on-screen') {
+              await onRequestCreatePlaneOnScreen(parsedMessage.userData);
+            } else if (parsedMessage.type === 'clear-scene') {
+              await onRequestClearScene();
+            } else if (parsedMessage.type === 'remove-object') {
+              await onRequestRemoveObject(parsedMessage.userData);
+            }
+          }
         } catch (e) {
           console.error(e);
         }
@@ -198,18 +208,6 @@
           break;
       }
     };
-
-    const queueReceivedMessage = (parsedMessage) => {
-      if (parsedMessage.type) {
-        if (parsedMessage.type === 'create-plane-on-screen') {
-          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.userData));
-        } else if (parsedMessage.type === 'clear-scene') {
-          messageQueue = messageQueue.then(() => onRequestClearScene());
-        } else if (parsedMessage.type === 'remove-object') {
-          messageQueue = messageQueue.then(() => onRequestRemoveObject(parsedMessage.userData));
-        }
-      }
-    }
 
     const onRequestClearScene = () => {
       objects.forEach(object => {

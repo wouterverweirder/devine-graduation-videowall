@@ -11,7 +11,7 @@ class ServerConnection {
       this.onopen();
     };
     this.client.onmessage = (message) => {
-      this.onmessage(message);
+      this.messageQueue = this.messageQueue.then(() => this.onmessage(message));
     };
   }
 
