@@ -28,7 +28,6 @@ const createCamerasForConfig = (config) => {
     camera.rotation.z = rotation;
 
     camera.userData.id = screen.id;
-    camera.userData.planes = [];
     
     cameras.push(camera);
   }

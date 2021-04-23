@@ -2,17 +2,17 @@ import * as THREE from '../three.js/build/three.module.js';
 import calculateScaleForScreen from './calculateScaleForScreen.js';
 import loadImage from './loadImage.js';
 
-const createTextureForPlane = async (planeConfig, screen, appConfig) => {
+const createTextureForPlane = async (userData, screen, appConfig) => {
   const width = Math.floor( appConfig.appDimensions.width * screen.output.width );
   const height = Math.floor( appConfig.appDimensions.height * screen.output.height );
-  if (planeConfig.type === 'video') {
+  if (userData.type === 'video') {
     return new THREE.VideoTexture(video);
   }
-  if (planeConfig.type === 'image') {
+  if (userData.type === 'image') {
     const planeCanvas = new OffscreenCanvas(width, height);
     const planeCtx = planeCanvas.getContext('2d');
     // draw the image in the center of the plane
-    const image = await loadImage(planeConfig.url);
+    const image = await loadImage(userData.url);
     const offsetX = (width - image.width) / 2;
     const offsetY =(height - image.height) / 2;
     planeCtx.drawImage(image, offsetX, offsetY);
@@ -23,9 +23,9 @@ const createTextureForPlane = async (planeConfig, screen, appConfig) => {
   return new THREE.CanvasTexture(planeCanvas);
 };
 
-const createPlaneForScreen = async ({planeConfig, screen, appConfig}) => {
+const createPlaneForScreen = async ({userData, screen, appConfig}) => {
 
-  const texture = await createTextureForPlane(planeConfig, screen, appConfig);
+  const texture = await createTextureForPlane(userData, screen, appConfig);
   const material = new THREE.MeshBasicMaterial( { map: texture } );
   const planeGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
   const plane = new THREE.Mesh(planeGeometry, material);
@@ -42,7 +42,7 @@ const createPlaneForScreen = async ({planeConfig, screen, appConfig}) => {
   texture.repeat.x = textureAspectRatio / outputAspectRatio;
   texture.offset.x = (1 - texture.repeat.x) / 2;
 
-  plane.userData.planeConfig = planeConfig;
+  Object.assign(plane.userData, userData);
 
   return plane;
 };

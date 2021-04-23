@@ -40,7 +40,7 @@
     let cameras;
     const screensById = {};
     const camerasById = {};
-    let planes = [];
+    let objects = [];
 
     let client;
     let messageQueue = Promise.resolve();
@@ -82,53 +82,52 @@
     const queueReceivedMessage = (parsedMessage) => {
       if (parsedMessage.type) {
         if (parsedMessage.type === 'create-plane-on-screen') {
-          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.planeConfig));
+          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.userData));
         } else if (parsedMessage.type === 'clear-scene') {
           messageQueue = messageQueue.then(() => onRequestClearScene());
-        } else if (parsedMessage.type === 'remove-plane-from-screen') {
-          messageQueue = messageQueue.then(() => onRequestRemovePlaneFromScreen(parsedMessage.planeConfig));
+        } else if (parsedMessage.type === 'remove-object') {
+          messageQueue = messageQueue.then(() => onRequestRemoveObject(parsedMessage.userData));
         }
       }
     }
 
-    const onRequestCreatePlaneOnScreen = async (planeConfig) => {
-      const screen = screensById[planeConfig.screenId];
+    const onRequestCreatePlaneOnScreen = async (userData) => {
+      const screen = screensById[userData.screenId];
       if (!screen) {
         return;
       }
-      const plane = await createPlaneForScreen({planeConfig, screen, appConfig: config});
+      const plane = await createPlaneForScreen({userData, screen, appConfig: config});
       scene.add(plane);
-      planes.push(plane);
+      objects.push(plane);
     };
 
-    const onRequestRemovePlaneFromScreen = async (planeConfig) => {
-      let applicablePlanes = planes.filter(plane => {
-        return plane.userData.planeConfig.id === planeConfig.id
+    const onRequestRemoveObject = async (userData) => {
+      let applicableObjects = objects.filter(object => {
+        return object.userData.id === userData.id
       });
-      applicablePlanes.forEach(plane => {
-        scene.remove(plane);
-        let index = planes.indexOf(plane);
+      applicableObjects.forEach(object => {
+        scene.remove(object);
+        let index = objects.indexOf(object);
         if (index > -1) {
-          planes.splice(index, 1);
+          objects.splice(index, 1);
         }
-        if (plane.userData.editorChild) {
-          editor.removeObject(plane.userData.editorChild);
+        if (object.userData.editorChild) {
+          editor.removeObject(object.userData.editorChild);
         }
       });
     };
 
     const onRequestClearScene = () => {
-      planes.forEach(plane => {
-        scene.remove(plane);
+      objects.forEach(object => {
+        scene.remove(object);
       });
-      planes = [];
+      objects = [];
     };
 
-    const updatePlanes = () => {
-      planes.forEach((plane) => {
-
-        if (plane.userData.planeConfig.type === 'canvas') {
-          const canvasTexture = plane.material.map;
+    const updateObjects = () => {
+      objects.forEach((object) => {
+        if (object.userData.type === 'canvas') {
+          const canvasTexture = object.material.map;
           const planeCanvas = canvasTexture.image;
           const planeCtx = planeCanvas.getContext('2d');
           // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
@@ -158,7 +157,7 @@
 
     const render = (time) => {
  
-      updatePlanes();
+      updateObjects();
       renderCameras();
         
       requestAnimationFrame(render);

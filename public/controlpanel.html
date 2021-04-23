@@ -43,7 +43,7 @@
     let cameras;
     const screensById = {};
     const camerasById = {};
-    let planes = [];
+    let objects = [];
     let editor;
     const editorCamerasById = {};
 
@@ -81,7 +81,7 @@
       editor.signals.configChanged = new Signal();
       // 
       // request signals
-      editor.signals.requestRemovePlaneFromScreen = new Signal();
+      editor.signals.requestRemoveObject = new Signal();
       //
       editor.signals.rendererChanged.dispatch( editorRenderer );
       editor.signals.windowResize.dispatch();
@@ -128,7 +128,6 @@
         if (!object.userData.onChange) {
           return;
         }
-        console.log(object);
       });
       editor.signals.refreshSidebarObject3D.add((object) => {
         if (!object.userData.onChange) {
@@ -139,15 +138,11 @@
         editor.signals.configChanged.dispatch();
       });
       // request signals
-      editor.signals.requestRemovePlaneFromScreen.add((planeConfig) => {
-        console.log('requestRemovePlaneFromScreen', planeConfig);
-        requestRemovePlaneFromScreen(planeConfig);
+      editor.signals.requestRemoveObject.add((userData) => {
+        requestRemoveObject(userData);
       });
-
-      function onWindowResize() {
-        editor.signals.windowResize.dispatch();
-      }
-      
+     
+      document.addEventListener('keydown', onKeyDown, false );
       window.addEventListener( 'resize', onWindowResize, false );
       onWindowResize();
 
@@ -178,14 +173,32 @@
       requestAnimationFrame(render);
     };
 
+    const onWindowResize = (event) => {
+      editor.signals.windowResize.dispatch();
+    };
+
+    const onKeyDown = (event) => {
+      switch ( event.key.toLowerCase() ) {
+        case 'backspace':
+        case 'delete':
+          const object = editor.selected;
+          if ( !object ) return;
+          if ( !object.userData.type ) return;
+
+          requestRemoveObject(object.userData);
+          editor.deselect();
+          break;
+      }
+    };
+
     const queueReceivedMessage = (parsedMessage) => {
       if (parsedMessage.type) {
         if (parsedMessage.type === 'create-plane-on-screen') {
-          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.planeConfig));
+          messageQueue = messageQueue.then(() => onRequestCreatePlaneOnScreen(parsedMessage.userData));
         } else if (parsedMessage.type === 'clear-scene') {
           messageQueue = messageQueue.then(() => onRequestClearScene());
-        } else if (parsedMessage.type === 'remove-plane-from-screen') {
-          messageQueue = messageQueue.then(() => onRequestRemovePlaneFromScreen(parsedMessage.planeConfig));
+        } else if (parsedMessage.type === 'remove-object') {
+          messageQueue = messageQueue.then(() => onRequestRemoveObject(parsedMessage.userData));
         }
       }
     }
@@ -201,70 +214,53 @@
       });
     };
 
-    const requestCreatePlaneOnScreen = (planeConfig) => {
+    const requestCreatePlaneOnScreen = (userData) => {
       sendRequest({
         type: 'create-plane-on-screen',
-        planeConfig
+        userData
       });
     };
 
-    const requestRemovePlaneFromScreen = (planeConfig) => {
+    const requestRemoveObject = (userData) => {
       sendRequest({
-        type: 'remove-plane-from-screen',
-        planeConfig
+        type: 'remove-object',
+        userData
       });
     };
 
     const onRequestClearScene = () => {
-      console.log('on request clear scene');
-      planes.forEach(plane => {
-        scene.remove(plane);
-        if (plane.userData.editorChild) {
-          editor.removeObject(plane.userData.editorChild);
+      objects.forEach(object => {
+        scene.remove(object);
+        if (object.userData.editorChild) {
+          editor.removeObject(object.userData.editorChild);
         }
       });
-      planes = [];
+      objects = [];
     };
 
-    const onRequestCreatePlaneOnScreen = async (planeConfig) => {
-      console.log('on request create plane on screen');
-      const screen = screensById[planeConfig.screenId];
+    const onRequestCreatePlaneOnScreen = async (userData) => {
+      const screen = screensById[userData.screenId];
       if (!screen) {
         return;
       }
-      const plane = await createPlaneForScreen({planeConfig, screen, appConfig: config});
-      console.log(plane);
+      const plane = await createPlaneForScreen({userData, screen, appConfig: config});
       scene.add(plane);
-      planes.push(plane);
+      objects.push(plane);
       addChildToEditor(plane);
-      // link to editor camera
-      const editorCamera = editorCamerasById[planeConfig.screenId];
-      if (editorCamera) {
-        editorCamera.userData.planes.push(planeConfig);
-      }
     };
 
-    const onRequestRemovePlaneFromScreen = async (planeConfig) => {
-      let applicablePlanes = planes.filter(plane => {
-        return plane.userData.planeConfig.id === planeConfig.id
+    const onRequestRemoveObject = async (userData) => {
+      let applicableObjects = objects.filter(object => {
+        return object.userData.id === userData.id
       });
-      applicablePlanes.forEach(plane => {
-        scene.remove(plane);
-        let index = planes.indexOf(plane);
+      applicableObjects.forEach(object => {
+        scene.remove(object);
+        let index = objects.indexOf(object);
         if (index > -1) {
-          planes.splice(index, 1);
+          objects.splice(index, 1);
         }
-        if (plane.userData.editorChild) {
-          editor.removeObject(plane.userData.editorChild);
-        }
-        // remove from editor camera
-        const editorCamera = editorCamerasById[planeConfig.screenId];
-        if (editorCamera) {
-          index = editorCamera.userData.planes.findIndex((o) => o.id === planeConfig.id);
-          if (index > -1) {
-            editorCamera.userData.planes.splice(index, 1);
-          }
-          editor.signals.objectChanged.dispatch(editor.selected);
+        if (object.userData.editorChild) {
+          editor.removeObject(object.userData.editorChild);
         }
       });
     };
@@ -285,24 +281,24 @@
     };
 
     const saveConfigs = () => {
-      console.log('save config');
       const json = {...config};
-      if (window.api && window.api.send) {
-        window.api.send("toMain", { type: 'saveConfigs', json });
-      }
+      sendRequest({
+        type: 'save-config',
+        json
+      });
     };
 
-    const updatePlanes = () => {
-      planes.forEach((plane) => {
-        if (plane.userData.planeConfig.type === 'canvas') {
-          const canvasTexture = plane.material.map;
+    const updateObjects = () => {
+      objects.forEach((object) => {
+        if (object.userData.type === 'canvas') {
+          const canvasTexture = object.material.map;
           const planeCanvas = canvasTexture.image;
           const planeCtx = planeCanvas.getContext('2d');
           // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
           // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
           canvasTexture.needsUpdate = true;
         }
-        plane.userData.onChange();
+        object.userData.onChange();
       });
     };
 
@@ -326,7 +322,7 @@
 
     const render = (time) => {
  
-      updatePlanes();
+      updateObjects();
       renderCameras();
 
       editor.signals.applicationRendered.dispatch();

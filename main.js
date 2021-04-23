@@ -1,53 +1,8 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, screen, ipcMain} = require('electron')
+const {app, BrowserWindow, screen} = require('electron')
 const path = require('path')
-const fs = require('fs')
 
-const express = require('express');
-const expressApp = express();
-const WebSocketServer = require('websocket').server;
-const http = require('http');
-const server = http.Server(app);
-const port = process.env.PORT || 80;
-
-const wsServer = new WebSocketServer({
-  httpServer: server,
-  // You should not use autoAcceptConnections for production
-  // applications, as it defeats all standard cross-origin protection
-  // facilities built into the protocol and the browser.  You should
-  // *always* verify the connection's origin and decide whether or not
-  // to accept it.
-  autoAcceptConnections: false
-});
-
-wsServer.on('request', function(request) {
-  const connection = request.accept();
-  console.log((new Date()) + ' Connection accepted.');
-  connection.on('message', function(message) {
-    if (message.type === 'utf8') {
-      console.log('Received Message: ' + message.utf8Data);
-      wsServer.broadcastUTF(message.utf8Data);
-      try {
-        const parsed = JSON.parse(message.utf8Data);
-        console.log(parsed);
-      } catch (e) {
-      }
-    }
-    else if (message.type === 'binary') {
-      console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-      wsServer.broadcastBytes(message.binaryData);
-    }
-  });
-
-  connection.on('close', function(reasonCode, description) {
-    console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-  });
-});
-
-expressApp.use(express.static('public'));
-server.listen(port, () => {
- console.log(`App listening on port ${port}!`);
-});
+require('./server');
 
 function createWindows () {
   let displays = screen.getAllDisplays()
@@ -120,15 +75,3 @@ app.on('window-all-closed', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-ipcMain.on("toMain", (event, args) => {
-  if (args.type === 'saveConfigs') {
-    fs.writeFileSync('public/config.json', JSON.stringify(args.json, null, 2));
-  }
-  console.log(args);
-  // fs.readFile("path/to/file", (error, data) => {
-  //   // Do something with file contents
-
-  //   // Send result back to renderer process
-  //   win.webContents.send("fromMain", responseObj);
-  // });
-});

@@ -1,5 +1,5 @@
 import * as THREE from '../three.js/build/three.module.js';
-import { UIPanel, UIRow, UIText, UINumber, UIBreak } from '../three.js/editor/js/libs/ui.js';
+import { UIPanel, UIRow, UIText, UINumber, UIBreak, UIButton } from '../three.js/editor/js/libs/ui.js';
 import { UIOutliner, UITexture } from '../three.js/editor/js/libs/ui.three.js';
 import { SetPositionCommand } from '../three.js/editor/js/commands/SetPositionCommand.js';
 
@@ -26,14 +26,24 @@ function SidebarObject( editor ) {
 
   container.add( new UIBreak() );
 
-  var outliner = new UIOutliner( editor );
-  outliner.setId( 'outliner' );
-  outliner.onChange( function () {
-    console.log(outliner.getValue());
-  } );
-  outliner.onDblClick( function () {
-  } );
-  container.add( outliner );
+  // var outliner = new UIOutliner( editor );
+  // outliner.setId( 'outliner' );
+  // outliner.onChange( function () {
+  //   console.log(outliner.getValue());
+  // } );
+  // outliner.onDblClick( function () {
+  // } );
+  // container.add( outliner );
+
+  // container.add( new UIBreak() );
+
+  // var newPlaneRow = new UIRow();
+  // var newPlaneButton = new UIButton().setLabel('New Plane');
+  // newPlaneButton.onClick(() => {
+  //   console.log('new plane');
+  // });
+  // newPlaneRow.add(newPlaneButton);
+  // container.add(newPlaneRow);
 
   function update() {
 
@@ -61,29 +71,29 @@ function SidebarObject( editor ) {
 
     var options = [];
 
-    if (object.userData.planes) {
-      object.userData.planes.forEach(planeConfig => {
+    // if (object.userData.planes) {
+    //   object.userData.planes.forEach(planeConfig => {
 
-        var option = document.createElement( 'div' );
-        option.style.display = 'flex';
-        option.style.alignItems = 'center';
-        option.draggable = false;
+    //     var option = document.createElement( 'div' );
+    //     option.style.display = 'flex';
+    //     option.style.alignItems = 'center';
+    //     option.draggable = false;
 
-        var html = `<span class="type"></span> <span>${planeConfig.url ? planeConfig.url : planeConfig.id}</span>`;
-        html += `<button style="margin-left: auto;">remove</button>`;
-        option.innerHTML = html;
-        option.value = planeConfig.id;
+    //     var html = `<span class="type"></span> <span>${planeConfig.url ? planeConfig.url : planeConfig.id}</span>`;
+    //     html += `<button style="margin-left: auto;">remove</button>`;
+    //     option.innerHTML = html;
+    //     option.value = planeConfig.id;
 
-        var removeButton = option.querySelector('button');
-        removeButton.addEventListener('click', () => {
-          editor.signals.requestRemovePlaneFromScreen.dispatch(planeConfig);
-        });
+    //     var removeButton = option.querySelector('button');
+    //     removeButton.addEventListener('click', () => {
+    //       editor.signals.requestRemovePlaneFromScreen.dispatch(planeConfig);
+    //     });
 
-        options.push( option );
-      });
-    }
+    //     options.push( option );
+    //   });
+    // }
 
-    outliner.setOptions(options);
+    // outliner.setOptions(options);
   }
 
   signals.objectSelected.add( function ( object ) {
