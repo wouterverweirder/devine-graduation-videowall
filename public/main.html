@@ -63,8 +63,8 @@
       renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
       scene = new THREE.Scene();
 
-      const light = new THREE.AmbientLight( 0xffffff );
-      scene.add(light);
+      // const light = new THREE.AmbientLight( 0xffffff );
+      // scene.add(light);
 
       client = new WebSocket("ws://127.0.0.1");
       client.onmessage = (message) => {

@@ -30,6 +30,8 @@ const createPlaneForScreen = async ({userData, screen, appConfig}) => {
   const planeGeometry = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
   const plane = new THREE.Mesh(planeGeometry, material);
 
+  plane.name = `${userData.type} plane ${screen.id}`;
+
   // place it on a certain config.screens camera
   plane.position.x = screen.camera.position[0];
   plane.position.y = screen.camera.position[1];

@@ -23,11 +23,12 @@ const createCamerasForConfig = (config) => {
     const far = 30;
     
     const camera = new THREE.OrthographicCamera( left, right, top, bottom, near, far );
-    camera.name = `Camera ${ii}`;
+    camera.name = `Screen ${ii}`;
     camera.position.fromArray( screen.camera.position );
     camera.rotation.z = rotation;
 
     camera.userData.id = screen.id;
+    camera.userData.type = 'screen';
     
     cameras.push(camera);
   }

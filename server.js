@@ -1,5 +1,6 @@
 const fs = require('fs');
 const http = require('http');
+const glob = require('glob');
 const express = require('express');
 const expressApp = express();
 const WebSocketServer = require('websocket').server;
@@ -44,6 +45,17 @@ wsServer.on('request', function(request) {
 
   connection.on('close', function(reasonCode, description) {
     console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+  });
+});
+
+expressApp.get('/api/images', (req, res) => {
+  const localPath = './public/';
+  const localPathLength = localPath.length;
+  glob(`${localPath}assets/**/*.{jpg,png,gif}`, (err, matches) => {
+    return res.send(JSON.stringify({
+      'result': 'ok',
+      'data': matches.map(match => req.protocol + '://' + req.get('host') + '/' + match.substring(localPathLength))
+    }));
   });
 });
 

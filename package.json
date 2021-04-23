@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
+    "glob": "^7.1.6",
     "websocket": "^1.0.33"
   }
 }

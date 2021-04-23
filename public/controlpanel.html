@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VideoWall</title>
   <link rel="stylesheet" href="js/three.js/editor/css/main.css">
+  <link rel="stylesheet" href="css/controlpanel.css">
   <style>
 
     /* #editor-container, #viewport {
@@ -24,6 +25,7 @@
   <script type="module">
 
     import * as THREE from './js/three.js/build/three.module.js';
+    import { ServerConnection } from './js/classes/ServerConnection.js';
     import createCamerasForConfig from './js/functions/createCamerasForConfig.js';
     import createPlaneForScreen from './js/functions/createPlaneForScreen.js';
 
@@ -46,8 +48,8 @@
     let objects = [];
     let editor;
     const editorCamerasById = {};
-
-    let client;
+    
+    const serverConnection = new ServerConnection();
     let messageQueue = Promise.resolve();
 
     const loadConfig = async () => {
@@ -66,6 +68,12 @@
       scene = new THREE.Scene();
 
       editor = new Editor();
+      editor.serverConnection = serverConnection;
+      let serverAddress = editor.config.getKey('serverAddress');
+      if (!serverAddress) {
+        serverAddress = '127.0.0.1';
+        editor.config.setKey('serverAddress', serverAddress);
+      }
       editor.camera.position.fromArray([23, 66, 37]);
       editor.camera.lookAt(0, 0, 0);
 
@@ -90,8 +98,8 @@
         saveConfigs();
       });
 
-      const light = new THREE.AmbientLight( 0xffffff );
-      scene.add(light);
+      // const light = new THREE.AmbientLight( 0xffffff );
+      // scene.add(light);
 
       // clone children into the editor and link it together
       scene.children.forEach(child => {
@@ -139,29 +147,29 @@
       });
       // request signals
       editor.signals.requestRemoveObject.add((userData) => {
-        requestRemoveObject(userData);
+        serverConnection.requestRemoveObject(userData);
       });
      
       document.addEventListener('keydown', onKeyDown, false );
       window.addEventListener( 'resize', onWindowResize, false );
       onWindowResize();
 
-      client = new WebSocket("ws://127.0.0.1");
+      serverConnection.onopen = () => {
+        serverConnection.requestClearScene();
 
-      client.onopen = () => {
-        requestClearScene();
-
-        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-4', type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'image', url: 'assets/2532.png' });
-        requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-4', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'image', url: 'assets/2532.png' });
+        serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'image', url: 'assets/2532.png' });
       };
 
-      client.onmessage = (message) => {
+      serverConnection.connect(serverAddress);
+
+      serverConnection.onmessage = (message) => {
         try {
           const parsedMessage = JSON.parse(message.data);
           queueReceivedMessage(parsedMessage);
@@ -183,9 +191,9 @@
         case 'delete':
           const object = editor.selected;
           if ( !object ) return;
-          if ( !object.userData.type ) return;
+          if ( !object.userData.type || object.userData.type === 'screen' ) return;
 
-          requestRemoveObject(object.userData);
+          serverConnection.requestRemoveObject(object.userData);
           editor.deselect();
           break;
       }
@@ -202,31 +210,6 @@
         }
       }
     }
-
-    const sendRequest = (object) => {
-      client.send(JSON.stringify(object));
-    };
-    window.sendRequest = sendRequest; // expose sendRequest to window for debugging
-
-    const requestClearScene = () => {
-      sendRequest({
-        type: 'clear-scene',
-      });
-    };
-
-    const requestCreatePlaneOnScreen = (userData) => {
-      sendRequest({
-        type: 'create-plane-on-screen',
-        userData
-      });
-    };
-
-    const requestRemoveObject = (userData) => {
-      sendRequest({
-        type: 'remove-object',
-        userData
-      });
-    };
 
     const onRequestClearScene = () => {
       objects.forEach(object => {
@@ -282,7 +265,7 @@
 
     const saveConfigs = () => {
       const json = {...config};
-      sendRequest({
+      serverConnection.sendRequest({
         type: 'save-config',
         json
       });
