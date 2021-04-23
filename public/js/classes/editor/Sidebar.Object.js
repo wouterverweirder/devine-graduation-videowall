@@ -1,6 +1,6 @@
-import * as THREE from '../three.js/build/three.module.js';
-import { UIPanel, UIRow, UIText, UINumber, UIBreak } from '../three.js/editor/js/libs/ui.js';
-import { SetPositionCommand } from '../three.js/editor/js/commands/SetPositionCommand.js';
+import * as THREE from '../../three.js/build/three.module.js';
+import { UIPanel, UIRow, UIText, UINumber, UIBreak } from '../../three.js/editor/js/libs/ui.js';
+import { SetPositionCommand } from '../../three.js/editor/js/commands/SetPositionCommand.js';
 
 function SidebarObject( editor ) {
 

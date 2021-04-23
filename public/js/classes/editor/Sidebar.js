@@ -1,4 +1,4 @@
-import { UITabbedPanel, UISpan } from '../three.js/editor/js/libs/ui.js';
+import { UITabbedPanel, UISpan } from '../../three.js/editor/js/libs/ui.js';
 import { SidebarScene } from './Sidebar.Scene.js';
 import { SidebarObject } from './Sidebar.Object.js';
 import { SidebarNew } from './Sidebar.New.js';

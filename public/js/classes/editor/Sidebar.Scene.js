@@ -1,5 +1,5 @@
-import { UIPanel, UIBreak, UIRow, UIColor, UISelect, UIText, UINumber } from '../three.js/editor/js/libs/ui.js';
-import { UIOutliner, UITexture } from '../three.js/editor/js/libs/ui.three.js';
+import { UIPanel, UIBreak, UIRow, UIColor, UISelect, UIText, UINumber } from '../../three.js/editor/js/libs/ui.js';
+import { UIOutliner, UITexture } from '../../three.js/editor/js/libs/ui.three.js';
 
 function SidebarScene( editor ) {
 

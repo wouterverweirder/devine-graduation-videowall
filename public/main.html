@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VideoWall</title>
-  <link rel="stylesheet" href="js/three.js/editor/css/main.css">
   <style>
     #app {
       position: absolute;
@@ -26,138 +25,19 @@
     <canvas id="output-canvas"></canvas>
   </div>
   <script type="module">
-
-    import * as THREE from './js/three.js/build/three.module.js';
-    import { ServerConnection } from './js/classes/ServerConnection.js';
-    import createCamerasForConfig from './js/functions/createCamerasForConfig.js';
-    import createPlaneForScreen from './js/functions/createPlaneForScreen.js';
-
-    const BLACK = new THREE.Color(1, 1, 1);
-
-    let config;
-    const outputCanvas = document.getElementById('output-canvas');
     
-    let renderer, scene;
-    let cameras;
-    const screensById = {};
-    const camerasById = {};
-    let objects = [];
+    import { ProjectorApplication } from './js/classes/ProjectorApplication.js';
 
-    const serverConnection = new ServerConnection();
+    let application;
+
+    const init = async () => {
+      const config = await loadConfig();
+      application = new ProjectorApplication(config);
+      await application.init();
+    };
 
     const loadConfig = async () => {
       return await (await fetch('config.json')).json();
-    };
-
-    const init = async () => {
-
-      config = await loadConfig();
-      config.screens.forEach(screen => screensById[screen.id] = screen);
-
-      outputCanvas.width = config.appDimensions.width;
-      outputCanvas.height = config.appDimensions.height;
-
-      cameras = createCamerasForConfig(config);
-      cameras.forEach(camera => camerasById[camera.userData.id] = camera);
-
-      renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
-      scene = new THREE.Scene();
-
-      // const light = new THREE.AmbientLight( 0xffffff );
-      // scene.add(light);
-
-      serverConnection.connect('127.0.0.1');
-
-      serverConnection.onmessage = async (message) => {
-        try {
-          const parsedMessage = JSON.parse(message.data);
-          if (parsedMessage.type) {
-            if (parsedMessage.type === 'create-plane-on-screen') {
-              await onRequestCreatePlaneOnScreen(parsedMessage.userData);
-            } else if (parsedMessage.type === 'clear-scene') {
-              await onRequestClearScene();
-            } else if (parsedMessage.type === 'remove-object') {
-              await onRequestRemoveObject(parsedMessage.userData);
-            }
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      };
-
-      requestAnimationFrame(render);
-    };
-
-    const onRequestCreatePlaneOnScreen = async (userData) => {
-      const screen = screensById[userData.screenId];
-      if (!screen) {
-        return;
-      }
-      const plane = await createPlaneForScreen({userData, screen, appConfig: config});
-      scene.add(plane);
-      objects.push(plane);
-    };
-
-    const onRequestRemoveObject = async (userData) => {
-      let applicableObjects = objects.filter(object => {
-        return object.userData.id === userData.id
-      });
-      applicableObjects.forEach(object => {
-        scene.remove(object);
-        let index = objects.indexOf(object);
-        if (index > -1) {
-          objects.splice(index, 1);
-        }
-        if (object.userData.editorChild) {
-          editor.removeObject(object.userData.editorChild);
-        }
-      });
-    };
-
-    const onRequestClearScene = () => {
-      objects.forEach(object => {
-        scene.remove(object);
-      });
-      objects = [];
-    };
-
-    const updateObjects = () => {
-      objects.forEach((object) => {
-        if (object.userData.type === 'canvas') {
-          const canvasTexture = object.material.map;
-          const planeCanvas = canvasTexture.image;
-          const planeCtx = planeCanvas.getContext('2d');
-          // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
-          // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
-          canvasTexture.needsUpdate = true;
-        }
-      });
-    };
-
-    const renderCameras = () => {
-      cameras.forEach(camera => {
-        const screen = screensById[camera.userData.id];
-
-        const left = Math.floor( config.appDimensions.width * screen.output.left );
-        const bottom = Math.floor( config.appDimensions.height * screen.output.bottom );
-        const width = Math.floor( config.appDimensions.width * screen.output.width );
-        const height = Math.floor( config.appDimensions.height * screen.output.height );
-
-        renderer.setViewport( left, bottom, width, height );
-        renderer.setScissor( left, bottom, width, height );
-        renderer.setScissorTest( true );
-        renderer.setClearColor( BLACK );
-
-        renderer.render( scene, camera );
-      })
-    };
-
-    const render = (time) => {
- 
-      updateObjects();
-      renderCameras();
-        
-      requestAnimationFrame(render);
     };
 
     init();

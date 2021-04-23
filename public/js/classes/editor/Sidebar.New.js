@@ -1,5 +1,5 @@
-import * as THREE from '../three.js/build/three.module.js';
-import { UIPanel, UIRow, UIText, UIButton, UISelect } from '../three.js/editor/js/libs/ui.js';
+import * as THREE from '../../three.js/build/three.module.js';
+import { UIPanel, UIRow, UIText, UIButton, UISelect } from '../../three.js/editor/js/libs/ui.js';
 
 function SidebarNew( editor ) {
 
