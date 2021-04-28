@@ -5,9 +5,16 @@ import { Application } from './Application.js';
 import { Editor } from '../three.js/editor/js/Editor.js';
 import { Sidebar } from './editor/Sidebar.js';
 import { Viewport } from '../three.js/editor/js/Viewport.js';
+import { getSizeForBounds } from '../functions/createCamerasForConfig.js';
 
 Number.prototype.format = function () {
   return this.toString().replace( /(\d)(?=(\d{3})+(?!\d))/g, "$1," );
+};
+
+const copyTransformsFromTo = (fromObject, toObject) => {
+  toObject.position.copy(fromObject.position);
+  toObject.quaternion.copy(fromObject.quaternion);
+  toObject.scale.copy(fromObject.scale);
 };
 
 class EditorApplication extends Application {
@@ -36,7 +43,6 @@ class EditorApplication extends Application {
     document.body.appendChild( sidebar.dom );
     
     const editorRenderer = new THREE.WebGLRenderer( { antialias: false } );
-    this.editor.signals.configChanged = new Signal();
     // 
     // request signals
     this.editor.signals.requestRemoveObject = new Signal();
@@ -44,52 +50,22 @@ class EditorApplication extends Application {
     this.editor.signals.rendererChanged.dispatch( editorRenderer );
     this.editor.signals.windowResize.dispatch();
 
-    this.editor.signals.configChanged.add(() => {
-      this.saveConfigs();
-    });
-
     // clone children into the editor and link it together
     this.scene.children.forEach(child => {
       this.addChildToEditor(child);
     });
 
-    // cameras
+    // clone cameras into the editor
     this.cameras.forEach(camera => {
-      const screen = this.screensById[camera.userData.id];
-      
-      const clonedCamera = camera.clone();
-      this.editor.addObject(clonedCamera);
-      const cameraHelper = this.editor.helpers[clonedCamera.id];
+      this.addCameraToEditor(camera);
+    });
 
-      const onChange = () => {
-        // update the config
-        screen.camera.position[0] = clonedCamera.position.x;
-        screen.camera.position[1] = clonedCamera.position.y;
-        screen.camera.position[2] = clonedCamera.position.z;
-        camera.position.copy(clonedCamera.position);
-        camera.quaternion.copy(clonedCamera.quaternion);
-        camera.updateProjectionMatrix();
-        clonedCamera.updateProjectionMatrix();
-        cameraHelper.update();
-      };
-      clonedCamera.userData.onChange = onChange;
-      onChange();
-    });
-    this.editor.signals.objectSelected.add((object) => {
-      if (!object) {
-        return;
-      }
-      if (!object.userData.onChange) {
-        return;
-      }
-    });
     this.editor.signals.refreshSidebarObject3D.add((object) => {
       if (!object.userData.onChange) {
         return;
       }
       // trigger the onChange
       object.userData.onChange();
-      this.editor.signals.configChanged.dispatch();
     });
     // request signals
     this.editor.signals.requestRemoveObject.add((userData) => {
@@ -119,7 +95,7 @@ class EditorApplication extends Application {
     this.serverConnection.connect(serverAddress);
   }
 
-  onWindowResize = (event) => {
+  onWindowResize = () => {
     this.editor.signals.windowResize.dispatch();
   };
 
@@ -148,25 +124,47 @@ class EditorApplication extends Application {
   };
 
   onSceneObjectChanged = (object) => {
-    object.userData.onChange();
+    // update the editor object
   }
+
+  addCameraToEditor = (camera) => {
+    const screenConfig = this.screenConfigsById[camera.userData.id];
+      
+    const clonedCamera = camera.clone();
+    this.editor.addObject(clonedCamera);
+    const cameraHelper = this.editor.helpers[clonedCamera.id];
+
+    clonedCamera.userData.onChange = () => {
+      // console.log('editor camera changed');
+      // update the config
+      screenConfig.camera.position[0] = clonedCamera.position.x;
+      screenConfig.camera.position[1] = clonedCamera.position.y;
+      screenConfig.camera.position[2] = clonedCamera.position.z;
+      const size = getSizeForBounds(clonedCamera);
+      screenConfig.camera.size.width = size.width;
+      screenConfig.camera.size.height = size.height;
+      // update the projector instance
+      copyTransformsFromTo(clonedCamera, camera);
+      camera.updateProjectionMatrix();
+      clonedCamera.updateProjectionMatrix();
+      cameraHelper.update();
+      this.saveConfigs();
+    };
+  };
 
   addChildToEditor = (child) => {
     const clonedChild = child.clone();
-    clonedChild.userData.onChange = () => {
-      child.position.copy(clonedChild.position);
-      child.quaternion.copy(clonedChild.quaternion);
-    }
-    child.userData.editorChild = clonedChild;
-    child.userData.onChange = () => {
-      clonedChild.position.copy(child.position);
-      clonedChild.quaternion.copy(child.quaternion);
-      clonedChild.scale.copy(child.scale);
-    };
     this.editor.addObject(clonedChild);
+
+    clonedChild.userData.onChange = () => {
+      copyTransformsFromTo(child, clonedChild);
+    }
+    
+    child.userData.editorChild = clonedChild;
   };
 
   saveConfigs = () => {
+    // console.log(Date.now(), 'save config');
     const json = {...this.config};
     this.serverConnection.sendRequest({
       type: 'save-config',

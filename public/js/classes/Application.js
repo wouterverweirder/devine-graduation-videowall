@@ -1,8 +1,8 @@
 import * as THREE from '../three.js/build/three.module.js';
 
 import { ServerConnection } from './ServerConnection.js';
-import createCamerasForConfig from '../functions/createCamerasForConfig.js';
-import createPlaneForScreen from '../functions/createPlaneForScreen.js';
+import { createCamerasForConfig } from '../functions/createCamerasForConfig.js';
+import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
 
 class Application {
 
@@ -10,7 +10,7 @@ class Application {
   renderer;
   scene;
   cameras;
-  screensById = {};
+  screenConfigsById = {};
   camerasById = {};
   objects = [];
   serverConnection = new ServerConnection()
@@ -20,7 +20,7 @@ class Application {
   }
 
   init = async () => {
-    this.config.screens.forEach(screen => this.screensById[screen.id] = screen);
+    this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
 
     this.cameras = createCamerasForConfig(this.config);
     this.cameras.forEach(camera => this.camerasById[camera.userData.id] = camera);
@@ -74,11 +74,11 @@ class Application {
   }
 
   onRequestCreatePlaneOnScreen = async (userData) => {
-    const screen = this.screensById[userData.screenId];
-    if (!screen) {
+    const screenConfig = this.screenConfigsById[userData.screenId];
+    if (!screenConfig) {
       return;
     }
-    const plane = await createPlaneForScreen({userData, screen, appConfig: this.config});
+    const plane = await createPlaneForScreen({userData, screenConfig, appConfig: this.config});
     this.scene.add(plane);
     this.objects.push(plane);
     this.onSceneObjectAdded(plane);
