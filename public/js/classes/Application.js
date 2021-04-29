@@ -111,14 +111,21 @@ class Application {
       applicableObjects.push(this.camerasById[userData.id]);
     }
     applicableObjects.forEach(object => {
-      if (userData.scale) {
-        object.scale.x = userData.scale.x;
-        object.scale.y = userData.scale.y;
+      if (userData.props.scale) {
+        object.scale.x = userData.props.scale.x;
+        object.scale.y = userData.props.scale.y;
       }
-      if (userData.position) {
-        object.position.x = userData.position.x;
-        object.position.y = userData.position.y;
-        object.position.z = userData.position.z;
+      if (userData.props.position) {
+        object.position.x = userData.props.position.x;
+        object.position.y = userData.props.position.y;
+        object.position.z = userData.props.position.z;
+      }
+      if (userData.props.left && userData.props.right && userData.props.top && userData.props.bottom) {
+        object.left = userData.props.left;
+        object.right = userData.props.right;
+        object.top = userData.props.top;
+        object.bottom = userData.props.bottom;
+        object.updateProjectionMatrix();
       }
       this.onSceneObjectPropsChanged(object);
     });

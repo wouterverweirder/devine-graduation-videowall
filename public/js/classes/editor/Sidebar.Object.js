@@ -54,7 +54,8 @@ function SidebarObject( editor ) {
 
     let hasNewObjectProps = false;
     const newObjectProps = {
-      id: object.userData.id
+      id: object.userData.id,
+      props: {}
     }
 
     const newPosition = new THREE.Vector3( objectPositionX.getValue(), objectPositionY.getValue(), objectPositionZ.getValue() );
@@ -62,7 +63,7 @@ function SidebarObject( editor ) {
       editor.execute( new SetPositionCommand(editor, object, newPosition ));
       needsConfigChange = true;
       hasNewObjectProps = true;
-      newObjectProps.position = {
+      newObjectProps.props.position = {
         x: newPosition.x,
         y: newPosition.y,
         z: newPosition.z
@@ -90,6 +91,9 @@ function SidebarObject( editor ) {
       object.userData.camera.size.width = width;
       object.userData.camera.size.height = height;
 
+      screenWidth.setValue(width);
+      screenHeight.setValue(height);
+
       const newSize = { width: width, height: height };
       const bounds = getBoundsForSize(newSize);
       
@@ -97,6 +101,12 @@ function SidebarObject( editor ) {
       editor.execute( new SetValueCommand( editor, object, 'right', bounds.right ) );
       editor.execute( new SetValueCommand( editor, object, 'top', bounds.top ) );
       editor.execute( new SetValueCommand( editor, object, 'bottom', bounds.bottom ) );
+
+      hasNewObjectProps = true;
+      newObjectProps.props.left = bounds.left;
+      newObjectProps.props.right = bounds.right;
+      newObjectProps.props.top = bounds.top;
+      newObjectProps.props.bottom = bounds.bottom;
     }
     if (isPlane) {
 
@@ -106,8 +116,8 @@ function SidebarObject( editor ) {
 
         editor.execute( new SetScaleCommand( editor, object, newScale ));
 
-        hasNewObjectProps = true
-        newObjectProps.scale = {
+        hasNewObjectProps = true;
+        newObjectProps.props.scale = {
           x: newScale.x,
           y: newScale.y,
           z: newScale.z
@@ -183,10 +193,12 @@ function SidebarObject( editor ) {
     if (object.userData) {
       const newObjectProps = {
         id: object.userData.id,
-        position: {
-          x: object.position.x,
-          y: object.position.y,
-          z: object.position.z,
+        props: {
+          position: {
+            x: object.position.x,
+            y: object.position.y,
+            z: object.position.z,
+          }
         }
       };
       serverConnection.requestSetObjectProps(newObjectProps);
