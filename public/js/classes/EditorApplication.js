@@ -121,10 +121,12 @@ class EditorApplication extends Application {
     if (object.userData.editorChild) {
       this.editor.removeObject(object.userData.editorChild);
     }
-  };
+  }
 
-  onSceneObjectChanged = (object) => {
-    // update the editor object
+  onSceneObjectPropsChanged = (object) => {
+    if (object.userData.editorChild) {
+      copyTransformsFromTo(object, object.userData.editorChild);
+    }
   }
 
   addCameraToEditor = (camera) => {
@@ -157,7 +159,7 @@ class EditorApplication extends Application {
     this.editor.addObject(clonedChild);
 
     clonedChild.userData.onChange = () => {
-      copyTransformsFromTo(child, clonedChild);
+      copyTransformsFromTo(clonedChild, child);
     }
     
     child.userData.editorChild = clonedChild;

@@ -41,6 +41,8 @@ class Application {
             await this.onRequestClearScene();
           } else if (parsedMessage.type === 'remove-object') {
             await this.onRequestRemoveObject(parsedMessage.userData);
+          } else if (parsedMessage.type === 'set-object-props') {
+            await this.onRequestSetObjectProps(parsedMessage.userData);
           }
         }
       } catch (e) {
@@ -70,7 +72,10 @@ class Application {
   onSceneObjectRemoved = (object) => {
   }
 
-  onSceneObjectChanged = (object) => {
+  onSceneObjectRender = (object) => {
+  }
+
+  onSceneObjectPropsChanged = (object) => {
   }
 
   onRequestCreatePlaneOnScreen = async (userData) => {
@@ -98,6 +103,27 @@ class Application {
     });
   };
 
+  onRequestSetObjectProps = async (userData) => {
+    let applicableObjects = this.objects.filter(object => {
+      return object.userData.id === userData.id
+    });
+    if (this.camerasById[userData.id]) {
+      applicableObjects.push(this.camerasById[userData.id]);
+    }
+    applicableObjects.forEach(object => {
+      if (userData.scale) {
+        object.scale.x = userData.scale.x;
+        object.scale.y = userData.scale.y;
+      }
+      if (userData.position) {
+        object.position.x = userData.position.x;
+        object.position.y = userData.position.y;
+        object.position.z = userData.position.z;
+      }
+      this.onSceneObjectPropsChanged(object);
+    });
+  };
+
   onRequestClearScene = () => {
     this.objects.forEach(object => {
       this.scene.remove(object);
@@ -121,7 +147,7 @@ class Application {
       // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
       canvasTexture.needsUpdate = true;
     }
-    this.onSceneObjectChanged(object);
+    this.onSceneObjectRender(object);
   };
 
   render = (time) => {

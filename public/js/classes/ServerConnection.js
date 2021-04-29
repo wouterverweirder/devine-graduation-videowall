@@ -38,6 +38,13 @@ class ServerConnection {
       userData
     });
   }
+
+  requestSetObjectProps(userData) {
+    this.sendRequest({
+      type: 'set-object-props',
+      userData
+    });
+  }
 }
 
 export { ServerConnection };
