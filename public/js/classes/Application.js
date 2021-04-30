@@ -150,6 +150,20 @@ class Application {
       const canvasTexture = object.material.map;
       const planeCanvas = canvasTexture.image;
       const planeCtx = planeCanvas.getContext('2d');
+      // test: create some text
+      planeCtx.fillStyle = 'black';
+      planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
+      planeCtx.fillStyle = 'red';
+      // planeCtx.font = '48px sans-serif';
+      // planeCtx.fillText('Hello world', 50, 50);
+      
+      // planeCtx.fillRect(0, 0, 10, 10);
+      const w = 1920;
+      const h = 1080;
+      const newW = h * (h / w);
+      const x = (w - newW) / 2;
+      planeCtx.fillRect(x, 0, 10, 10);
+      
       // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
       // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
       canvasTexture.needsUpdate = true;

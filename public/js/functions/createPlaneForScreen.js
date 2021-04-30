@@ -5,21 +5,25 @@ import loadImage from './loadImage.js';
 const createTextureForPlane = async (userData, screenConfig, appConfig) => {
   const width = Math.floor( appConfig.appDimensions.width * screenConfig.output.width );
   const height = Math.floor( appConfig.appDimensions.height * screenConfig.output.height );
+  const maxSize = Math.max(width, height);
+  
   if (userData.type === 'video') {
     return new THREE.VideoTexture(video);
   }
   if (userData.type === 'image') {
-    const planeCanvas = new OffscreenCanvas(width, height);
+    const planeCanvas = new OffscreenCanvas(maxSize, maxSize);
     const planeCtx = planeCanvas.getContext('2d');
+
     // draw the image in the center of the plane
     const image = await loadImage(userData.url);
-    const offsetX = (width - image.width) / 2;
-    const offsetY =(height - image.height) / 2;
+    const offsetX = (maxSize - image.width) / 2;
+    const offsetY = (maxSize - image.height) / 2;
     planeCtx.drawImage(image, offsetX, offsetY);
+
     return new THREE.CanvasTexture(planeCanvas);
   }
   // default: an empty canvas
-  const planeCanvas = new OffscreenCanvas(width, height)
+  const planeCanvas = new OffscreenCanvas(maxSize, maxSize)
   return new THREE.CanvasTexture(planeCanvas);
 };
 
@@ -39,10 +43,17 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
   const scale = calculateScaleForScreen(screenConfig);
   plane.scale.set(scale.x, scale.y);
 
+  // the texture size is a square - fill the plane proportionally instead of stretch
   const textureAspectRatio = scale.x / scale.y;
-  const outputAspectRatio = screenConfig.camera.size.width / screenConfig.camera.size.height;
-  texture.repeat.x = textureAspectRatio / outputAspectRatio;
-  texture.offset.x = (1 - texture.repeat.x) / 2;
+  let repeatX = 1;
+  let repeatY = 1 / textureAspectRatio;
+  if (textureAspectRatio < 1) {
+    repeatX = textureAspectRatio * textureAspectRatio;
+    repeatY = textureAspectRatio;
+  }
+  texture.repeat.set(repeatX, repeatY);
+  texture.offset.x = (repeatX - 1) * -0.5;
+  texture.offset.y = (repeatY - 1) * -0.5;
 
   Object.assign(plane.userData, userData);
 
