@@ -8,4 +8,4 @@ const loadImage = (src) => {
   });
 };
 
-export default loadImage;
+export { loadImage };

@@ -1,6 +1,8 @@
 import * as THREE from '../three.js/build/three.module.js';
+import { gsap } from '../gsap/src/index.js';
 import calculateScaleForScreen from './calculateScaleForScreen.js';
-import loadImage from './loadImage.js';
+import { loadImage } from './loadImage.js';
+import { getLines } from './getLines.js'
 
 const createTextureForPlane = async (userData, screenConfig, appConfig) => {
   const width = Math.floor( appConfig.appDimensions.width * screenConfig.output.width );
@@ -23,7 +25,7 @@ const createTextureForPlane = async (userData, screenConfig, appConfig) => {
     return new THREE.CanvasTexture(planeCanvas);
   }
   // default: an empty canvas
-  const planeCanvas = new OffscreenCanvas(maxSize, maxSize)
+  const planeCanvas = new OffscreenCanvas(maxSize, maxSize);
   return new THREE.CanvasTexture(planeCanvas);
 };
 
@@ -73,70 +75,71 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
     const planeCanvas = canvasTexture.image;
     const planeCtx = planeCanvas.getContext('2d');
     
-    planeCtx.fillStyle = 'black';
-    planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
-
     const marginLeft = 100;
     const marginRight = 100;
     const marginTop = 100;
 
     let yPos = topLeft.y + 55 + marginTop;
 
-    planeCtx.fillStyle = 'white';
-    planeCtx.font = '55px "Embedded Space Grotesk"';
-    planeCtx.fillText('Project Info', topLeft.x + marginLeft, yPos);
-
-    planeCtx.font = '55px "Embedded Space Grotesk"';
-
-    const getLines = (ctx, text, maxWidth) => {
-      const words = text.split(" ");
-      const lines = [];
-      let currentLine = words[0];
-  
-      for (let i = 1; i < words.length; i++) {
-          const word = words[i];
-          const width = ctx.measureText(currentLine + " " + word).width;
-          if (width < maxWidth) {
-              currentLine += " " + word;
-          } else {
-              lines.push(currentLine);
-              currentLine = word;
-          }
+    const canvasObjects = [
+      {
+        type: 'text',
+        font: '55px "Embedded Space Grotesk"',
+        fillStyle: 'white',
+        content: 'Project Info',
+        x: topLeft.x + marginLeft,
+        y: yPos
       }
-      lines.push(currentLine);
-      return lines;
-    }
+    ];
 
     yPos += 200;
     const paragraphs = plane.userData.data.description.split("\n");
     paragraphs.forEach(paragraph => {
+      planeCtx.font = '55px "Embedded Space Grotesk"';
       const lines = getLines(planeCtx, paragraph.trim(), topRight.x - topLeft.x - marginLeft - marginRight);
       lines.forEach(line => {
-        planeCtx.fillText(line, topLeft.x + marginLeft, yPos );
+        canvasObjects.push({
+          type: 'text',
+          font: planeCtx.font,
+          fillStyle: 'white',
+          content: line,
+          x: topLeft.x + marginLeft,
+          y: yPos
+        })
         yPos += 55;
       });
       yPos += 55 / 2;
     });
 
+    gsap.from(canvasObjects, {
+      y: bottomRight.y + 100,
+      repeat: -1,
+      stagger: {
+        amount: 0.5,
+        ease: "cubic.inOut"
+      }
+    });
 
-    // planeCtx.fillText(plane.userData.data.description, topLeft.x, topLeft.y + 55 + 100  );
-    
-    // planeCtx.fillRect(0, 0, 10, 10);
+    plane.userData.render = () => {
+      planeCtx.fillStyle = 'black';
+      planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
+      canvasObjects.forEach(canvasObject => {
+        if (canvasObject.type === 'text') {
+          planeCtx.fillStyle = canvasObject.fillStyle;
+          planeCtx.font = canvasObject.font;
+          planeCtx.fillText(canvasObject.content, canvasObject.x, canvasObject.y );
+        }
+      });
+      canvasTexture.needsUpdate = true;
+    };
 
-    // planeCtx.fillRect(topLeft.x, topLeft.y, 100, 100);
-    // planeCtx.fillRect(topRight.x - 100, y, 100, 100);
-    // planeCtx.fillRect(bottomLeft.x, bottomLeft.y - 100, 100, 100);
-    // planeCtx.fillRect(bottomRight.x - 100, bottomRight.y - 100, 100, 100);
-    
-    
-    // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
-    // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
     canvasTexture.needsUpdate = true;
   }
 
-  plane.userData.render = () => {
-    
-  };
+  if (!plane.userData.render) {
+    plane.userData.render = () => {
+    };
+  }
 
   return plane;
 };
