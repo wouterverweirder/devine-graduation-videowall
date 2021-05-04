@@ -80,22 +80,16 @@ class EditorApplication extends Application {
   onServerConnectionOpen = () => {
     this.serverConnection.requestClearScene();
 
-    const projectDescription = `This project deals with the big topic of education around different aspects of dogs. The handling and communication with these canines, is often underestimated. This also happens with children on a daily basis where there is a lot of concerncoming from the parents for example.
+    const project = this.projects[0];
 
-    Education about general knowledge of dogs in children would ensure that this concern becomesapeace of mind. I have always loved animals very much and would like to have a dog someday. But I've never had a dog myself, how exactly do you approach this?
-    
-    After informing myself at an animal shelter in Ostend, I learned more in 3 hours thana week of searching on the internet. How could I make sure that children would be able to acquire that general and actually simple knowledge like the informationI had gained in 3 hours?I tackled this through creatingthe concept of an app in which they canread unique stories (based on facts) with educational exercises.`;
-
-
-
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'project-info', data: { description: projectDescription } });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'project-info', data: { description: projectDescription } });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'project-info', data: { description: projectDescription } });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'project-info', data: { description: projectDescription } });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-4', type: 'project-info', data: { description: projectDescription } });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'project-info', data: { description: projectDescription } });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'project-info', data: { description: projectDescription } });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'project-info', data: { description: projectDescription } });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'project-description', data: project });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'project-description', data: project });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'project-description', data: project });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'project-description', data: project });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-4', type: 'project-description', data: project });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'project-description', data: project });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'project-description', data: project });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'project-description', data: project });
   }
 
   connectToServer = () => {

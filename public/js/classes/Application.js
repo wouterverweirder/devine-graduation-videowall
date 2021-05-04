@@ -13,13 +13,18 @@ class Application {
   screenConfigsById = {};
   camerasById = {};
   objects = [];
-  serverConnection = new ServerConnection()
+  serverConnection = new ServerConnection();
+  projects;
 
   constructor(config) {
     this.config = config;
   }
 
   init = async () => {
+
+    const projectsJSON = await (await fetch('assets/projects.json')).json();
+    this.projects = projectsJSON.projects;
+
     this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
 
     this.cameras = createCamerasForConfig(this.config);

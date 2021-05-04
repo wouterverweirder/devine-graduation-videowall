@@ -68,7 +68,7 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
   const bottomLeft = {x, y: (isPortrait) ? w : y + h};
   const bottomRight = {x: w - x, y: (isPortrait) ? w : y + h};
 
-  if (plane.userData.type === 'project-info') {
+  if (plane.userData.type === 'project-description') {
     const canvasTexture = plane.material.map;
     const planeCanvas = canvasTexture.image;
     const planeCtx = planeCanvas.getContext('2d');
