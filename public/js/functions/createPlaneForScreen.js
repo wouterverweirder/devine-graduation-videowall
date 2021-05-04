@@ -43,19 +43,58 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
   const scale = calculateScaleForScreen(screenConfig);
   plane.scale.set(scale.x, scale.y);
 
-  // the texture size is a square - fill the plane proportionally instead of stretch
+  // clip to center
   const textureAspectRatio = scale.x / scale.y;
+  const isPortrait = textureAspectRatio < 1;
   let repeatX = 1;
   let repeatY = 1 / textureAspectRatio;
-  if (textureAspectRatio < 1) {
-    repeatX = textureAspectRatio * textureAspectRatio;
-    repeatY = textureAspectRatio;
+  if (isPortrait) {
+    repeatX = textureAspectRatio;
+    repeatY = 1;
   }
   texture.repeat.set(repeatX, repeatY);
   texture.offset.x = (repeatX - 1) * -0.5;
   texture.offset.y = (repeatY - 1) * -0.5;
 
   Object.assign(plane.userData, userData);
+  
+  const w = 1920;
+  const h = 1080;
+  const x = isPortrait ? (w - h) / 2 : 0;
+  const y = isPortrait ? 0 : (w - h) / 2;
+
+  const topLeft = {x, y};
+  const topRight = {x: w - x, y};
+  const bottomLeft = {x, y: (isPortrait) ? w : y + h};
+  const bottomRight = {x: w - x, y: (isPortrait) ? w : y + h};
+
+  // if (plane.userData.type === 'canvas') {
+    const canvasTexture = plane.material.map;
+    const planeCanvas = canvasTexture.image;
+    const planeCtx = planeCanvas.getContext('2d');
+    // test: create some text
+    planeCtx.fillStyle = 'black';
+    planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
+    planeCtx.fillStyle = 'red';
+    planeCtx.font = '48px sans-serif';
+    planeCtx.fillText('Hello world', topLeft.x, topLeft.y + 48);
+    
+    // planeCtx.fillRect(0, 0, 10, 10);
+
+    // planeCtx.fillRect(topLeft.x, topLeft.y, 100, 100);
+    // planeCtx.fillRect(topRight.x - 100, y, 100, 100);
+    // planeCtx.fillRect(bottomLeft.x, bottomLeft.y - 100, 100, 100);
+    // planeCtx.fillRect(bottomRight.x - 100, bottomRight.y - 100, 100, 100);
+    
+    
+    // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
+    // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
+    canvasTexture.needsUpdate = true;
+  // }
+
+  plane.userData.render = () => {
+    
+  };
 
   return plane;
 };
