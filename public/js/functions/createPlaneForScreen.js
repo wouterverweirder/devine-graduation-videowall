@@ -68,16 +68,51 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
   const bottomLeft = {x, y: (isPortrait) ? w : y + h};
   const bottomRight = {x: w - x, y: (isPortrait) ? w : y + h};
 
-  // if (plane.userData.type === 'canvas') {
+  if (plane.userData.type === 'project-info') {
     const canvasTexture = plane.material.map;
     const planeCanvas = canvasTexture.image;
     const planeCtx = planeCanvas.getContext('2d');
-    // test: create some text
+    
     planeCtx.fillStyle = 'black';
     planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
-    planeCtx.fillStyle = 'red';
-    planeCtx.font = '48px sans-serif';
-    planeCtx.fillText('Hello world', topLeft.x, topLeft.y + 48);
+    planeCtx.fillStyle = 'white';
+    planeCtx.font = '55px "Embedded Space Grotesk"';
+    planeCtx.fillText('Project Info', topLeft.x, topLeft.y + 55);
+
+    planeCtx.font = '55px "Embedded Space Grotesk"';
+
+    const getLines = (ctx, text, maxWidth) => {
+      const words = text.split(" ");
+      const lines = [];
+      let currentLine = words[0];
+  
+      for (let i = 1; i < words.length; i++) {
+          const word = words[i];
+          const width = ctx.measureText(currentLine + " " + word).width;
+          if (width < maxWidth) {
+              currentLine += " " + word;
+          } else {
+              lines.push(currentLine);
+              currentLine = word;
+          }
+      }
+      lines.push(currentLine);
+      return lines;
+    }
+
+    const paragraphs = plane.userData.data.description.split("\n");
+    let yPos = topLeft.y + 55 + 200;
+    paragraphs.forEach(paragraph => {
+      const lines = getLines(planeCtx, paragraph.trim(), topRight.x - topLeft.x);
+      lines.forEach(line => {
+        planeCtx.fillText(line, topLeft.x, yPos );
+        yPos += 55;
+      });
+      yPos += 55 / 2;
+    });
+
+
+    // planeCtx.fillText(plane.userData.data.description, topLeft.x, topLeft.y + 55 + 100  );
     
     // planeCtx.fillRect(0, 0, 10, 10);
 
@@ -90,7 +125,7 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
     // planeCtx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}`;
     // planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
     canvasTexture.needsUpdate = true;
-  // }
+  }
 
   plane.userData.render = () => {
     

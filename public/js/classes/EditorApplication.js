@@ -86,14 +86,16 @@ class EditorApplication extends Application {
     
     After informing myself at an animal shelter in Ostend, I learned more in 3 hours thana week of searching on the internet. How could I make sure that children would be able to acquire that general and actually simple knowledge like the informationI had gained in 3 hours?I tackled this through creatingthe concept of an app in which they canread unique stories (based on facts) with educational exercises.`;
 
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'image', url: 'assets/debug-image-square.png' });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'image', url: 'assets/debug-image-square.png' });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'image', url: 'assets/debug-image-square.png' });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'image', url: 'assets/debug-image-square.png' });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-4', type: 'image', url: 'assets/debug-image-square.png' });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'image', url: 'assets/debug-image-square.png' });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'image', url: 'assets/debug-image-square.png' });
-    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'image', url: 'assets/debug-image-square.png' });
+
+
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-0', type: 'project-info', data: { description: projectDescription } });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-1', type: 'project-info', data: { description: projectDescription } });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-2', type: 'project-info', data: { description: projectDescription } });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-3', type: 'project-info', data: { description: projectDescription } });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-4', type: 'project-info', data: { description: projectDescription } });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-5', type: 'project-info', data: { description: projectDescription } });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-6', type: 'project-info', data: { description: projectDescription } });
+    this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'project-info', data: { description: projectDescription } });
   }
 
   connectToServer = () => {
