@@ -113,7 +113,6 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
 
     gsap.from(canvasObjects, {
       y: bottomRight.y + 100,
-      repeat: -1,
       stagger: {
         amount: 0.5,
         ease: "cubic.inOut"

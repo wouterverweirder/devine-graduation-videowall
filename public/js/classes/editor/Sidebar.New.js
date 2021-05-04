@@ -19,8 +19,9 @@ function SidebarNew( editor ) {
   const typeRow = new UIRow();
   typeRow.add( new UIText( 'Type' ).setWidth( '90px' ) );
   const typeSelect = new UISelect().setOptions({
-    'image': 'Image'
-  });
+    'image': 'Image',
+    'project-description': 'Project Description'
+  }).onChange(() => refreshUI());
   typeSelect.setValue( 'image' );
   typeRow.add(typeSelect);
   container.add(typeRow);
@@ -31,6 +32,12 @@ function SidebarNew( editor ) {
   imageRow.add(imageSelect);
   container.add(imageRow);
 
+  const projectRow = new UIRow();
+  projectRow.add( new UIText( 'Project' ).setWidth( '90px' ) );
+  const projectSelect = new UISelect();
+  projectRow.add(projectSelect);
+  container.add(projectRow);
+
   const newPlaneRow = new UIRow();
   newPlaneRow.add( new UIText( '' ).setWidth( '90px' ) );
   const newPlaneButton = new UIButton().setLabel('Create New Plane');
@@ -40,6 +47,8 @@ function SidebarNew( editor ) {
   let firstScreen;
   let images = [];
   let firstImage;
+  let projects = [];
+  let firstProject;
   const refreshUI = () => {
     const scene = editor.scene;
     const screens = scene.children.filter(child => child.userData.type && child.userData.type === 'screen');
@@ -64,16 +73,39 @@ function SidebarNew( editor ) {
       firstImage = images[0];
       imageSelect.setValue(firstImage);
     }
+
+    const projectOptions = {};
+    projects.forEach((project, index) => {
+      projectOptions[index] = `${project.student.firstName} ${project.student.lastName}`;
+    })
+    projectSelect.setOptions(projectOptions);
+    if (!firstProject && projects.length > 0) {
+      firstProject = projects[0];
+      projectSelect.setValue(0);
+    }
+
+    const imageSelectVisible = (typeSelect.getValue() === 'image');
+    const projectSelectVisible = (typeSelect.getValue() === 'project-description');
+
+    imageRow.setDisplay((imageSelectVisible) ? '' : 'none' );
+    projectRow.setDisplay((projectSelectVisible) ? '' : 'none' );
+
   };
 
   const fetchImageList = async () => {
     const data = await (await fetch(`http://${serverAddress}/api/images`)).json();
     images = data.data;
-    refreshUI();
+  };
+
+  const fetchProjectsList = async () => {
+    const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
+    projects = data.data.projects;
   };
 
   refreshUI();
-  fetchImageList();
+  fetchImageList()
+    .then(() => fetchProjectsList())
+    .then(() => refreshUI());
 
   signals.editorCleared.add( refreshUI );
   signals.sceneGraphChanged.add( refreshUI );
@@ -82,9 +114,14 @@ function SidebarNew( editor ) {
     const createOptions = {
       id: THREE.MathUtils.generateUUID(),
       screenId: locationSelect.getValue(),
-      type: typeSelect.getValue(),
-      url: imageSelect.getValue()
+      type: typeSelect.getValue()
     };
+    // url: imageSelect.getValue()
+    if (typeSelect.getValue() === 'image') {
+      createOptions.url = imageSelect.getValue();
+    } else if (typeSelect.getValue() === 'project-description') {
+      createOptions.data = projects[projectSelect.getValue()];
+    }
     serverConnection.requestCreatePlaneOnScreen(createOptions);
   });
 

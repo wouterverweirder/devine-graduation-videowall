@@ -59,6 +59,17 @@ expressApp.get('/api/images', (req, res) => {
   });
 });
 
+expressApp.get('/api/projects', (req, res) => {
+  const localPath = './public/assets/projects.json';
+  const localPathLength = localPath.length;
+  fs.readFile(localPath, 'utf8', (err, contents) => {
+    return res.send(JSON.stringify({
+      'result': 'ok',
+      'data': JSON.parse(contents)
+    }));
+  });
+});
+
 expressApp.use(express.static('public'));
 server.listen(port, () => {
  console.log(`App listening on port ${port}!`);
