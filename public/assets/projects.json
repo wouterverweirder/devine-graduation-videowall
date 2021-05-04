@@ -4,7 +4,9 @@
       "student": {
         "firstName": "Julia",
         "lastName": "Anseele",
-        "photo": "assets/student.jpg"
+        "photo": {
+          "url": "assets/student.jpg"
+        }
       },
       "description": "This project deals with the big topic of education around different aspects of dogs. The handling and communication with these canines, is often underestimated. This also happens with children on a daily basis where there is a lot of concerncoming from the parents for example.\n\nEducation about general knowledge of dogs in children would ensure that this concern becomesapeace of mind. I have always loved animals very much and would like to have a dog someday. But I've never had a dog myself, how exactly do you approach this?\n\nAfter informing myself at an animal shelter in Ostend, I learned more in 3 hours thana week of searching on the internet. How could I make sure that children would be able to acquire that general and actually simple knowledge like the informationI had gained in 3 hours?I tackled this through creatingthe concept of an app in which they canread unique stories (based on facts) with educational exercises."
     }

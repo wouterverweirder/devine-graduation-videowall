@@ -75,9 +75,16 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
     
     planeCtx.fillStyle = 'black';
     planeCtx.fillRect(0, 0, planeCanvas.width, planeCanvas.height);
+
+    const marginLeft = 100;
+    const marginRight = 100;
+    const marginTop = 100;
+
+    let yPos = topLeft.y + 55 + marginTop;
+
     planeCtx.fillStyle = 'white';
     planeCtx.font = '55px "Embedded Space Grotesk"';
-    planeCtx.fillText('Project Info', topLeft.x, topLeft.y + 55);
+    planeCtx.fillText('Project Info', topLeft.x + marginLeft, yPos);
 
     planeCtx.font = '55px "Embedded Space Grotesk"';
 
@@ -100,12 +107,12 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
       return lines;
     }
 
+    yPos += 200;
     const paragraphs = plane.userData.data.description.split("\n");
-    let yPos = topLeft.y + 55 + 200;
     paragraphs.forEach(paragraph => {
-      const lines = getLines(planeCtx, paragraph.trim(), topRight.x - topLeft.x);
+      const lines = getLines(planeCtx, paragraph.trim(), topRight.x - topLeft.x - marginLeft - marginRight);
       lines.forEach(line => {
-        planeCtx.fillText(line, topLeft.x, yPos );
+        planeCtx.fillText(line, topLeft.x + marginLeft, yPos );
         yPos += 55;
       });
       yPos += 55 / 2;
