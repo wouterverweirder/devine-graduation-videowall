@@ -50,6 +50,7 @@ class ProjectAssetsTexture extends ScreenTexture {
       video.removeAttribute('src');
       video.load();
     }
+    // call super dispose for texture itself
     super.dispose();
   }
 }

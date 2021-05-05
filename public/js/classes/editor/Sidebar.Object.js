@@ -71,7 +71,7 @@ function SidebarObject( editor ) {
     }
 
     const isScreen = (object.userData.type === 'screen');
-    const isPlane = (object.userData.type === 'image');
+    const isPlane = (object.userData.type && !isScreen);
 
     if (isScreen) {
       needsConfigChange = true;
@@ -142,7 +142,7 @@ function SidebarObject( editor ) {
     const isScreen = (object.userData.type === 'screen');
     screenSizeRow.setDisplay(isScreen ? '' : 'none');
 
-    const isPlane = (object.userData.type === 'image');
+    const isPlane = (object.userData.type && !isScreen);
     planeSizeRow.setDisplay(isPlane ? '' : 'none');
   }
 
@@ -155,7 +155,7 @@ function SidebarObject( editor ) {
     objectPositionZ.setValue( object.position.z );
 
     const isScreen = (object.userData.type === 'screen');
-    const isPlane = (object.userData.type === 'image');
+    const isPlane = (object.userData.type && !isScreen);
 
     if (isScreen) {
       screenWidth.setValue(object.userData.camera.size.width);
