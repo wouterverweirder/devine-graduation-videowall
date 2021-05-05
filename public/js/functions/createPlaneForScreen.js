@@ -18,8 +18,8 @@ const createTextureForPlane = async (userData, screenConfig, appConfig) => {
 
     // draw the image in the center of the plane
     const image = await loadImage(userData.url);
-    const offsetX = (maxSize - image.width) / 2;
-    const offsetY = (maxSize - image.height) / 2;
+    const offsetX = (planeCanvas.width - image.width) / 2;
+    const offsetY = (planeCanvas.height - image.height) / 2;
     planeCtx.drawImage(image, offsetX, offsetY);
 
     return new THREE.CanvasTexture(planeCanvas);
@@ -131,6 +131,38 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
       });
       canvasTexture.needsUpdate = true;
     };
+
+    canvasTexture.needsUpdate = true;
+  } else if (plane.userData.type === 'project-student') {
+    const canvasTexture = plane.material.map;
+    const planeCanvas = canvasTexture.image;
+    const planeCtx = planeCanvas.getContext('2d');
+
+    loadImage(plane.userData.data.profilePicture.url).then(image => {
+      const offsetX = (planeCanvas.width - image.width) / 2;
+      const offsetY = (planeCanvas.height - image.height) / 2;
+      planeCtx.drawImage(image, offsetX, offsetY);
+      canvasTexture.needsUpdate = true;
+    });
+
+    canvasTexture.needsUpdate = true;
+  } else if (plane.userData.type === 'project-assets') {
+    const canvasTexture = plane.material.map;
+    const planeCanvas = canvasTexture.image;
+    const planeCtx = planeCanvas.getContext('2d');
+
+    if (plane.userData.data && plane.userData.data.length > 0) {
+      // take the first image asset
+      const imageAssets = plane.userData.data.filter(asset => asset.mime.includes('image'));
+      if (imageAssets.length > 0) {
+        loadImage(imageAssets[0].url).then(image => {
+          const offsetX = (planeCanvas.width - image.width) / 2;
+          const offsetY = (planeCanvas.height - image.height) / 2;
+          planeCtx.drawImage(image, offsetX, offsetY);
+          canvasTexture.needsUpdate = true;
+        });
+      }
+    }
 
     canvasTexture.needsUpdate = true;
   }
