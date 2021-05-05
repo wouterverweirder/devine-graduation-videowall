@@ -42,15 +42,8 @@ class ProjectDescriptionTexture extends ScreenTexture {
       yPos += 55 / 2;
     });
 
-    gsap.from(canvasObjects, {
-      y: this.bottomRight.y + 100,
-      stagger: {
-        amount: 0.5,
-        ease: "cubic.inOut"
-      }
-    });
-
-    this.userData.render = () => {
+    // draw my basic displaylist to the screen
+    const draw = () => {
       this.ctx.fillStyle = 'black';
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       canvasObjects.forEach(canvasObject => {
@@ -63,8 +56,18 @@ class ProjectDescriptionTexture extends ScreenTexture {
       this.texture.needsUpdate = true;
     };
 
-    // ask for a texture update
-    this.texture.needsUpdate = true;
+    gsap.from(canvasObjects, {
+      y: this.bottomRight.y + 100,
+      stagger: {
+        amount: 0.5,
+        ease: "cubic.inOut"
+      },
+      onUpdate: () => {
+        draw();
+      }
+    });
+
+    draw();
   }
 }
 

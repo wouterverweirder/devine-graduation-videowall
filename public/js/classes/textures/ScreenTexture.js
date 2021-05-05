@@ -46,6 +46,10 @@ class ScreenTexture {
 
   render() {
   }
+
+  dispose() {
+    this.texture.dispose();
+  }
 }
 
 export { ScreenTexture }
