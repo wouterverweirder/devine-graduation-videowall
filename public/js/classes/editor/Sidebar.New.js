@@ -1,5 +1,6 @@
 import * as THREE from '../../three.js/build/three.module.js';
-import { UIPanel, UIRow, UIText, UIButton, UISelect } from '../../three.js/editor/js/libs/ui.js';
+import { UIPanel, UIRow, UIText, UIButton, UISelect, UIListbox } from '../../three.js/editor/js/libs/ui.js';
+import { UICheckboxList } from './UICheckboxList.js';
 
 function SidebarNew( editor ) {
 
@@ -20,7 +21,9 @@ function SidebarNew( editor ) {
   typeRow.add( new UIText( 'Type' ).setWidth( '90px' ) );
   const typeSelect = new UISelect().setOptions({
     'image': 'Image',
-    'project-description': 'Project Description'
+    'project-description': 'Project Description',
+    'project-student': 'Project Student',
+    'project-assets': 'Project Assets'
   }).onChange(() => refreshUI());
   typeSelect.setValue( 'image' );
   typeRow.add(typeSelect);
@@ -34,9 +37,15 @@ function SidebarNew( editor ) {
 
   const projectRow = new UIRow();
   projectRow.add( new UIText( 'Project' ).setWidth( '90px' ) );
-  const projectSelect = new UISelect();
+  const projectSelect = new UISelect().onChange(() => updateProjectAssetsList());
   projectRow.add(projectSelect);
   container.add(projectRow);
+
+  const projectAssetsRow = new UIRow();
+  projectAssetsRow.add( new UIText( 'Assets' ).setWidth( '90px' ) );
+  const projectAssetsList = new UICheckboxList();
+  projectAssetsRow.add(projectAssetsList);
+  container.add(projectAssetsRow);
 
   const newPlaneRow = new UIRow();
   newPlaneRow.add( new UIText( '' ).setWidth( '90px' ) );
@@ -49,6 +58,7 @@ function SidebarNew( editor ) {
   let firstImage;
   let projects = [];
   let firstProject;
+
   const refreshUI = () => {
     const scene = editor.scene;
     const screens = scene.children.filter(child => child.userData.type && child.userData.type === 'screen');
@@ -75,21 +85,63 @@ function SidebarNew( editor ) {
     }
 
     const projectOptions = {};
-    projects.forEach((project, index) => {
-      projectOptions[index] = `${project.student.firstName} ${project.student.lastName}`;
+    projects.forEach((project) => {
+      projectOptions[project.id] = `${project.firstName} ${project.lastName}`;
     })
     projectSelect.setOptions(projectOptions);
     if (!firstProject && projects.length > 0) {
       firstProject = projects[0];
-      projectSelect.setValue(0);
+      projectSelect.setValue(firstProject.id);
+      updateProjectAssetsList();
     }
 
     const imageSelectVisible = (typeSelect.getValue() === 'image');
-    const projectSelectVisible = (typeSelect.getValue() === 'project-description');
 
     imageRow.setDisplay((imageSelectVisible) ? '' : 'none' );
-    projectRow.setDisplay((projectSelectVisible) ? '' : 'none' );
+    projectRow.setDisplay(shouldProjectSelectBeVisible() ? '' : 'none' );
+    projectAssetsRow.setDisplay(shouldProjectAssetsListBeVisible() ? '' : 'none' );
 
+  };
+
+  const updateProjectAssetsList = () => {
+    const project = getSelectedProject();
+    const items = [];
+    items.push({
+      id: project.mainAsset.id,
+      name: new URL(project.mainAsset.url).pathname
+    });
+    project.assets.forEach(asset => {
+      items.push({
+        id: asset.id,
+        name: new URL(asset.url).pathname
+      });
+    });
+    projectAssetsList.setItems(items);
+  };
+
+  const getSelectedProject = () => {
+    const projectId = parseInt(projectSelect.getValue());
+    return projects.find(project => project.id === projectId);
+  };
+
+  const getSelectedProjectAssets = () => {
+    const projectAssetsListValue = projectAssetsList.getValue().map(id => parseInt(id));
+    const project = getSelectedProject();
+    const selectedProjectAssets = project.assets.filter(asset => projectAssetsListValue.includes(asset.id));
+    if (projectAssetsListValue.includes(project.mainAsset.id)) {
+      selectedProjectAssets.unshift(project.mainAsset);
+    }
+    return selectedProjectAssets;
+  };
+
+  const shouldProjectSelectBeVisible = () => {
+    const projectTypes = ['project-description', 'project-student', 'project-assets'];
+    return projectTypes.includes(typeSelect.getValue());
+  };
+
+  const shouldProjectAssetsListBeVisible = () => {
+    const projectAssetsTypes = ['project-assets'];
+    return projectAssetsTypes.includes(typeSelect.getValue());
   };
 
   const fetchImageList = async () => {
@@ -99,7 +151,7 @@ function SidebarNew( editor ) {
 
   const fetchProjectsList = async () => {
     const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
-    projects = data.data.projects;
+    projects = data.data;
   };
 
   refreshUI();
@@ -119,8 +171,11 @@ function SidebarNew( editor ) {
     // url: imageSelect.getValue()
     if (typeSelect.getValue() === 'image') {
       createOptions.url = imageSelect.getValue();
-    } else if (typeSelect.getValue() === 'project-description') {
-      createOptions.data = projects[projectSelect.getValue()];
+    } else if (shouldProjectSelectBeVisible()) {
+      createOptions.data = getSelectedProject();
+      if (typeSelect.getValue() === 'project-assets') {
+        createOptions.data = getSelectedProjectAssets();
+      }
     }
     serverConnection.requestCreatePlaneOnScreen(createOptions);
   });

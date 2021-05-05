@@ -51,10 +51,11 @@ wsServer.on('request', function(request) {
 expressApp.get('/api/images', (req, res) => {
   const localPath = './public/';
   const localPathLength = localPath.length;
+  const serverURL = req.protocol + '://' + req.get('host') + '/';
   glob(`${localPath}assets/**/*.{jpg,png,gif}`, (err, matches) => {
     return res.send(JSON.stringify({
       'result': 'ok',
-      'data': matches.map(match => req.protocol + '://' + req.get('host') + '/' + match.substring(localPathLength))
+      'data': matches.map(match =>serverURL + match.substring(localPathLength))
     }));
   });
 });
@@ -62,10 +63,17 @@ expressApp.get('/api/images', (req, res) => {
 expressApp.get('/api/projects', (req, res) => {
   const localPath = './public/assets/projects.json';
   const localPathLength = localPath.length;
+  const serverURL = req.protocol + '://' + req.get('host') + '/';
   fs.readFile(localPath, 'utf8', (err, contents) => {
+    const projects = JSON.parse(contents);
+    projects.forEach(project => {
+      project.profilePicture.url = serverURL + project.profilePicture.url;
+      project.mainAsset.url = serverURL + project.mainAsset.url;
+      project.assets.forEach(asset => asset.url = serverURL + asset.url);
+    });
     return res.send(JSON.stringify({
       'result': 'ok',
-      'data': JSON.parse(contents)
+      'data': projects
     }));
   });
 });
