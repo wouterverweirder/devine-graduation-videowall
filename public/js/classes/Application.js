@@ -105,6 +105,9 @@ class Application {
         this.objects.splice(index, 1);
       }
       this.onSceneObjectRemoved(object);
+      if (object.userData.dispose) {
+        object.userData.dispose();
+      }
     });
   };
 

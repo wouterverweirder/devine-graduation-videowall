@@ -48,6 +48,13 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
       texture.render();
     };
   }
+  if (!plane.userData.dispose) {
+    plane.userData.dispose = () => {
+      texture.dispose();
+      material.dispose();
+      planeGeometry.dispose();
+    };
+  }
 
   return plane;
 };
