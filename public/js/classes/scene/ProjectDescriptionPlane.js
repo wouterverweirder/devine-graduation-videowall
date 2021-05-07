@@ -1,6 +1,6 @@
 import * as THREE from '../../three.js/build/three.module.js';
 import { VisualBase } from "./VisualBase.js";
-import { gsap } from '../../gsap/src/index.js';
+import { gsap, Cubic } from '../../gsap/src/index.js';
 import { getLines } from '../../functions/getLines.js';
 
 class ProjectDescriptionPlane extends VisualBase {
@@ -30,11 +30,13 @@ class ProjectDescriptionPlane extends VisualBase {
         fillStyle: 'white',
         content: 'Project Info',
         x: marginLeft,
-        y: yPos
+        y: yPos,
+        opacity: 0
       }
     ];
 
     yPos += 200;
+
     const paragraphs = this.props.data.description.split("\n");
     paragraphs.forEach(paragraph => {
       this.ctx.font = `${fontSize}px "Embedded Space Grotesk"`;
@@ -46,8 +48,9 @@ class ProjectDescriptionPlane extends VisualBase {
           fillStyle: 'white',
           content: line,
           x: marginLeft,
-          y: yPos
-        })
+          y: yPos,
+          opacity: 0
+        });
         yPos += lineHeight;
       });
       yPos += lineHeight / 2;
@@ -59,24 +62,41 @@ class ProjectDescriptionPlane extends VisualBase {
       this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
       canvasObjects.forEach(canvasObject => {
         if (canvasObject.type === 'text') {
+          this.ctx.save();
+          this.ctx.globalAlpha = canvasObject.opacity;
           this.ctx.fillStyle = canvasObject.fillStyle;
           this.ctx.font = canvasObject.font;
           this.ctx.fillText(canvasObject.content, canvasObject.x, canvasObject.y );
+          this.ctx.restore();
         }
       });
       this.texture.needsUpdate = true;
     };
 
-    gsap.from(canvasObjects, {
-      y: this.canvas.height + 100,
-      stagger: {
-        amount: 0.5,
-        ease: "cubic.inOut"
-      },
+    // setup timeline
+    const tl = gsap.timeline({
+      yoyo: true, repeat: -1, repeatDelay: 1,
       onUpdate: () => {
         draw();
       }
     });
+    const maxDelay = 0.5;
+    canvasObjects.forEach((canvasObject, index) => {
+      const delay = Cubic.easeInOut(index / canvasObjects.length) * maxDelay;
+      tl.to(canvasObject, { y: canvasObject.y, opacity: 1, delay, duration: 0.5, ease: Cubic.easeInOut }, 0);
+      canvasObject.y = canvasObject.y + 100;
+    });
+
+    // gsap.from(canvasObjects, {
+    //   y: this.canvas.height + 100,
+    //   stagger: {
+    //     amount: 0.5,
+    //     ease: "cubic.inOut"
+    //   },
+    //   onUpdate: () => {
+    //     draw();
+    //   }
+    // });
 
     return new THREE.MeshBasicMaterial( { map: texture } );
   }
