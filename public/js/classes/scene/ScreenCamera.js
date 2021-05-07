@@ -27,8 +27,8 @@ class ScreenCamera extends SceneObject {
   }
 
   async createObject3D() {
-    const near = 1;
-    const far = 30;
+    const near = 0;
+    const far = 2;
     return new THREE.OrthographicCamera( this.props.left, this.props.right, this.props.top, this.props.bottom, near, far );
   }
 

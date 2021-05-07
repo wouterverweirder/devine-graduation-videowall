@@ -25,7 +25,7 @@ class EditorApplication extends Application {
       this.editor.config.setKey('serverAddress', serverAddress);
     }
     this.editor.serverConnection = this.serverConnection;
-    this.editor.camera.position.fromArray([23, 66, 37]);
+    this.editor.camera.position.fromArray([1.57, 2.72, 5.47]);
     this.editor.camera.lookAt(0, 0, 0);
 
     const viewport = new Viewport( this.editor );
