@@ -1,16 +1,24 @@
-import { ScreenTexture } from "./ScreenTexture.js";
+import * as THREE from '../../three.js/build/three.module.js';
+import { VisualBase } from "./VisualBase.js";
 import { gsap } from '../../gsap/src/index.js';
 import { getLines } from '../../functions/getLines.js';
 
-class ProjectDescriptionTexture extends ScreenTexture {
+class ProjectDescriptionPlane extends VisualBase {
+  async createMaterial() {
 
-  async init() {
+    const canvas = new OffscreenCanvas(this.props.textureSize.x, this.props.textureSize.y);
+    const ctx = canvas.getContext('2d');
+    const texture = new THREE.CanvasTexture(canvas);
+
+    this.canvas = canvas;
+    this.ctx = ctx;
+    this.texture = texture;
 
     const marginLeft = 100;
     const marginRight = 100;
     const marginTop = 100;
 
-    let yPos = this.topLeft.y + 55 + marginTop;
+    let yPos = 55 + marginTop;
 
     const canvasObjects = [
       {
@@ -18,23 +26,23 @@ class ProjectDescriptionTexture extends ScreenTexture {
         font: '55px "Embedded Space Grotesk"',
         fillStyle: 'white',
         content: 'Project Info',
-        x: this.topLeft.x + marginLeft,
+        x: marginLeft,
         y: yPos
       }
     ];
 
     yPos += 200;
-    const paragraphs = this.userData.data.description.split("\n");
+    const paragraphs = this.props.data.description.split("\n");
     paragraphs.forEach(paragraph => {
       this.ctx.font = '55px "Embedded Space Grotesk"';
-      const lines = getLines(this.ctx, paragraph.trim(), this.topRight.x - this.topLeft.x - marginLeft - marginRight);
+      const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
       lines.forEach(line => {
         canvasObjects.push({
           type: 'text',
           font: this.ctx.font,
           fillStyle: 'white',
           content: line,
-          x: this.topLeft.x + marginLeft,
+          x: marginLeft,
           y: yPos
         })
         yPos += 55;
@@ -57,7 +65,7 @@ class ProjectDescriptionTexture extends ScreenTexture {
     };
 
     gsap.from(canvasObjects, {
-      y: this.bottomRight.y + 100,
+      y: this.canvas.height + 100,
       stagger: {
         amount: 0.5,
         ease: "cubic.inOut"
@@ -67,8 +75,13 @@ class ProjectDescriptionTexture extends ScreenTexture {
       }
     });
 
-    draw();
+    return new THREE.MeshBasicMaterial( { map: texture } );
+  }
+
+  dispose() {
+    this.texture.dispose();
+    super.dispose();
   }
 }
 
-export { ProjectDescriptionTexture };
+export { ProjectDescriptionPlane }

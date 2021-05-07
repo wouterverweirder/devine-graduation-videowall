@@ -1,7 +1,7 @@
 import * as THREE from '../../three.js/build/three.module.js';
 import { UIPanel, UIRow, UIText, UINumber, UIBreak } from '../../three.js/editor/js/libs/ui.js';
 import { SetValueCommand } from '../../three.js/editor/js/commands/SetValueCommand.js';
-import { getBoundsForSize } from '../../functions/createCamerasForConfig.js';
+import { getBoundsForSize, getSizeForBounds } from '../../functions/createCamerasForConfig.js';
 import { SetScaleCommand } from '../../three.js/editor/js/commands/SetScaleCommand.js';
 import { SetPositionCommand } from '../../three.js/editor/js/commands/SetPositionCommand.js';
 
@@ -45,16 +45,18 @@ function SidebarObject( editor ) {
 
     const object = editor.selected;
 
-    if ( object === null) {
+    if ( object === null || !object.userData.sceneObject) {
       // don't do anything when no object is selected
       return;
     }
+
+    const sceneObject = object.userData.sceneObject;
 
     let needsConfigChange = false;
 
     let hasNewObjectProps = false;
     const newObjectProps = {
-      id: object.userData.id,
+      id: sceneObject.id,
       props: {}
     }
 
@@ -70,8 +72,8 @@ function SidebarObject( editor ) {
       };
     }
 
-    const isScreen = (object.userData.type === 'screen');
-    const isPlane = (object.userData.type && !isScreen);
+    const isScreen = (sceneObject.type === 'camera');
+    const isPlane = (!isScreen);
 
     if (isScreen) {
       needsConfigChange = true;
@@ -80,16 +82,15 @@ function SidebarObject( editor ) {
       let width = screenWidth.getValue();
       let height = screenHeight.getValue();
 
+      const size = getSizeForBounds(object);
+
       if (uiInput === screenWidth) {
-        const aspect = object.userData.camera.size.width / object.userData.camera.size.height;
+        const aspect = size.width / size.height;
         height = width / aspect;
       } else if (uiInput === screenHeight) {
-        const aspect = object.userData.camera.size.height / object.userData.camera.size.width;
+        const aspect = size.height / size.width;
         width = height / aspect;
       }
-
-      object.userData.camera.size.width = width;
-      object.userData.camera.size.height = height;
 
       screenWidth.setValue(width);
       screenHeight.setValue(height);
@@ -130,36 +131,49 @@ function SidebarObject( editor ) {
     }
 
     if ( needsConfigChange ) {
-      if (object.userData.onChange) {
-        object.userData.onChange();
-      }
+      // if (object.userData.onChange) {
+      //   object.userData.onChange();
+      // }
     }
   }
 
   function updateRows( object ) {
-    objectIdRow.setDisplay((object.userData.id) ? '' : 'none' );
 
-    const isScreen = (object.userData.type === 'screen');
+    if ( !object.userData.sceneObject) {
+      return;
+    }
+
+    const sceneObject = object.userData.sceneObject;
+
+    objectIdRow.setDisplay((sceneObject.id) ? '' : 'none' );
+
+    const isScreen = (sceneObject.type === 'camera');
     screenSizeRow.setDisplay(isScreen ? '' : 'none');
 
-    const isPlane = (object.userData.type && !isScreen);
+    const isPlane = (!isScreen);
     planeSizeRow.setDisplay(isPlane ? '' : 'none');
   }
 
   function updateUI( object ) {
-    if (object.userData.id) {
-      objectId.setValue(object.userData.id);
+    if ( !object.userData.sceneObject) {
+      return;
     }
+
+    const sceneObject = object.userData.sceneObject;
+
+    objectId.setValue(sceneObject.id);
+
     objectPositionX.setValue( object.position.x );
     objectPositionY.setValue( object.position.y );
     objectPositionZ.setValue( object.position.z );
 
-    const isScreen = (object.userData.type === 'screen');
-    const isPlane = (object.userData.type && !isScreen);
+    const isScreen = (sceneObject.type === 'camera');
+    const isPlane = (!isScreen);
 
     if (isScreen) {
-      screenWidth.setValue(object.userData.camera.size.width);
-      screenHeight.setValue(object.userData.camera.size.height);
+      const size = getSizeForBounds(object);
+      screenWidth.setValue(size.width);
+      screenHeight.setValue(size.height);
     }
     if (isPlane) {
       planeWidth.setValue(object.scale.x);
@@ -190,9 +204,10 @@ function SidebarObject( editor ) {
     if ( object !== editor.selected ) return
 
     // sync through serverConnection
-    if (object.userData) {
+    if (object.userData.sceneObject) {
+      const sceneObject = object.userData.sceneObject;
       const newObjectProps = {
-        id: object.userData.id,
+        id: sceneObject.id,
         props: {
           position: {
             x: object.position.x,

@@ -61,16 +61,16 @@ function SidebarNew( editor ) {
 
   const refreshUI = () => {
     const scene = editor.scene;
-    const screens = scene.children.filter(child => child.userData.type && child.userData.type === 'screen');
+    const screens = scene.children.filter(child => child.userData.sceneObject && child.userData.sceneObject.type === 'camera');
     
     const screenOptions = {};
     screens.forEach(screen => {
-      screenOptions[screen.userData.id] = screen.name;
+      screenOptions[screen.userData.sceneObject.id] = screen.name;
     });
     locationSelect.setOptions(screenOptions);
     if (!firstScreen && screens.length > 0) {
       firstScreen = screens[0];
-      locationSelect.setValue(firstScreen.userData.id);
+      locationSelect.setValue(firstScreen.userData.sceneObject.id);
     }
 
     const imageOptions = {};

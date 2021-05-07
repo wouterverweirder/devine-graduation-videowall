@@ -27,8 +27,8 @@ class Application {
 
     this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
 
-    this.cameras = createCamerasForConfig(this.config);
-    this.cameras.forEach(camera => this.camerasById[camera.userData.id] = camera);
+    this.cameras = await createCamerasForConfig(this.config);
+    this.cameras.forEach(camera => this.camerasById[camera.id] = camera);
     this.scene = new THREE.Scene();
 
     this.setupApplicationSpecificUI();
@@ -89,51 +89,36 @@ class Application {
       return;
     }
     const plane = await createPlaneForScreen({userData, screenConfig, appConfig: this.config});
-    this.scene.add(plane);
     this.objects.push(plane);
     this.onSceneObjectAdded(plane);
   };
 
   onRequestRemoveObject = async (userData) => {
     let applicableObjects = this.objects.filter(object => {
-      return object.userData.id === userData.id
+      return object.id === userData.id
     });
     applicableObjects.forEach(object => {
-      this.scene.remove(object);
       let index = this.objects.indexOf(object);
       if (index > -1) {
         this.objects.splice(index, 1);
       }
       this.onSceneObjectRemoved(object);
-      if (object.userData.dispose) {
-        object.userData.dispose();
+      if (object.dispose) {
+        object.dispose();
       }
     });
   };
 
   onRequestSetObjectProps = async (userData) => {
     let applicableObjects = this.objects.filter(object => {
-      return object.userData.id === userData.id
+      return object.id === userData.id
     });
     if (this.camerasById[userData.id]) {
       applicableObjects.push(this.camerasById[userData.id]);
     }
     applicableObjects.forEach(object => {
-      if (userData.props.scale) {
-        object.scale.x = userData.props.scale.x;
-        object.scale.y = userData.props.scale.y;
-      }
-      if (userData.props.position) {
-        object.position.x = userData.props.position.x;
-        object.position.y = userData.props.position.y;
-        object.position.z = userData.props.position.z;
-      }
-      if (userData.props.left && userData.props.right && userData.props.top && userData.props.bottom) {
-        object.left = userData.props.left;
-        object.right = userData.props.right;
-        object.top = userData.props.top;
-        object.bottom = userData.props.bottom;
-        object.updateProjectionMatrix();
+      if (object.applyProps) {
+        object.applyProps(userData.props);
       }
       this.onSceneObjectPropsChanged(object);
     });
@@ -141,7 +126,6 @@ class Application {
 
   onRequestClearScene = () => {
     this.objects.forEach(object => {
-      this.scene.remove(object);
       this.onSceneObjectRemoved(object);
     });
     this.objects = [];
@@ -154,7 +138,7 @@ class Application {
   };
 
   updateObject = (object) => {
-    object.userData.render();
+    object.render();
     this.onSceneObjectRender(object);
   };
 
