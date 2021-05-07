@@ -4,6 +4,7 @@ const glob = require('glob');
 const express = require('express');
 const expressApp = express();
 const WebSocketServer = require('websocket').server;
+const { profile } = require('console');
 const server = http.Server(expressApp);
 const port = process.env.PORT || 80;
 
@@ -67,8 +68,12 @@ expressApp.get('/api/projects', (req, res) => {
   fs.readFile(localPath, 'utf8', (err, contents) => {
     const projects = JSON.parse(contents);
     projects.forEach(project => {
-      project.profilePicture.url = serverURL + project.profilePicture.url;
-      project.mainAsset.url = serverURL + project.mainAsset.url;
+      if (project.profilePicture) {
+        project.profilePicture.url = serverURL + project.profilePicture.url;
+      }
+      if (project.mainAsset) {
+        project.mainAsset.url = serverURL + project.mainAsset.url;
+      }
       project.assets.forEach(asset => asset.url = serverURL + asset.url);
     });
     return res.send(JSON.stringify({
