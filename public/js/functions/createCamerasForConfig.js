@@ -1,3 +1,4 @@
+import { ScreenCamera } from '../classes/scene/ScreenCamera.js';
 import * as THREE from '../three.js/build/three.module.js';
 
 const getBoundsForSize = ({width, height}) => {
@@ -19,7 +20,7 @@ const getSizeForBounds = ({left, right, top, bottom}) => {
   return { width: right - left, height: top - bottom };
 };
 
-const createCamerasForConfig = (config) => {
+const createCamerasForConfig = async (config) => {
   const cameras = [];
   for ( let ii = 0; ii < config.screens.length; ++ ii ) {
     const screen = config.screens[ ii ];
@@ -30,16 +31,25 @@ const createCamerasForConfig = (config) => {
       rotation = screen.camera.rotation;
     }
 
-    const near = 1;
-    const far = 30;
-    
-    const camera = new THREE.OrthographicCamera( bounds.left, bounds.right, bounds.top, bounds.bottom, near, far );
-    camera.name = `Screen ${ii}`;
-    camera.position.fromArray( screen.camera.position );
-    camera.rotation.z = rotation;
+    const camera = new ScreenCamera(screen.id, {
+      name: `Screen ${ii}`,
+      position: {
+        x: screen.camera.position[0],
+        y: screen.camera.position[1],
+        z: screen.camera.position[2]
+      },
+      rotation: {
+        x: 0,
+        y: 0,
+        z: rotation
+      },
+      left: bounds.left,
+      right: bounds.right,
+      top: bounds.top,
+      bottom: bounds.bottom
+    });
 
-    Object.assign(camera.userData, screen);
-    camera.userData.type = 'screen';
+    await camera.init();
     
     cameras.push(camera);
   }

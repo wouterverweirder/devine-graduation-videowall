@@ -11,12 +11,6 @@ Number.prototype.format = function () {
   return this.toString().replace( /(\d)(?=(\d{3})+(?!\d))/g, "$1," );
 };
 
-const copyTransformsFromTo = (fromObject, toObject) => {
-  toObject.position.copy(fromObject.position);
-  toObject.quaternion.copy(fromObject.quaternion);
-  toObject.scale.copy(fromObject.scale);
-};
-
 class EditorApplication extends Application {
 
   $editorContainer;
@@ -34,8 +28,6 @@ class EditorApplication extends Application {
     this.editor.camera.position.fromArray([23, 66, 37]);
     this.editor.camera.lookAt(0, 0, 0);
 
-    const Signal = signals.Signal;
-
     const viewport = new Viewport( this.editor );
     this.$editorContainer.appendChild( viewport.dom );
 
@@ -43,33 +35,13 @@ class EditorApplication extends Application {
     document.body.appendChild( sidebar.dom );
     
     const editorRenderer = new THREE.WebGLRenderer( { antialias: false } );
-    // 
-    // request signals
-    this.editor.signals.requestRemoveObject = new Signal();
     //
     this.editor.signals.rendererChanged.dispatch( editorRenderer );
     this.editor.signals.windowResize.dispatch();
 
-    // clone children into the editor and link it together
-    this.scene.children.forEach(child => {
-      this.addChildToEditor(child);
-    });
-
     // clone cameras into the editor
     this.cameras.forEach(camera => {
       this.addCameraToEditor(camera);
-    });
-
-    this.editor.signals.refreshSidebarObject3D.add((object) => {
-      if (!object.userData.onChange) {
-        return;
-      }
-      // trigger the onChange
-      object.userData.onChange();
-    });
-    // request signals
-    this.editor.signals.requestRemoveObject.add((userData) => {
-      this.serverConnection.requestRemoveObject(userData);
     });
   
     document.addEventListener('keydown', this.onKeyDown, false );
@@ -107,64 +79,34 @@ class EditorApplication extends Application {
       case 'delete':
         const object = this.editor.selected;
         if ( !object ) return;
-        if ( !object.userData.type || object.userData.type === 'screen' ) return;
+        if ( !object.userData.sceneObject ) return;
 
-        this.serverConnection.requestRemoveObject(object.userData);
+        this.serverConnection.requestRemoveObject({ id: object.userData.sceneObject.id });
         this.editor.deselect();
         break;
     }
   };
 
   onSceneObjectAdded = (object) => {
-    this.addChildToEditor(object);
+    this.editor.addObject(object.object3D);
   }
 
   onSceneObjectRemoved = (object) => {
-    if (object.userData.editorChild) {
-      this.editor.removeObject(object.userData.editorChild);
-    }
-  }
-
-  onSceneObjectPropsChanged = (object) => {
-    if (object.userData.editorChild) {
-      copyTransformsFromTo(object, object.userData.editorChild);
-    }
+    this.editor.removeObject(object.object3D);
   }
 
   addCameraToEditor = (camera) => {
-    const screenConfig = this.screenConfigsById[camera.userData.id];
-      
-    const clonedCamera = camera.clone();
-    this.editor.addObject(clonedCamera);
-    const cameraHelper = this.editor.helpers[clonedCamera.id];
-
-    clonedCamera.userData.onChange = () => {
-      // console.log('editor camera changed');
-      // update the config
-      screenConfig.camera.position[0] = clonedCamera.position.x;
-      screenConfig.camera.position[1] = clonedCamera.position.y;
-      screenConfig.camera.position[2] = clonedCamera.position.z;
-      const size = getSizeForBounds(clonedCamera);
-      screenConfig.camera.size.width = size.width;
-      screenConfig.camera.size.height = size.height;
-      // update the projector instance
-      copyTransformsFromTo(clonedCamera, camera);
-      camera.updateProjectionMatrix();
-      clonedCamera.updateProjectionMatrix();
-      cameraHelper.update();
+    this.editor.addObject(camera.object3D);
+    // when camera props change => save to config
+    camera.signals.onPropsApplied.add(() => {
+      const screenConfig = this.screenConfigsById[camera.id];
+      screenConfig.camera.position[0] = camera.props.position.x;
+      screenConfig.camera.position[1] = camera.props.position.y;
+      screenConfig.camera.position[2] = camera.props.position.z;
+      screenConfig.camera.rotation = camera.props.rotation.z;
+      screenConfig.camera.size = getSizeForBounds(camera.props);
       this.saveConfigs();
-    };
-  };
-
-  addChildToEditor = (child) => {
-    const clonedChild = child.clone();
-    this.editor.addObject(clonedChild);
-
-    clonedChild.userData.onChange = () => {
-      copyTransformsFromTo(clonedChild, child);
-    }
-    
-    child.userData.editorChild = clonedChild;
+    });
   };
 
   saveConfigs = () => {

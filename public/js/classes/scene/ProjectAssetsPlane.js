@@ -1,12 +1,21 @@
+import * as THREE from '../../three.js/build/three.module.js';
+import { VisualBase } from "./VisualBase.js";
 import { loadImage } from "../../functions/loadImage.js";
-import { ScreenTexture } from "./ScreenTexture.js";
 
-class ProjectAssetsTexture extends ScreenTexture {
-  async init() {
+class ProjectAssetsPlane extends VisualBase {
+  async createMaterial() {
 
-    if (this.userData.data && this.userData.data.length > 0) {
+    const canvas = new OffscreenCanvas(this.props.textureSize.x, this.props.textureSize.y);
+    const ctx = canvas.getContext('2d');
+    const texture = new THREE.CanvasTexture(canvas);
+
+    this.canvas = canvas;
+    this.ctx = ctx;
+    this.texture = texture;
+
+    if (this.props.data && this.props.data.length > 0) {
       // take the first asset
-      const asset = this.userData.data[0];
+      const asset = this.props.data[0];
       const isImage = asset.mime.includes('image');
       const isVideo = asset.mime.includes('video');
       if (isImage) {
@@ -39,8 +48,7 @@ class ProjectAssetsTexture extends ScreenTexture {
       }
     }
 
-    // ask for a texture update
-    this.texture.needsUpdate = true;
+    return new THREE.MeshBasicMaterial( { map: texture } );
   }
 
   dispose() {
@@ -50,9 +58,9 @@ class ProjectAssetsTexture extends ScreenTexture {
       video.removeAttribute('src');
       video.load();
     }
-    // call super dispose for texture itself
+    this.texture.dispose();
     super.dispose();
   }
 }
 
-export { ProjectAssetsTexture };
+export { ProjectAssetsPlane }

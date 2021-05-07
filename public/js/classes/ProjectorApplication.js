@@ -19,7 +19,7 @@ class ProjectorApplication extends Application {
 
   applicationSpecificRender = () => {
     this.cameras.forEach(camera => {
-      const screenConfig = this.screenConfigsById[camera.userData.id];
+      const screenConfig = this.screenConfigsById[camera.id];
 
       const left = Math.floor( this.config.appDimensions.width * screenConfig.output.left );
       const bottom = Math.floor( this.config.appDimensions.height * screenConfig.output.bottom );
@@ -31,9 +31,17 @@ class ProjectorApplication extends Application {
       this.renderer.setScissorTest( true );
       this.renderer.setClearColor( BLACK );
 
-      this.renderer.render( this.scene, camera );
+      this.renderer.render( this.scene, camera.object3D );
     })
   };
+
+  onSceneObjectAdded = (object) => {
+    this.scene.add(object.object3D);
+  }
+
+  onSceneObjectRemoved = (object) => {
+    this.scene.remove(object.object3D);
+  }
 }
 
 export { ProjectorApplication }
