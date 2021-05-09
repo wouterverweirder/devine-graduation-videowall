@@ -6,10 +6,7 @@ import { ProjectStudentPlane } from '../classes/scene/ProjectStudentPlane.js';
 import { ProjectAssetsPlane } from '../classes/scene/ProjectAssetsPlane.js';
 import { ProjectDescriptionPlane } from '../classes/scene/ProjectDescriptionPlane.js';
 
-const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
-
-  const scale = calculateScaleForScreen(screenConfig);
-
+const calculateTextureSizeForScreen = (screenConfig) => {
   let rotation = 0;
   if (screenConfig.camera.rotation) {
     rotation = screenConfig.camera.rotation;
@@ -25,6 +22,13 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
     textureSize.x = y;
     textureSize.y = x;
   }
+  return textureSize;
+};
+
+const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
+
+  const scale = calculateScaleForScreen(screenConfig);
+  const textureSize = calculateTextureSizeForScreen(screenConfig);
 
   const props = {};
   Object.assign(props, userData);
