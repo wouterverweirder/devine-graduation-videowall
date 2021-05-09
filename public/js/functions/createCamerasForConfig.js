@@ -71,12 +71,20 @@ const calculateBoundsOfAllScreenCameras = (screenCameras) => {
       top = Math.max(screenCamera.object3D.position.y + screenCamera.object3D.top, top);
     }
   });
+  const width = right - left;
+  const height = top - bottom;
+  const width_2 = width / 2;
+  const height_2 = height / 2;
   const totalBounds = {
-    width: right - left,
-    height: top - bottom
+    width,
+    height
   };
-  totalBounds.x = left + (totalBounds.width / 2);
-  totalBounds.y = bottom + (totalBounds.height / 2);
+  totalBounds.x = left + width_2;
+  totalBounds.y = bottom + height_2;
+  totalBounds.left = totalBounds.x - width_2;
+  totalBounds.right = totalBounds.x + width_2;
+  totalBounds.bottom = totalBounds.y - height_2;
+  totalBounds.top = totalBounds.y + height_2;
   return totalBounds;
 }
 
