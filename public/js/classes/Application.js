@@ -29,7 +29,6 @@ class Application {
 
     this.cameras = await createCamerasForConfig(this.config);
     this.cameras.forEach(camera => this.camerasById[camera.id] = camera);
-    this.scene = new THREE.Scene();
 
     this.setupApplicationSpecificUI();
 
