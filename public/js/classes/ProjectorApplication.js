@@ -8,7 +8,7 @@ class ProjectorApplication extends Application {
 
   setupApplicationSpecificUI = () => {
     this.scene = new THREE.Scene();
-    
+
     const outputCanvas = document.getElementById('output-canvas');
     outputCanvas.width = this.config.appDimensions.width;
     outputCanvas.height = this.config.appDimensions.height;
