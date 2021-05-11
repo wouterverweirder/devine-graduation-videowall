@@ -1,6 +1,7 @@
 import * as THREE from '../../three.js/build/three.module.js';
 import { UIPanel, UIRow, UIText, UIButton, UISelect, UIListbox } from '../../three.js/editor/js/libs/ui.js';
 import { UICheckboxList } from './UICheckboxList.js';
+import { PlaneType } from '../../consts/PlaneType.js';
 
 function SidebarNew( editor ) {
 
@@ -22,7 +23,7 @@ function SidebarNew( editor ) {
   const typeSelect = new UISelect().setOptions({
     'image': 'Image',
     'project-description': 'Project Description',
-    'project-student': 'Project Student',
+    'profile-picture': 'Project Student',
     'project-assets': 'Project Assets'
   }).onChange(() => refreshUI());
   typeSelect.setValue( 'image' );
@@ -135,7 +136,7 @@ function SidebarNew( editor ) {
   };
 
   const shouldProjectSelectBeVisible = () => {
-    const projectTypes = ['project-description', 'project-student', 'project-assets'];
+    const projectTypes = ['project-description', 'profile-picture', 'project-assets'];
     return projectTypes.includes(typeSelect.getValue());
   };
 

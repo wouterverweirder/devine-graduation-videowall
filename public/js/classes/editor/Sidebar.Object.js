@@ -1,10 +1,11 @@
 import * as THREE from '../../three.js/build/three.module.js';
 import { UIPanel, UIRow, UIText, UINumber, UIBreak } from '../../three.js/editor/js/libs/ui.js';
 import { SetValueCommand } from '../../three.js/editor/js/commands/SetValueCommand.js';
-import { getBoundsForSize, getSizeForBounds } from '../../functions/createCamerasForConfig.js';
+import { getBoundsForSize, getSizeForBounds } from '../../functions/screenUtils.js';
 import { SetScaleCommand } from '../../three.js/editor/js/commands/SetScaleCommand.js';
 import { SetPositionCommand } from '../../three.js/editor/js/commands/SetPositionCommand.js';
 import { UICheckboxList } from './UICheckboxList.js';
+import { ScreenRole } from '../../consts/ScreenRole.js';
 
 function SidebarObject( editor ) {
 
@@ -38,14 +39,15 @@ function SidebarObject( editor ) {
   const screenRolesRow = new UIRow();
   screenRolesRow.add( new UIText( 'Roles' ).setWidth( '90px' ) );
   const screenRolesList = new UICheckboxList().onChange( () => update(screenRolesList));
+
   screenRolesList.setItems([
-    { id: 'main-video', name: 'main video' },
-    { id: 'profile-picture', name: 'profile picture' },
-    { id: 'profile-description', name: 'profile description' },
-    { id: 'project-description', name: 'project-description' },
-    { id: 'portrait-screenshots', name: 'portrait screenshots' },
-    { id: 'landscape-screenshots', name: 'landscape screenshots' },
-    { id: 'videos', name: 'videos' }
+    { id: ScreenRole.MAIN_VIDEO, name: 'main video' },
+    { id: ScreenRole.PROFILE_PICTURE, name: 'profile picture' },
+    { id: ScreenRole.PROFILE_DESCRIPTION, name: 'profile description' },
+    { id: ScreenRole.PROJECT_DESCRIPTION, name: 'project description' },
+    { id: ScreenRole.PORTRAIT_SCREENSHOTS, name: 'portrait screenshots' },
+    { id: ScreenRole.LANDSCAPE_SCREENSHOTS, name: 'landscape screenshots' },
+    { id: ScreenRole.VIDEOS, name: 'videos' }
   ]);
   screenRolesRow.add(screenRolesList);
   container.add( screenRolesRow );

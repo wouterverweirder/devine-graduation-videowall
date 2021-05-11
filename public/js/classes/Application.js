@@ -1,9 +1,11 @@
 import * as THREE from '../three.js/build/three.module.js';
 
 import { ServerConnection } from './ServerConnection.js';
-import { createCamerasForConfig, calculateBoundsOfAllScreenCameras } from '../functions/createCamerasForConfig.js';
+import { createCamerasForConfig, calculateBoundsOfAllScreenCameras, getScreenCamerasForRole, getFirstScreenCameraForRole } from '../functions/screenUtils.js';
 import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
 import { ImagePlane } from './scene/ImagePlane.js';
+import { ScreenRole } from '../consts/ScreenRole.js';
+import { PlaneType } from '../consts/PlaneType.js';
 
 class Application {
 
@@ -97,7 +99,7 @@ class Application {
     if (!screenConfig) {
       return;
     }
-    const plane = await createPlaneForScreen({data, screenConfig, appConfig: this.config});
+    const plane = await createPlaneForScreen({data, screenConfig});
     this.objects.push(plane);
     this.onSceneObjectAdded(plane);
   }
@@ -208,12 +210,56 @@ class Application {
   }
 
   async onRequestShowProject(project) {
-    // create some planes
-    // console.log('show project');
-    // console.log(project);
-    // project.mainAsset
-    // project.assets
-    // project.profilePicture
+
+    const createProjectPlane = async (screenCamera, planeType, data) => {
+      if (screenCamera) {
+        const screenConfig = this.screenConfigsById[screenCamera.id];
+        const plane = await createPlaneForScreen({
+          data: {
+            type: planeType,
+            data
+          },
+          screenConfig
+        });
+        this.objects.push(plane);
+        this.onSceneObjectAdded(plane);
+        return plane;
+      }
+      return false;
+    };
+
+    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE), PlaneType.PROFILE_PICTURE, project);
+    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project);
+    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO), PlaneType.PROJECT_ASSETS, [project.mainAsset]);
+    // TMP: show project description as profile
+    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project);
+    //
+    const portraitScreenshots = project.assets.filter(asset => {
+      if (asset.mime.indexOf('image') === -1) {
+        return false;
+      }
+      return asset.width < asset.height;
+    });
+    const landscapeScreenshots = project.assets.filter(asset => {
+      if (asset.mime.indexOf('image') === -1) {
+        return false;
+      }
+      return asset.width > asset.height;
+    });
+    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS), PlaneType.PROJECT_ASSETS, portraitScreenshots);
+    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS), PlaneType.PROJECT_ASSETS, landscapeScreenshots);
+
+    let videos = project.assets.filter(asset => {
+      return (asset.mime.indexOf('video') === 0);
+    });
+    let videoScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.VIDEOS);
+    if (videoScreenCameras.length > 0) {
+      await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]);
+    }
+    if (videoScreenCameras.length > 0) {
+      await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]);
+    }
+
   }
 
   updateObjects() {
