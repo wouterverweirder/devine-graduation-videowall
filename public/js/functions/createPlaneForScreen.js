@@ -1,10 +1,11 @@
-import calculateScaleForScreen from './calculateScaleForScreen.js';
+import { calculateScaleForScreenConfig } from './screenUtils.js';
 
 import { VisualBase } from '../classes/scene/VisualBase.js';
 import { ImagePlane } from '../classes/scene/ImagePlane.js';
 import { ProjectStudentPlane } from '../classes/scene/ProjectStudentPlane.js';
 import { ProjectAssetsPlane } from '../classes/scene/ProjectAssetsPlane.js';
 import { ProjectDescriptionPlane } from '../classes/scene/ProjectDescriptionPlane.js';
+import { PlaneType } from '../consts/PlaneType.js';
 
 const calculateTextureSizeForScreen = (screenConfig) => {
   let rotation = 0;
@@ -25,9 +26,9 @@ const calculateTextureSizeForScreen = (screenConfig) => {
   return textureSize;
 };
 
-const createPlaneForScreen = async ({data, screenConfig, appConfig}) => {
+const createPlaneForScreen = async ({data, screenConfig}) => {
 
-  const scale = calculateScaleForScreen(screenConfig);
+  const scale = calculateScaleForScreenConfig(screenConfig);
   const textureSize = calculateTextureSizeForScreen(screenConfig);
 
   const props = {};
@@ -44,13 +45,13 @@ const createPlaneForScreen = async ({data, screenConfig, appConfig}) => {
   });
 
   let plane;
-  if (data.type === 'image') {
+  if (data.type === PlaneType.IMAGE) {
     plane = new ImagePlane(data.id, props);
-  } else if (data.type === 'project-assets') {
+  } else if (data.type === PlaneType.PROJECT_ASSETS) {
     plane = new ProjectAssetsPlane(data.id, props);
-  } else if (data.type === 'project-description') {
+  } else if (data.type === PlaneType.PROJECT_DESCRIPTION) {
     plane = new ProjectDescriptionPlane(data.id, props);
-  } else if (data.type === 'project-student') {
+  } else if (data.type === PlaneType.PROFILE_PICTURE) {
     plane = new ProjectStudentPlane(data.id, props);
   } else {
     plane = new VisualBase(data.id, props);

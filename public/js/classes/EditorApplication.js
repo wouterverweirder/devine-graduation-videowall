@@ -6,7 +6,7 @@ import { Editor } from '../three.js/editor/js/Editor.js';
 import { Config } from '../three.js/editor/js/Config.js';
 import { Sidebar } from './editor/Sidebar.js';
 import { Viewport } from '../three.js/editor/js/Viewport.js';
-import { getSizeForBounds } from '../functions/createCamerasForConfig.js';
+import { getSizeForBounds } from '../functions/screenUtils.js';
 
 Number.prototype.format = function () {
   return this.toString().replace( /(\d)(?=(\d{3})+(?!\d))/g, "$1," );

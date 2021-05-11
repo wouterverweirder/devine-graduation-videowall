@@ -1,6 +1,30 @@
 import { ScreenCamera } from '../classes/scene/ScreenCamera.js';
 import * as THREE from '../three.js/build/three.module.js';
 
+const calculateScaleForScreenConfig = (screenConfig) => {
+  let rotation = 0;
+  if (screenConfig.camera.rotation) {
+    rotation = screenConfig.camera.rotation;
+  }
+
+  const bounds = getBoundsForSize(screenConfig.camera.size);
+
+  const x = bounds.right - bounds.left;
+  const y = bounds.top - bounds.bottom;
+
+  // dirty fix, just assume 90 degrees when non-zero
+  if (rotation === 0) {
+    return {
+      x,
+      y
+    }
+  }
+  return {
+    x: y,
+    y: x
+  }
+};
+
 const getBoundsForSize = ({width, height}) => {
   const halfWidth = width / 2;
   const halfHeight = height / 2;
@@ -57,6 +81,18 @@ const createCamerasForConfig = async (config) => {
   return cameras;
 };
 
+const getScreenCamerasForRole = (screenCameras, role) => {
+  return screenCameras.filter(screenCamera => screenCamera.props.roles.includes(role));
+};
+
+const getFirstScreenCameraForRole = (screenCameras, role) => {
+  const applicableCameras = getScreenCamerasForRole(screenCameras, role);
+  if (applicableCameras.length > 0) {
+    return applicableCameras[0];
+  }
+  return null;
+};
+
 const calculateBoundsOfAllScreenCameras = (screenCameras) => {
   let left = 0, right = 0, bottom = 0, top = 0;
   screenCameras.forEach(screenCamera => {
@@ -90,8 +126,11 @@ const calculateBoundsOfAllScreenCameras = (screenCameras) => {
 }
 
 export {
+  calculateScaleForScreenConfig,
   getBoundsForSize,
   getSizeForBounds,
   createCamerasForConfig,
-  calculateBoundsOfAllScreenCameras
+  calculateBoundsOfAllScreenCameras,
+  getScreenCamerasForRole,
+  getFirstScreenCameraForRole
 }
