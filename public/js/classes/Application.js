@@ -1,5 +1,7 @@
 import * as THREE from '../three.js/build/three.module.js';
 
+import { gsap, Cubic, Power1 } from '../gsap/src/index.js';
+
 import { ServerConnection } from './ServerConnection.js';
 import { createCamerasForConfig, calculateBoundsOfAllScreenCameras, getScreenCamerasForRole, getFirstScreenCameraForRole } from '../functions/screenUtils.js';
 import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
@@ -221,18 +223,18 @@ class Application {
           },
           screenConfig
         });
-        this.objects.push(plane);
-        this.onSceneObjectAdded(plane);
         return plane;
       }
       return false;
     };
 
-    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE), PlaneType.PROFILE_PICTURE, project);
-    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project);
-    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO), PlaneType.PROJECT_ASSETS, [project.mainAsset]);
+    const projectPlanes = [];
+
+    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE), PlaneType.PROFILE_PICTURE, project));
+    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
+    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO), PlaneType.PROJECT_ASSETS, [project.mainAsset]));
     // TMP: show project description as profile
-    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project);
+    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
     //
     const portraitScreenshots = project.assets.filter(asset => {
       if (asset.mime.indexOf('image') === -1) {
@@ -246,19 +248,43 @@ class Application {
       }
       return asset.width > asset.height;
     });
-    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS), PlaneType.PROJECT_ASSETS, portraitScreenshots);
-    await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS), PlaneType.PROJECT_ASSETS, landscapeScreenshots);
+    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS), PlaneType.PROJECT_ASSETS, portraitScreenshots));
+    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS), PlaneType.PROJECT_ASSETS, landscapeScreenshots));
 
     let videos = project.assets.filter(asset => {
       return (asset.mime.indexOf('video') === 0);
     });
     let videoScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.VIDEOS);
     if (videoScreenCameras.length > 0) {
-      await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]);
+      projectPlanes.push(await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]));
     }
     if (videoScreenCameras.length > 0) {
-      await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]);
+      projectPlanes.push(await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]));
     }
+
+    const tl = gsap.timeline({
+      yoyo: true, repeat: -1, repeatDelay: 1,
+      onUpdate: () => {
+        projectPlanes.forEach(plane => plane.applyProps(plane.props));
+      }
+    });
+
+    const maxDelay = .5;
+    projectPlanes.forEach((plane, index) => {
+      const startPropValues = JSON.parse(JSON.stringify(plane.props));
+      const endPropValues = JSON.parse(JSON.stringify(plane.props));
+
+      startPropValues.scale.x *= 0;
+      startPropValues.scale.y *= 0;
+
+      plane.applyProps(startPropValues);
+
+      const delay = Power1.easeInOut(index / projectPlanes.length) * maxDelay;
+      tl.to(plane.props.scale, {x: endPropValues.scale.x, y: endPropValues.scale.y, ease: Power1.easeInOut, delay }, 0);
+
+      this.objects.push(plane);
+      this.onSceneObjectAdded(plane);
+    });
 
   }
 
