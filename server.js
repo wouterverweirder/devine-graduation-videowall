@@ -1,12 +1,14 @@
-const fs = require('fs');
-const http = require('http');
-const glob = require('glob');
-const express = require('express');
+import fs from 'fs';
+import http from 'http';
+import glob from 'glob';
+import express from 'express';
+import { server as WebSocketServer } from 'websocket';
+
 const expressApp = express();
-const WebSocketServer = require('websocket').server;
-const { profile } = require('console');
 const server = http.Server(expressApp);
 const port = process.env.PORT || 80;
+
+import { requestShowProjectsOverview } from './public/js/classes/ServerConnection.js';
 
 const wsServer = new WebSocketServer({
   httpServer: server,
@@ -25,8 +27,11 @@ const handleParsedMessage = parsedMessage => {
 };
 
 wsServer.on('request', function(request) {
+
   const connection = request.accept();
   console.log((new Date()) + ' Connection accepted.');
+
+  // connection listeners
   connection.on('message', function(message) {
     if (message.type === 'utf8') {
       console.log('Received Message: ' + message.utf8Data);
@@ -47,6 +52,10 @@ wsServer.on('request', function(request) {
   connection.on('close', function(reasonCode, description) {
     console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
   });
+
+  // initial commands
+  requestShowProjectsOverview(connection);
+
 });
 
 expressApp.get('/api/images', (req, res) => {
@@ -61,21 +70,30 @@ expressApp.get('/api/images', (req, res) => {
   });
 });
 
-expressApp.get('/api/projects', (req, res) => {
+const getProjects = (serverURL = 'http://localhost/') => {
   const localPath = './public/assets/projects.json';
-  const localPathLength = localPath.length;
-  const serverURL = req.protocol + '://' + req.get('host') + '/';
-  fs.readFile(localPath, 'utf8', (err, contents) => {
-    const projects = JSON.parse(contents);
-    projects.forEach(project => {
-      if (project.profilePicture) {
-        project.profilePicture.url = serverURL + project.profilePicture.url;
+  return new Promise((resolve, reject) => {
+    fs.readFile(localPath, 'utf8', (err, contents) => {
+      if (err) {
+        return reject(err);
       }
-      if (project.mainAsset) {
-        project.mainAsset.url = serverURL + project.mainAsset.url;
-      }
-      project.assets.forEach(asset => asset.url = serverURL + asset.url);
+      const projects = JSON.parse(contents);
+      projects.forEach(project => {
+        if (project.profilePicture) {
+          project.profilePicture.url = serverURL + project.profilePicture.url;
+        }
+        if (project.mainAsset) {
+          project.mainAsset.url = serverURL + project.mainAsset.url;
+        }
+        project.assets.forEach(asset => asset.url = serverURL + asset.url);
+      });
+      resolve(projects);
     });
+  });
+};
+
+expressApp.get('/api/projects', (req, res) => {
+  getProjects(req.protocol + '://' + req.get('host') + '/').then((projects) => {
     return res.send(JSON.stringify({
       'result': 'ok',
       'data': projects
