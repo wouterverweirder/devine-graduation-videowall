@@ -46,7 +46,8 @@ const createCamerasForConfig = async (config) => {
       left: bounds.left,
       right: bounds.right,
       top: bounds.top,
-      bottom: bounds.bottom
+      bottom: bounds.bottom,
+      roles: screen.roles
     });
 
     await camera.init();

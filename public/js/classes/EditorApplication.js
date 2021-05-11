@@ -111,6 +111,7 @@ class EditorApplication extends Application {
       screenConfig.camera.position[2] = camera.props.position.z;
       screenConfig.camera.rotation = camera.props.rotation.z;
       screenConfig.camera.size = getSizeForBounds(camera.props);
+      screenConfig.roles = camera.props.roles;
       this.saveConfigs();
     });
   }
