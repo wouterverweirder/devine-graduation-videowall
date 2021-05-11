@@ -51,6 +51,8 @@ class Application {
             await this.onRequestSetObjectProps(parsedMessage.data);
           } else if (parsedMessage.type === 'show-projects-overview') {
             await this.onRequestShowProjectsOverview();
+          } else if (parsedMessage.type === 'show-project') {
+            await this.onRequestShowProject(parsedMessage.data);
           }
         }
       } catch (e) {
@@ -203,6 +205,15 @@ class Application {
       this.objects.push(plane);
       this.onSceneObjectAdded(plane);
     });
+  }
+
+  async onRequestShowProject(project) {
+    // create some planes
+    // console.log('show project');
+    // console.log(project);
+    // project.mainAsset
+    // project.assets
+    // project.profilePicture
   }
 
   updateObjects() {

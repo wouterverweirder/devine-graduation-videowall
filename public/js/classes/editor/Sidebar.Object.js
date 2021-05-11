@@ -4,6 +4,7 @@ import { SetValueCommand } from '../../three.js/editor/js/commands/SetValueComma
 import { getBoundsForSize, getSizeForBounds } from '../../functions/createCamerasForConfig.js';
 import { SetScaleCommand } from '../../three.js/editor/js/commands/SetScaleCommand.js';
 import { SetPositionCommand } from '../../three.js/editor/js/commands/SetPositionCommand.js';
+import { UICheckboxList } from './UICheckboxList.js';
 
 function SidebarObject( editor ) {
 
@@ -33,6 +34,21 @@ function SidebarObject( editor ) {
   screenSizeRow.add( new UIText( 'Size' ).setWidth( '90px' ) );
   screenSizeRow.add( screenWidth, screenHeight );
   container.add( screenSizeRow );
+
+  const screenRolesRow = new UIRow();
+  screenRolesRow.add( new UIText( 'Roles' ).setWidth( '90px' ) );
+  const screenRolesList = new UICheckboxList().onChange( () => update(screenRolesList));
+  screenRolesList.setItems([
+    { id: 'main-video', name: 'main video' },
+    { id: 'profile-picture', name: 'profile picture' },
+    { id: 'profile-description', name: 'profile description' },
+    { id: 'project-description', name: 'project-description' },
+    { id: 'portrait-screenshots', name: 'portrait screenshots' },
+    { id: 'landscape-screenshots', name: 'landscape screenshots' },
+    { id: 'videos', name: 'videos' }
+  ]);
+  screenRolesRow.add(screenRolesList);
+  container.add( screenRolesRow );
 
   const planeSizeRow = new UIRow();
   const planeWidth = new UINumber().setPrecision( 3 ).setWidth( '50px' ).onChange( () => update(planeWidth) );
@@ -108,6 +124,9 @@ function SidebarObject( editor ) {
       newObjectProps.props.right = bounds.right;
       newObjectProps.props.top = bounds.top;
       newObjectProps.props.bottom = bounds.bottom;
+
+      // update the roles
+      newObjectProps.props.roles = screenRolesList.getValue();
     }
     if (isPlane) {
 
@@ -143,6 +162,7 @@ function SidebarObject( editor ) {
 
     const isScreen = (sceneObject.type === 'camera');
     screenSizeRow.setDisplay(isScreen ? '' : 'none');
+    screenRolesRow.setDisplay(isScreen ? '' : 'none');
 
     const isPlane = (!isScreen);
     planeSizeRow.setDisplay(isPlane ? '' : 'none');
@@ -168,6 +188,8 @@ function SidebarObject( editor ) {
       const size = getSizeForBounds(object);
       screenWidth.setValue(size.width);
       screenHeight.setValue(size.height);
+
+      screenRolesList.setValue(sceneObject.props.roles);
     }
     if (isPlane) {
       planeWidth.setValue(object.scale.x);

@@ -54,6 +54,9 @@ class SceneObject {
       this.object3D.scale.x = this.props.scale.x;
       this.object3D.scale.y = this.props.scale.y;
     }
+    if (newProps.roles) {
+      Object.assign(this.props.roles, newProps.roles);
+    }
     if (newProps.name) {
       this.props.name = newProps.name;
       this.object3D.name = this.props.name;

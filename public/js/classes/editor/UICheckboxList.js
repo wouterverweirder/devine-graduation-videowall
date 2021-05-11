@@ -77,8 +77,6 @@ UICheckboxList.prototype.getValue = function () {
 
 UICheckboxList.prototype.setValue = function ( value ) {
 
-  console.log(value);
-
   for ( var i = 0; i < this.listitems.length; i ++ ) {
 
     var element = this.listitems[ i ];
