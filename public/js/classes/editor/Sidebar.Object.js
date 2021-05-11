@@ -129,12 +129,6 @@ function SidebarObject( editor ) {
     if ( hasNewObjectProps ) {
       serverConnection.requestSetObjectProps(newObjectProps);
     }
-
-    if ( needsConfigChange ) {
-      // if (object.userData.onChange) {
-      //   object.userData.onChange();
-      // }
-    }
   }
 
   function updateRows( object ) {
