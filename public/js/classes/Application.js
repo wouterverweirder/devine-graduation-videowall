@@ -141,13 +141,14 @@ class Application {
   async onRequestShowProjectsOverview () {
     const planes = [];
     // create square planes in background to show student images
-    const scale = { x: 0.2, y: 0.2 };
+    const scale = { x: 0.3, y: 0.3 };
     const gap = 0.05;
     const numCols = 4;
     for (let i = 0; i < this.projects.length; i++) {
       const project = this.projects[i];
       const col = i % numCols;
       const row = Math.floor(i / numCols);
+      const randScaleFactor = THREE.MathUtils.randFloat(0.5, 1);
       const props = {
         name: `project ${project.firstName} ${project.lastName}`,
         position: {
@@ -155,15 +156,18 @@ class Application {
           y: row * (scale.y + gap),
           z: 0
         },
-        scale,
+        scale: {
+          x: scale.x * randScaleFactor,
+          y: scale.y * randScaleFactor
+        },
         textureSize: {
           x: 1080,
           y: 1080
         },
         url: project.profilePicture.url,
         velocity: {
-          x: THREE.MathUtils.randFloat(-0.005, 0.005),
-          y: THREE.MathUtils.randFloat(-0.005, 0.005),
+          x: THREE.MathUtils.randFloat(-0.001, 0.001),
+          y: THREE.MathUtils.randFloat(-0.001, 0.001),
           z: 0
         }
       };
