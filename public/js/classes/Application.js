@@ -230,11 +230,19 @@ class Application {
 
     const projectPlanes = [];
 
-    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE), PlaneType.PROFILE_PICTURE, project));
-    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
-    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO), PlaneType.PROJECT_ASSETS, [project.mainAsset]));
+    if (project.profilePicture) {
+      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE), PlaneType.PROFILE_PICTURE, project));
+    }
+    if (project.description) {
+      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
+    }
+    if (project.mainAsset) {
+      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO), PlaneType.PROJECT_ASSETS, [project.mainAsset]));
+    }
     // TMP: show project description as profile
-    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
+    if (project.description) {
+      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
+    }
     //
     const portraitScreenshots = project.assets.filter(asset => {
       if (asset.mime.indexOf('image') === -1) {
@@ -248,22 +256,25 @@ class Application {
       }
       return asset.width > asset.height;
     });
-    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS), PlaneType.PROJECT_ASSETS, portraitScreenshots));
-    projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS), PlaneType.PROJECT_ASSETS, landscapeScreenshots));
+    if (portraitScreenshots.length > 0) {
+      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS), PlaneType.PROJECT_ASSETS, portraitScreenshots));
+    }
+    if (landscapeScreenshots.length > 0) {
+      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS), PlaneType.PROJECT_ASSETS, landscapeScreenshots));
+    }
 
     let videos = project.assets.filter(asset => {
       return (asset.mime.indexOf('video') === 0);
     });
     let videoScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.VIDEOS);
-    if (videoScreenCameras.length > 0) {
+    if (videoScreenCameras.length > 0 && videos.length > 0) {
       projectPlanes.push(await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]));
     }
-    if (videoScreenCameras.length > 0) {
+    if (videoScreenCameras.length > 0 && videos.length > 0) {
       projectPlanes.push(await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]));
     }
 
     const tl = gsap.timeline({
-      yoyo: true, repeat: -1, repeatDelay: 1,
       onUpdate: () => {
         projectPlanes.forEach(plane => plane.applyProps(plane.props));
       }
