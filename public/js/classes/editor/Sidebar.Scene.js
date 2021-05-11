@@ -1,10 +1,12 @@
-import { UIPanel, UIBreak, UIRow, UIColor, UISelect, UIText, UINumber } from '../../three.js/editor/js/libs/ui.js';
-import { UIOutliner, UITexture } from '../../three.js/editor/js/libs/ui.three.js';
+import { UIPanel, UIBreak, UIRow, UIButton, UISelect, UIText } from '../../three.js/editor/js/libs/ui.js';
+import { UIOutliner } from '../../three.js/editor/js/libs/ui.three.js';
 
 function SidebarScene( editor ) {
 
 	var signals = editor.signals;
-	var strings = editor.strings;
+	const serverConnection = editor.serverConnection;
+
+	const serverAddress = editor.config.getKey('serverAddress');
 
 	var container = new UIPanel();
 	container.setBorderTop( '0' );
@@ -149,7 +151,42 @@ function SidebarScene( editor ) {
 	container.add( outliner );
 	container.add( new UIBreak() );
 
+	const projectRow = new UIRow();
+  projectRow.add( new UIText( 'Project' ).setWidth( '90px' ) );
+  const projectSelect = new UISelect();
+  projectRow.add(projectSelect);
+  container.add(projectRow);
+
+	const showProjectButtonRow = new UIRow();
+	const showProjectButton = new UIButton().setLabel('Show Project').onClick(() => {
+		console.log('show project');
+		const project = getSelectedProject();
+		serverConnection.requestShowProject(project);
+	});
+  showProjectButtonRow.add(showProjectButton);
+	container.add(showProjectButtonRow);
+
+	const showOverviewButtonRow = new UIRow();
+	const showOverviewButton = new UIButton().setLabel('Show Overview').onClick(() => {
+		console.log('show overview');
+		serverConnection.requestShowProjectsOverview();
+	});
+  showOverviewButtonRow.add(showOverviewButton);
+	container.add(showOverviewButtonRow);
+
+	const clearSceneButtonRow = new UIRow();
+	const clearSceneButton = new UIButton().setLabel('Clear Scene').onClick(() => {
+		console.log('clear scene');
+		serverConnection.requestClearScene();
+	});
+  clearSceneButtonRow.add(clearSceneButton);
+	container.add(clearSceneButtonRow);
+
+	// navigate betweeon project details and overview
 	//
+
+	let projects = [];
+	let firstProject;
 
 	function refreshUI() {
 
@@ -195,7 +232,22 @@ function SidebarScene( editor ) {
 
 		}
 
+		const projectOptions = {};
+    projects.forEach((project) => {
+      projectOptions[project.id] = `${project.firstName} ${project.lastName}`;
+    })
+    projectSelect.setOptions(projectOptions);
+		if (!firstProject && projects.length > 0) {
+      firstProject = projects[0];
+      projectSelect.setValue(firstProject.id);
+    }
+
 	}
+
+	const getSelectedProject = () => {
+    const projectId = parseInt(projectSelect.getValue());
+    return projects.find(project => project.id === projectId);
+  };
 
 	refreshUI();
 
@@ -259,6 +311,14 @@ function SidebarScene( editor ) {
 		}
 
 	} );
+
+	const fetchProjectsList = async () => {
+    const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
+    projects = data.data;
+  };
+
+	fetchProjectsList()
+		.then(() => refreshUI());
 
 	return container;
 
