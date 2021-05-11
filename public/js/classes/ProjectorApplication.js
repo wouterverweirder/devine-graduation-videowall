@@ -6,8 +6,10 @@ const BLACK = new THREE.Color(0, 0, 0);
 
 class ProjectorApplication extends Application {
 
-  setupApplicationSpecificUI = () => {
+  setupApplicationSpecificUI() {
     this.scene = new THREE.Scene();
+
+    this.fullSceneCamera = new THREE.OrthographicCamera(this.fullBounds.left, this.fullBounds.right, this.fullBounds.top, this.fullBounds.bottom, -2, 2);
 
     const outputCanvas = document.getElementById('output-canvas');
     outputCanvas.width = this.config.appDimensions.width;
@@ -15,11 +17,16 @@ class ProjectorApplication extends Application {
     this.renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
   }
 
-  connectToServer = () => {
-    this.serverConnection.connect('127.0.0.1');
-  }
-
-  applicationSpecificRender = () => {
+  applicationSpecificRender() {
+    // {
+    //   this.fullSceneCamera.left = this.fullBounds.left;
+    //   this.fullSceneCamera.right = this.fullBounds.right;
+    //   this.fullSceneCamera.top = this.fullBounds.top;
+    //   this.fullSceneCamera.bottom = this.fullBounds.bottom;
+    //   this.renderer.setSize( this.fullBounds.width * 500, this.fullBounds.height * 500 );
+    //   this.renderer.render( this.scene, this.fullSceneCamera );
+    //   return;
+    // }
     this.cameras.forEach(camera => {
       const screenConfig = this.screenConfigsById[camera.id];
 
@@ -35,13 +42,13 @@ class ProjectorApplication extends Application {
 
       this.renderer.render( this.scene, camera.object3D );
     })
-  };
+  }
 
-  onSceneObjectAdded = (object) => {
+  onSceneObjectAdded(object) {
     this.scene.add(object.object3D);
   }
 
-  onSceneObjectRemoved = (object) => {
+  onSceneObjectRemoved(object) {
     this.scene.remove(object.object3D);
   }
 }

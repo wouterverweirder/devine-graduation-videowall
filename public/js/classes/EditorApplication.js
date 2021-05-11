@@ -3,6 +3,7 @@ import * as THREE from '../three.js/build/three.module.js';
 import { Application } from './Application.js';
 
 import { Editor } from '../three.js/editor/js/Editor.js';
+import { Config } from '../three.js/editor/js/Config.js';
 import { Sidebar } from './editor/Sidebar.js';
 import { Viewport } from '../three.js/editor/js/Viewport.js';
 import { getSizeForBounds } from '../functions/createCamerasForConfig.js';
@@ -16,14 +17,14 @@ class EditorApplication extends Application {
   $editorContainer;
   editor;
 
-  setupApplicationSpecificUI = () => {
+  async init() {
+    this.editorConfig = new Config();
+    return super.init();
+  }
+
+  setupApplicationSpecificUI() {
     this.$editorContainer = document.getElementById('editor-container');
     this.editor = new Editor();
-    let serverAddress = this.editor.config.getKey('serverAddress');
-    if (!serverAddress) {
-      serverAddress = '127.0.0.1';
-      this.editor.config.setKey('serverAddress', serverAddress);
-    }
     this.editor.serverConnection = this.serverConnection;
     this.editor.camera.position.fromArray([1.57, 2.72, 5.47]);
     this.editor.camera.lookAt(0, 0, 0);
@@ -49,8 +50,8 @@ class EditorApplication extends Application {
     this.onWindowResize();
   }
 
-  onServerConnectionOpen = () => {
-    this.serverConnection.requestClearScene();
+  onServerConnectionOpen() {
+    // this.serverConnection.requestClearScene();
 
     // const project = this.projects[0];
 
@@ -64,16 +65,21 @@ class EditorApplication extends Application {
     // this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'project-description', data: project });
   }
 
-  connectToServer = () => {
-    let serverAddress = this.editor.config.getKey('serverAddress');
-    this.serverConnection.connect(serverAddress);
+  getServerAddress() {
+
+    let serverAddress = this.editorConfig.getKey('serverAddress');
+    if (!serverAddress) {
+      serverAddress = '127.0.0.1';
+      this.editorConfig.setKey('serverAddress', serverAddress);
+    }
+    return serverAddress;
   }
 
-  onWindowResize = () => {
+  onWindowResize() {
     this.editor.signals.windowResize.dispatch();
-  };
+  }
 
-  onKeyDown = (event) => {
+  onKeyDown(event) {
     switch ( event.key.toLowerCase() ) {
       case 'backspace':
       case 'delete':
@@ -85,17 +91,17 @@ class EditorApplication extends Application {
         this.editor.deselect();
         break;
     }
-  };
+  }
 
-  onSceneObjectAdded = (object) => {
+  onSceneObjectAdded(object) {
     this.editor.addObject(object.object3D);
   }
 
-  onSceneObjectRemoved = (object) => {
+  onSceneObjectRemoved(object) {
     this.editor.removeObject(object.object3D);
   }
 
-  addCameraToEditor = (camera) => {
+  addCameraToEditor(camera) {
     this.editor.addObject(camera.object3D);
     // when camera props change => save to config
     camera.signals.onPropsApplied.add(() => {
@@ -107,18 +113,18 @@ class EditorApplication extends Application {
       screenConfig.camera.size = getSizeForBounds(camera.props);
       this.saveConfigs();
     });
-  };
+  }
 
-  saveConfigs = () => {
+  saveConfigs() {
     // console.log(Date.now(), 'save config');
     const json = {...this.config};
     this.serverConnection.sendRequest({
       type: 'save-config',
       json
     });
-  };
+  }
 
-  applicationSpecificRender = () => {
+  applicationSpecificRender() {
     this.editor.signals.applicationRendered.dispatch();
   }
 }

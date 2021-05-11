@@ -1,3 +1,47 @@
+const sendRequest = (client, object) => {
+  client.send(JSON.stringify(object));
+};
+
+const requestClearScene = (client) => {
+  sendRequest(client, {
+    type: 'clear-scene',
+  });
+};
+
+const requestShowProjectsOverview = (client) => {
+  sendRequest(client, {
+    type: 'show-projects-overview'
+  });
+};
+
+const requestShowProject = (client, project) => {
+  sendRequest(client, {
+    type: 'show-project',
+    data: project
+  });
+};
+
+const requestCreatePlaneOnScreen = (client, userData) => {
+  sendRequest(client, {
+    type: 'create-plane-on-screen',
+    userData
+  });
+};
+
+const requestRemoveObject = (client, userData) => {
+  sendRequest(client, {
+    type: 'remove-object',
+    userData
+  });
+};
+
+const requestSetObjectProps = (client, userData) => {
+  sendRequest(client, {
+    type: 'set-object-props',
+    userData
+  });
+};
+
 class ServerConnection {
   constructor() {
     this.messageQueue = Promise.resolve();
@@ -16,35 +60,41 @@ class ServerConnection {
   }
 
   sendRequest(object) {
-    this.client.send(JSON.stringify(object));
+    sendRequest(this.client, object);
   }
 
   requestClearScene() {
-    this.sendRequest({
-      type: 'clear-scene',
-    });
+    requestClearScene(this.client);
+  }
+
+  requestShowProjectsOverview() {
+    requestShowProjectsOverview(this.client);
+  }
+
+  requestShowProject(project) {
+    requestShowProject(this.client, project);
   }
 
   requestCreatePlaneOnScreen(userData) {
-    this.sendRequest({
-      type: 'create-plane-on-screen',
-      userData
-    });
+    requestCreatePlaneOnScreen(this.client, userData);
   }
 
   requestRemoveObject(userData) {
-    this.sendRequest({
-      type: 'remove-object',
-      userData
-    });
+    requestRemoveObject(this.client, userData);
   }
 
   requestSetObjectProps(userData) {
-    this.sendRequest({
-      type: 'set-object-props',
-      userData
-    });
+    requestSetObjectProps(this.client, userData);
   }
 }
 
-export { ServerConnection };
+export {
+  sendRequest,
+  requestClearScene,
+  requestShowProjectsOverview,
+  requestShowProject,
+  requestCreatePlaneOnScreen,
+  requestRemoveObject,
+  requestSetObjectProps,
+  ServerConnection
+};
