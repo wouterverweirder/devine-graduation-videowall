@@ -45,8 +45,8 @@ class EditorApplication extends Application {
       this.addCameraToEditor(camera);
     });
   
-    document.addEventListener('keydown', this.onKeyDown, false );
-    window.addEventListener( 'resize', this.onWindowResize, false );
+    document.addEventListener('keydown', (event) => this.onKeyDown(event), false );
+    window.addEventListener( 'resize', (event) => this.onWindowResize(event), false );
     this.onWindowResize();
   }
 

@@ -42,13 +42,13 @@ class Application {
         const parsedMessage = JSON.parse(message.data);
         if (parsedMessage.type) {
           if (parsedMessage.type === 'create-plane-on-screen') {
-            await this.onRequestCreatePlaneOnScreen(parsedMessage.userData);
+            await this.onRequestCreatePlaneOnScreen(parsedMessage.data);
           } else if (parsedMessage.type === 'clear-scene') {
             await this.onRequestClearScene();
           } else if (parsedMessage.type === 'remove-object') {
-            await this.onRequestRemoveObject(parsedMessage.userData);
+            await this.onRequestRemoveObject(parsedMessage.data);
           } else if (parsedMessage.type === 'set-object-props') {
-            await this.onRequestSetObjectProps(parsedMessage.userData);
+            await this.onRequestSetObjectProps(parsedMessage.data);
           } else if (parsedMessage.type === 'show-projects-overview') {
             await this.onRequestShowProjectsOverview();
           }
@@ -90,19 +90,19 @@ class Application {
   onSceneObjectPropsChanged (object) {
   }
 
-  async onRequestCreatePlaneOnScreen (userData) {
-    const screenConfig = this.screenConfigsById[userData.screenId];
+  async onRequestCreatePlaneOnScreen (data) {
+    const screenConfig = this.screenConfigsById[data.screenId];
     if (!screenConfig) {
       return;
     }
-    const plane = await createPlaneForScreen({userData, screenConfig, appConfig: this.config});
+    const plane = await createPlaneForScreen({data, screenConfig, appConfig: this.config});
     this.objects.push(plane);
     this.onSceneObjectAdded(plane);
   }
 
-  async onRequestRemoveObject (userData) {
+  async onRequestRemoveObject (data) {
     let applicableObjects = this.objects.filter(object => {
-      return object.id === userData.id
+      return object.id === data.id
     });
     applicableObjects.forEach(object => {
       let index = this.objects.indexOf(object);
@@ -116,16 +116,16 @@ class Application {
     });
   }
 
-  async onRequestSetObjectProps (userData) {
+  async onRequestSetObjectProps (data) {
     let applicableObjects = this.objects.filter(object => {
-      return object.id === userData.id
+      return object.id === data.id
     });
-    if (this.camerasById[userData.id]) {
-      applicableObjects.push(this.camerasById[userData.id]);
+    if (this.camerasById[data.id]) {
+      applicableObjects.push(this.camerasById[data.id]);
     }
     applicableObjects.forEach(object => {
       if (object.applyProps) {
-        object.applyProps(userData.props);
+        object.applyProps(data.props);
       }
       this.onSceneObjectPropsChanged(object);
     });
@@ -161,8 +161,8 @@ class Application {
           y: scale.y * randScaleFactor
         },
         textureSize: {
-          x: 1080,
-          y: 1080
+          x: 1920,
+          y: 1920
         },
         url: project.profilePicture.url,
         velocity: {

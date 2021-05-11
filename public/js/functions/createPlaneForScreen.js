@@ -25,15 +25,15 @@ const calculateTextureSizeForScreen = (screenConfig) => {
   return textureSize;
 };
 
-const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
+const createPlaneForScreen = async ({data, screenConfig, appConfig}) => {
 
   const scale = calculateScaleForScreen(screenConfig);
   const textureSize = calculateTextureSizeForScreen(screenConfig);
 
   const props = {};
-  Object.assign(props, userData);
+  Object.assign(props, data);
   Object.assign(props, {
-    name: `${userData.type} plane ${screenConfig.id}`,
+    name: `${data.type} plane ${screenConfig.id}`,
     position: {
       x: screenConfig.camera.position[0],
       y: screenConfig.camera.position[1],
@@ -44,16 +44,16 @@ const createPlaneForScreen = async ({userData, screenConfig, appConfig}) => {
   });
 
   let plane;
-  if (userData.type === 'image') {
-    plane = new ImagePlane(userData.id, props);
-  } else if (userData.type === 'project-assets') {
-    plane = new ProjectAssetsPlane(userData.id, props);
-  } else if (userData.type === 'project-description') {
-    plane = new ProjectDescriptionPlane(userData.id, props);
-  } else if (userData.type === 'project-student') {
-    plane = new ProjectStudentPlane(userData.id, props);
+  if (data.type === 'image') {
+    plane = new ImagePlane(data.id, props);
+  } else if (data.type === 'project-assets') {
+    plane = new ProjectAssetsPlane(data.id, props);
+  } else if (data.type === 'project-description') {
+    plane = new ProjectDescriptionPlane(data.id, props);
+  } else if (data.type === 'project-student') {
+    plane = new ProjectStudentPlane(data.id, props);
   } else {
-    plane = new VisualBase(userData.id, props);
+    plane = new VisualBase(data.id, props);
   }
   await plane.init();
   return plane;

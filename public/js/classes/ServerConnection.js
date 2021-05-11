@@ -21,24 +21,24 @@ const requestShowProject = (client, project) => {
   });
 };
 
-const requestCreatePlaneOnScreen = (client, userData) => {
+const requestCreatePlaneOnScreen = (client, data) => {
   sendRequest(client, {
     type: 'create-plane-on-screen',
-    userData
+    data
   });
 };
 
-const requestRemoveObject = (client, userData) => {
+const requestRemoveObject = (client, data) => {
   sendRequest(client, {
     type: 'remove-object',
-    userData
+    data
   });
 };
 
-const requestSetObjectProps = (client, userData) => {
+const requestSetObjectProps = (client, data) => {
   sendRequest(client, {
     type: 'set-object-props',
-    userData
+    data
   });
 };
 
@@ -75,16 +75,16 @@ class ServerConnection {
     requestShowProject(this.client, project);
   }
 
-  requestCreatePlaneOnScreen(userData) {
-    requestCreatePlaneOnScreen(this.client, userData);
+  requestCreatePlaneOnScreen(data) {
+    requestCreatePlaneOnScreen(this.client, data);
   }
 
-  requestRemoveObject(userData) {
-    requestRemoveObject(this.client, userData);
+  requestRemoveObject(data) {
+    requestRemoveObject(this.client, data);
   }
 
-  requestSetObjectProps(userData) {
-    requestSetObjectProps(this.client, userData);
+  requestSetObjectProps(data) {
+    requestSetObjectProps(this.client, data);
   }
 }
 
