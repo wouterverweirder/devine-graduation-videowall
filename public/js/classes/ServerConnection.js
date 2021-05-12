@@ -42,6 +42,12 @@ const requestSetObjectProps = (client, data) => {
   });
 };
 
+const requestShowBouncingDVDLogo = (client) => {
+  sendRequest(client, {
+    type: 'show-bouncing-dvd-logo'
+  });
+};
+
 class ServerConnection {
   constructor() {
     this.messageQueue = Promise.resolve();
@@ -86,6 +92,10 @@ class ServerConnection {
   requestSetObjectProps(data) {
     requestSetObjectProps(this.client, data);
   }
+
+  requestShowBouncingDVDLogo() {
+    requestShowBouncingDVDLogo(this.client);
+  }
 }
 
 export {
@@ -96,5 +106,6 @@ export {
   requestCreatePlaneOnScreen,
   requestRemoveObject,
   requestSetObjectProps,
+  requestShowBouncingDVDLogo,
   ServerConnection
 };
