@@ -6,6 +6,7 @@ import { ProjectStudentPlane } from '../classes/scene/ProjectStudentPlane.js';
 import { ProjectAssetsPlane } from '../classes/scene/ProjectAssetsPlane.js';
 import { ProjectDescriptionPlane } from '../classes/scene/ProjectDescriptionPlane.js';
 import { PlaneType } from '../consts/PlaneType.js';
+import { ProjectBioPlane } from '../classes/scene/ProjectBioPlane.js';
 
 const calculateTextureSizeForScreen = (screenConfig) => {
   let rotation = 0;
@@ -53,6 +54,8 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
     plane = new ProjectDescriptionPlane(data.id, props);
   } else if (data.type === PlaneType.PROFILE_PICTURE) {
     plane = new ProjectStudentPlane(data.id, props);
+  } else if (data.type === PlaneType.PROJECT_BIO) {
+    plane = new ProjectBioPlane(data.id, props);
   } else {
     plane = new VisualBase(data.id, props);
   }

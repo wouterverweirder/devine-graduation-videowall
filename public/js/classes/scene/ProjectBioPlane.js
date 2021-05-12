@@ -3,7 +3,7 @@ import { VisualBase } from "./VisualBase.js";
 import { gsap, Cubic } from '../../gsap/src/index.js';
 import { getLines } from '../../functions/getLines.js';
 
-class ProjectDescriptionPlane extends VisualBase {
+class ProjectBioPlane extends VisualBase {
   async createMaterial() {
 
     const canvas = new OffscreenCanvas(this.props.textureSize.x, this.props.textureSize.y);
@@ -28,7 +28,7 @@ class ProjectDescriptionPlane extends VisualBase {
         type: 'text',
         font: `${fontSize}px "Embedded Space Grotesk"`,
         fillStyle: 'white',
-        content: 'Project Info',
+        content: 'Bio',
         x: marginLeft,
         y: yPos,
         opacity: 0
@@ -37,7 +37,7 @@ class ProjectDescriptionPlane extends VisualBase {
 
     yPos += 200;
 
-    const paragraphs = this.props.data.description.split("\n");
+    const paragraphs = this.props.data.bio.split("\n");
     paragraphs.forEach(paragraph => {
       this.ctx.font = `${fontSize}px "Embedded Space Grotesk"`;
       const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
@@ -95,4 +95,4 @@ class ProjectDescriptionPlane extends VisualBase {
   }
 }
 
-export { ProjectDescriptionPlane }
+export { ProjectBioPlane }

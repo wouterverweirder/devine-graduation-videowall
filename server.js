@@ -54,14 +54,14 @@ wsServer.on('request', function(request) {
   });
 
   // initial commands
-  requestShowBouncingDVDLogo(connection);
+  // requestShowBouncingDVDLogo(connection);
   // requestShowProjectsOverview(connection);
-  // getProjects(`http://${request.host}/`).then(projects => {
-  //   if (projects.length === 0) {
-  //     return;
-  //   }
-  //   requestShowProject(connection, projects[0]);
-  // });
+  getProjects(`http://${request.host}/`).then(projects => {
+    if (projects.length === 0) {
+      return;
+    }
+    requestShowProject(connection, projects[0]);
+  });
 });
 
 expressApp.get('/api/images', (req, res) => {

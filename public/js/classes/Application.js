@@ -1,6 +1,6 @@
 import * as THREE from '../three.js/build/three.module.js';
 
-import { gsap, Cubic, Power1 } from '../gsap/src/index.js';
+import { gsap, Power1 } from '../gsap/src/index.js';
 
 import { ServerConnection } from './ServerConnection.js';
 import { createCamerasForConfig, calculateBoundsOfAllScreenCameras, getScreenCamerasForRole, getFirstScreenCameraForRole } from '../functions/screenUtils.js';
@@ -215,11 +215,14 @@ class Application {
 
   async onRequestShowProject(project) {
 
-    const createProjectPlane = async (screenCamera, planeType, data) => {
+    const idPrefix = `project-${project.id}`;
+
+    const createProjectPlane = async (id, screenCamera, planeType, data) => {
       if (screenCamera) {
         const screenConfig = this.screenConfigsById[screenCamera.id];
         const plane = await createPlaneForScreen({
           data: {
+            id,
             type: planeType,
             data
           },
@@ -233,19 +236,17 @@ class Application {
     const projectPlanes = [];
 
     if (project.profilePicture) {
-      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE), PlaneType.PROFILE_PICTURE, project));
+      projectPlanes.push(await createProjectPlane(`${idPrefix}-profile-picture`, getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE), PlaneType.PROFILE_PICTURE, project));
     }
     if (project.description) {
-      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
+      projectPlanes.push(await createProjectPlane(`${idPrefix}-project-description`, getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
     }
     if (project.mainAsset) {
-      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO), PlaneType.PROJECT_ASSETS, [project.mainAsset]));
+      projectPlanes.push(await createProjectPlane(`${idPrefix}-main-asset`, getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO), PlaneType.PROJECT_ASSETS, [project.mainAsset]));
     }
-    // TMP: show project description as profile
-    if (project.description) {
-      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
+    if (project.bio) {
+      projectPlanes.push(await createProjectPlane(`${idPrefix}-project-bio`, getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_BIO), PlaneType.PROJECT_BIO, project));
     }
-    //
     const portraitScreenshots = project.assets.filter(asset => {
       if (asset.mime.indexOf('image') === -1) {
         return false;
@@ -259,10 +260,10 @@ class Application {
       return asset.width > asset.height;
     });
     if (portraitScreenshots.length > 0) {
-      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS), PlaneType.PROJECT_ASSETS, portraitScreenshots));
+      projectPlanes.push(await createProjectPlane(`${idPrefix}-portrait-screenshots`, getFirstScreenCameraForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS), PlaneType.PROJECT_ASSETS, portraitScreenshots));
     }
     if (landscapeScreenshots.length > 0) {
-      projectPlanes.push(await createProjectPlane(getFirstScreenCameraForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS), PlaneType.PROJECT_ASSETS, landscapeScreenshots));
+      projectPlanes.push(await createProjectPlane(`${idPrefix}-landscape-screenshots`, getFirstScreenCameraForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS), PlaneType.PROJECT_ASSETS, landscapeScreenshots));
     }
 
     let videos = project.assets.filter(asset => {
@@ -270,10 +271,10 @@ class Application {
     });
     let videoScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.VIDEOS);
     if (videoScreenCameras.length > 0 && videos.length > 0) {
-      projectPlanes.push(await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]));
+      projectPlanes.push(await createProjectPlane(`${idPrefix}-videos-1`, videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]));
     }
     if (videoScreenCameras.length > 0 && videos.length > 0) {
-      projectPlanes.push(await createProjectPlane(videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]));
+      projectPlanes.push(await createProjectPlane(`${idPrefix}-videos-2`, videoScreenCameras.pop(), PlaneType.PROJECT_ASSETS, [videos.pop()]));
     }
 
     const tl = gsap.timeline({

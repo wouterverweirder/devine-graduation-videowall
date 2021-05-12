@@ -43,7 +43,7 @@ function SidebarObject( editor ) {
   screenRolesList.setItems([
     { id: ScreenRole.MAIN_VIDEO, name: 'main video' },
     { id: ScreenRole.PROFILE_PICTURE, name: 'profile picture' },
-    { id: ScreenRole.PROFILE_DESCRIPTION, name: 'profile description' },
+    { id: ScreenRole.PROJECT_BIO, name: 'project bio' },
     { id: ScreenRole.PROJECT_DESCRIPTION, name: 'project description' },
     { id: ScreenRole.PORTRAIT_SCREENSHOTS, name: 'portrait screenshots' },
     { id: ScreenRole.LANDSCAPE_SCREENSHOTS, name: 'landscape screenshots' },
