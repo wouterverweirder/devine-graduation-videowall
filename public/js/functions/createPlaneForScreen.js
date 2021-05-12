@@ -28,8 +28,8 @@ const calculateTextureSizeForScreen = (screenConfig) => {
 
 const createPlaneForScreen = async ({data, screenConfig}) => {
 
-  const scale = calculateScaleForScreenConfig(screenConfig);
-  const textureSize = calculateTextureSizeForScreen(screenConfig);
+  const scale = (data.scale) ? data.scale : calculateScaleForScreenConfig(screenConfig);
+  const textureSize = (data.textureSize) ? data.textureSize : calculateTextureSizeForScreen(screenConfig);
 
   const props = {};
   Object.assign(props, data);

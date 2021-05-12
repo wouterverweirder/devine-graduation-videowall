@@ -57,6 +57,8 @@ class Application {
             await this.onRequestShowProjectsOverview();
           } else if (parsedMessage.type === 'show-project') {
             await this.onRequestShowProject(parsedMessage.data);
+          } else if (parsedMessage.type === 'show-bouncing-dvd-logo') {
+            await this.onRequestShowBouncingDVDLogo();
           }
         }
       } catch (e) {
@@ -297,6 +299,61 @@ class Application {
       this.onSceneObjectAdded(plane);
     });
 
+  }
+
+  async onRequestShowBouncingDVDLogo() {
+
+    const mainCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
+
+    const screenConfig = this.screenConfigsById[mainCamera.id];
+    const textureSize = {
+      x: 512,
+      y: 237
+    };
+    const scale = {
+      x: textureSize.x / 2000,
+      y: textureSize.y / 2000
+    }
+    const plane = await createPlaneForScreen({
+      data: {
+        type: 'image',
+        url: 'assets/dvd-logo.png',
+        scale,
+        textureSize,
+        velocity: {
+          x: 0.001,
+          y: 0.001,
+          z: 0
+        }
+      },
+      screenConfig
+    });
+    plane.render = () => {
+      const velocity = plane.props.velocity;
+      if (plane.props.position.x - scale.x < this.fullBounds.left) {
+        velocity.x = Math.abs(velocity.x);
+      }
+      if (plane.props.position.x + scale.x > this.fullBounds.right) {
+        velocity.x = -Math.abs(velocity.x);
+      }
+      if (plane.props.position.y - scale.y < this.fullBounds.bottom) {
+        velocity.y = Math.abs(velocity.y);
+      }
+      if (plane.props.position.y + scale.y > this.fullBounds.top) {
+        velocity.y = -Math.abs(velocity.y);
+      }
+      plane.applyProps({
+        position: {
+          x: plane.props.position.x + velocity.x,
+          y: plane.props.position.y + velocity.y,
+          z: 0
+        },
+        velocity
+      });
+      
+    };
+    this.objects.push(plane);
+    this.onSceneObjectAdded(plane);
   }
 
   updateObjects() {

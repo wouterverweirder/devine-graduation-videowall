@@ -8,7 +8,7 @@ const expressApp = express();
 const server = http.Server(expressApp);
 const port = process.env.PORT || 80;
 
-import { requestShowProject, requestShowProjectsOverview } from './public/js/classes/ServerConnection.js';
+import { requestShowBouncingDVDLogo, requestShowProject, requestShowProjectsOverview } from './public/js/classes/ServerConnection.js';
 
 const wsServer = new WebSocketServer({
   httpServer: server,
@@ -54,13 +54,14 @@ wsServer.on('request', function(request) {
   });
 
   // initial commands
+  requestShowBouncingDVDLogo(connection);
   // requestShowProjectsOverview(connection);
-  getProjects(`http://${request.host}/`).then(projects => {
-    if (projects.length === 0) {
-      return;
-    }
-    requestShowProject(connection, projects[0]);
-  });
+  // getProjects(`http://${request.host}/`).then(projects => {
+  //   if (projects.length === 0) {
+  //     return;
+  //   }
+  //   requestShowProject(connection, projects[0]);
+  // });
 });
 
 expressApp.get('/api/images', (req, res) => {
