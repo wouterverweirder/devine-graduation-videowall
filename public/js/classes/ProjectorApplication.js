@@ -18,15 +18,15 @@ class ProjectorApplication extends Application {
   }
 
   applicationSpecificRender() {
-    {
-      this.fullSceneCamera.left = this.fullBounds.left;
-      this.fullSceneCamera.right = this.fullBounds.right;
-      this.fullSceneCamera.top = this.fullBounds.top;
-      this.fullSceneCamera.bottom = this.fullBounds.bottom;
-      this.renderer.setSize( this.fullBounds.width * 500, this.fullBounds.height * 500 );
-      this.renderer.render( this.scene, this.fullSceneCamera );
-      return;
-    }
+    // {
+    //   this.fullSceneCamera.left = this.fullBounds.left;
+    //   this.fullSceneCamera.right = this.fullBounds.right;
+    //   this.fullSceneCamera.top = this.fullBounds.top;
+    //   this.fullSceneCamera.bottom = this.fullBounds.bottom;
+    //   this.renderer.setSize( this.fullBounds.width * 500, this.fullBounds.height * 500 );
+    //   this.renderer.render( this.scene, this.fullSceneCamera );
+    //   return;
+    // }
     this.cameras.forEach(camera => {
       const screenConfig = this.screenConfigsById[camera.id];
 
