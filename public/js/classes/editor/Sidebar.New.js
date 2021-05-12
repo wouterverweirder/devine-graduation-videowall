@@ -23,6 +23,7 @@ function SidebarNew( editor ) {
   const typeSelect = new UISelect().setOptions({
     'image': 'Image',
     'project-description': 'Project Description',
+    'project-bio': 'Project Bio',
     'profile-picture': 'Project Student',
     'project-assets': 'Project Assets'
   }).onChange(() => refreshUI());
@@ -136,7 +137,7 @@ function SidebarNew( editor ) {
   };
 
   const shouldProjectSelectBeVisible = () => {
-    const projectTypes = ['project-description', 'profile-picture', 'project-assets'];
+    const projectTypes = ['project-description', 'project-bio', 'profile-picture', 'project-assets'];
     return projectTypes.includes(typeSelect.getValue());
   };
 

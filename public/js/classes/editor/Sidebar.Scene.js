@@ -159,7 +159,6 @@ function SidebarScene( editor ) {
 
 	const showProjectButtonRow = new UIRow();
 	const showProjectButton = new UIButton().setLabel('Show Project').onClick(() => {
-		console.log('show project');
 		const project = getSelectedProject();
 		serverConnection.requestShowProject(project);
 	});
@@ -168,7 +167,6 @@ function SidebarScene( editor ) {
 
 	const showOverviewButtonRow = new UIRow();
 	const showOverviewButton = new UIButton().setLabel('Show Overview').onClick(() => {
-		console.log('show overview');
 		serverConnection.requestShowProjectsOverview();
 	});
   showOverviewButtonRow.add(showOverviewButton);
@@ -176,11 +174,17 @@ function SidebarScene( editor ) {
 
 	const clearSceneButtonRow = new UIRow();
 	const clearSceneButton = new UIButton().setLabel('Clear Scene').onClick(() => {
-		console.log('clear scene');
 		serverConnection.requestClearScene();
 	});
   clearSceneButtonRow.add(clearSceneButton);
 	container.add(clearSceneButtonRow);
+
+	const dvdButtonRow = new UIRow();
+	const dvdButton = new UIButton().setLabel('DVD').onClick(() => {
+		serverConnection.requestShowBouncingDVDLogo();
+	});
+  dvdButtonRow.add(dvdButton);
+	container.add(dvdButtonRow);
 
 	// navigate betweeon project details and overview
 	//
