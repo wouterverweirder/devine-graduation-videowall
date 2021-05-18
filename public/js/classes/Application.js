@@ -142,6 +142,9 @@ class Application {
   onRequestClearScene() {
     this.objects.forEach(object => {
       this.onSceneObjectRemoved(object);
+      if (object.dispose) {
+        object.dispose();
+      }
     });
     this.objects = [];
   }
