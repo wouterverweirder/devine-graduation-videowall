@@ -1,9 +1,11 @@
 // Modules to control application life and create native browser window
 
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, globalShortcut } from 'electron';
 import path from 'path';
 
-import './server.js';
+import { init, goToNextProject } from './server.js';
+
+init();
 
 const createMainWindow = true;
 const createControlPanel = true;
@@ -70,6 +72,10 @@ function createWindows () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  globalShortcut.register('Right', () => {
+    goToNextProject();
+  });
+
   createWindows()
   
   app.on('activate', function () {

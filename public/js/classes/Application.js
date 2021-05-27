@@ -3,11 +3,12 @@ import * as THREE from '../three.js/build/three.module.js';
 import { gsap, Power1 } from '../gsap/src/index.js';
 
 import { ServerConnection } from './ServerConnection.js';
-import { createCamerasForConfig, calculateBoundsOfAllScreenCameras, getScreenCamerasForRole, getFirstScreenCameraForRole } from '../functions/screenUtils.js';
+import { calculateScaleForScreenConfig, createCamerasForConfig, calculateBoundsOfAllScreenCameras, getScreenCamerasForRole, getFirstScreenCameraForRole } from '../functions/screenUtils.js';
 import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
 import { ImagePlane } from './scene/ImagePlane.js';
 import { ScreenRole } from '../consts/ScreenRole.js';
 import { PlaneType } from '../consts/PlaneType.js';
+import { ShaderPlane } from './scene/ShaderPlane.js';
 
 class Application {
 
@@ -150,70 +151,95 @@ class Application {
   }
 
   async onRequestShowProjectsOverview () {
-    const planes = [];
-    // create square planes in background to show student images
-    const scale = { x: 0.3, y: 0.3 };
-    const gap = 0.05;
-    const numCols = 4;
-    for (let i = 0; i < this.projects.length; i++) {
-      const project = this.projects[i];
-      const col = i % numCols;
-      const row = Math.floor(i / numCols);
-      const randScaleFactor = THREE.MathUtils.randFloat(0.5, 1);
-      const props = {
-        name: `project ${project.firstName} ${project.lastName}`,
-        position: {
-          x: col * (scale.x + gap),
-          y: row * (scale.y + gap),
-          z: 0
-        },
-        scale: {
-          x: scale.x * randScaleFactor,
-          y: scale.y * randScaleFactor
-        },
-        textureSize: {
-          x: 1920,
-          y: 1920
-        },
-        url: project.profilePicture.url,
-        velocity: {
-          x: THREE.MathUtils.randFloat(-0.001, 0.001),
-          y: THREE.MathUtils.randFloat(-0.001, 0.001),
-          z: 0
-        }
-      };
-      const plane = new ImagePlane(`project-${project.id}`, props);
-      await plane.init();
-      planes.push(plane);
-    }
-    planes.forEach(plane => {
-      plane.render = () => {
-        const velocity = plane.props.velocity;
-        if (plane.props.position.x < this.fullBounds.left) {
-          velocity.x = Math.abs(velocity.x);
-        }
-        if (plane.props.position.x > this.fullBounds.right) {
-          velocity.x = -Math.abs(velocity.x);
-        }
-        if (plane.props.position.y < this.fullBounds.bottom) {
-          velocity.y = Math.abs(velocity.y);
-        }
-        if (plane.props.position.y > this.fullBounds.top) {
-          velocity.y = -Math.abs(velocity.y);
-        }
-        plane.applyProps({
-          position: {
-            x: plane.props.position.x + velocity.x,
-            y: plane.props.position.y + velocity.y,
-            z: 0
-          },
-          velocity
-        });
+    
+    const mainScreenCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
+    const screenConfig = this.screenConfigsById[mainScreenCamera.id];
+
+    const props = {
+      name: `test-shader-plane`,
+      position: {
+        x: screenConfig.camera.position[0],
+        y: screenConfig.camera.position[1] - 0.1,
+        z: 0
+      },
+      scale: calculateScaleForScreenConfig(screenConfig),
+      textureSize: {
+        x: 1920,
+        y: 1080
+      },
+      url: this.projects[0].profilePicture.url
+    };
+    const plane = new ImagePlane(props.name, props);
+    await plane.init();
+    this.objects.push(plane);
+    this.onSceneObjectAdded(plane);
+
+    return;
+
+    // const planes = [];
+    // // create square planes in background to show student images
+    // const scale = { x: 0.3, y: 0.3 };
+    // const gap = 0.05;
+    // const numCols = 4;
+    // for (let i = 0; i < this.projects.length; i++) {
+    //   const project = this.projects[i];
+    //   const col = i % numCols;
+    //   const row = Math.floor(i / numCols);
+    //   const randScaleFactor = THREE.MathUtils.randFloat(0.5, 1);
+    //   const props = {
+    //     name: `project ${project.firstName} ${project.lastName}`,
+    //     position: {
+    //       x: col * (scale.x + gap),
+    //       y: row * (scale.y + gap),
+    //       z: 0
+    //     },
+    //     scale: {
+    //       x: scale.x * randScaleFactor,
+    //       y: scale.y * randScaleFactor
+    //     },
+    //     textureSize: {
+    //       x: 1920,
+    //       y: 1920
+    //     },
+    //     url: project.profilePicture.url,
+    //     velocity: {
+    //       x: THREE.MathUtils.randFloat(-0.001, 0.001),
+    //       y: THREE.MathUtils.randFloat(-0.001, 0.001),
+    //       z: 0
+    //     }
+    //   };
+    //   const plane = new ImagePlane(`project-${project.id}`, props);
+    //   await plane.init();
+    //   planes.push(plane);
+    // }
+    // planes.forEach(plane => {
+    //   plane.render = () => {
+    //     const velocity = plane.props.velocity;
+    //     if (plane.props.position.x < this.fullBounds.left) {
+    //       velocity.x = Math.abs(velocity.x);
+    //     }
+    //     if (plane.props.position.x > this.fullBounds.right) {
+    //       velocity.x = -Math.abs(velocity.x);
+    //     }
+    //     if (plane.props.position.y < this.fullBounds.bottom) {
+    //       velocity.y = Math.abs(velocity.y);
+    //     }
+    //     if (plane.props.position.y > this.fullBounds.top) {
+    //       velocity.y = -Math.abs(velocity.y);
+    //     }
+    //     plane.applyProps({
+    //       position: {
+    //         x: plane.props.position.x + velocity.x,
+    //         y: plane.props.position.y + velocity.y,
+    //         z: 0
+    //       },
+    //       velocity
+    //     });
         
-      };
-      this.objects.push(plane);
-      this.onSceneObjectAdded(plane);
-    });
+    //   };
+    //   this.objects.push(plane);
+    //   this.onSceneObjectAdded(plane);
+    // });
   }
 
   async onRequestShowProject(project) {
@@ -371,7 +397,7 @@ class Application {
     this.onSceneObjectRender(object);
   }
 
-  render(time) {
+  render() {
 
     this.fullBounds = calculateBoundsOfAllScreenCameras(this.cameras);
     this.updateObjects();

@@ -28,6 +28,7 @@ class ProjectAssetsPlane extends VisualBase {
         const video = document.createElement('video');
         video.autoplay = true;
         video.loop = true;
+        video.muted = true; // tmp set to muted
         video.src = asset.url;
 
         const updateVideo = () => {
