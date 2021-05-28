@@ -145,8 +145,7 @@ const goToNextProject = async () => {
   // show the next project
   extendedConnections.forEach(extendedConnection => {
     const project = JSON.parse(JSON.stringify(projects[currentProjectIndex]));
-    setProjectUrls(project, `http://${extendedConnection.request.host}/`)
-    requestClearScene(extendedConnection.connection);
+    setProjectUrls(project, `http://${extendedConnection.request.host}/`);
     requestShowProject(extendedConnection.connection, project);
   });
 };
