@@ -1,7 +1,7 @@
-import * as THREE from '../../three.js/build/three.module.js';
+import * as THREE from '../../../three.js/build/three.module.js';
 import { VisualBase } from "./VisualBase.js";
-import { gsap, Cubic } from '../../gsap/src/index.js';
-import { getLines } from '../../functions/getLines.js';
+import { gsap, Cubic } from '../../../gsap/src/index.js';
+import { getLines } from '../../../functions/getLines.js';
 
 class ProjectBioPlane extends VisualBase {
   async createMaterial() {

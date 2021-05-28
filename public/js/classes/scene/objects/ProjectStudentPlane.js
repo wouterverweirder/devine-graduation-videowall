@@ -1,6 +1,6 @@
-import * as THREE from '../../three.js/build/three.module.js';
+import * as THREE from '../../../three.js/build/three.module.js';
 import { VisualBase } from "./VisualBase.js";
-import { loadImage } from "../../functions/loadImage.js";
+import { loadImage } from "../../../functions/loadImage.js";
 
 class ProjectStudentPlane extends VisualBase {
   async createMaterial() {

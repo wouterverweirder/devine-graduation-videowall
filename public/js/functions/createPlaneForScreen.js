@@ -1,12 +1,12 @@
 import { calculateScaleForScreenConfig } from './screenUtils.js';
 
-import { VisualBase } from '../classes/scene/VisualBase.js';
-import { ImagePlane } from '../classes/scene/ImagePlane.js';
-import { ProjectStudentPlane } from '../classes/scene/ProjectStudentPlane.js';
-import { ProjectAssetsPlane } from '../classes/scene/ProjectAssetsPlane.js';
-import { ProjectDescriptionPlane } from '../classes/scene/ProjectDescriptionPlane.js';
+import { VisualBase } from '../classes/scene/objects/VisualBase.js';
+import { ImagePlane } from '../classes/scene/objects/ImagePlane.js';
+import { ProjectStudentPlane } from '../classes/scene/objects/ProjectStudentPlane.js';
+import { ProjectAssetsPlane } from '../classes/scene/objects/ProjectAssetsPlane.js';
+import { ProjectDescriptionPlane } from '../classes/scene/objects/ProjectDescriptionPlane.js';
 import { PlaneType } from '../consts/PlaneType.js';
-import { ProjectBioPlane } from '../classes/scene/ProjectBioPlane.js';
+import { ProjectBioPlane } from '../classes/scene/objects/ProjectBioPlane.js';
 
 const calculateTextureSizeForScreen = (screenConfig) => {
   let rotation = 0;
