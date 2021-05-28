@@ -22,6 +22,11 @@ class ProjectDetailScene extends SceneBase {
 
       // circle animation
       const circleAnimationPlane = new CircleAnimationPlane(`circle-project-${project.id}`, {
+        position: {
+          x: 0,
+          y: -0.5,
+          z: 0.1
+        },
         scale: {
           x: 0.1,
           y: 0.1
