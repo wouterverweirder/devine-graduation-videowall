@@ -152,27 +152,113 @@ class Application {
 
   async onRequestShowProjectsOverview () {
     
-    const mainScreenCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
-    const screenConfig = this.screenConfigsById[mainScreenCamera.id];
+    {
+      const camera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
+      const screenConfig = this.screenConfigsById[camera.id];
+      const scale = calculateScaleForScreenConfig(screenConfig);
+  
+      {
+        const props = {
+          name: `test-plane-${this.projects[0].id}`,
+          position: {
+            x: screenConfig.camera.position[0] - scale.x / 4,
+            y: screenConfig.camera.position[1],
+            z: 0
+          },
+          scale: {
+            x: scale.x / 2,
+            y: scale.y
+          },
+          textureSize: {
+            x: 1920,
+            y: 1080
+          },
+          url: this.projects[0].profilePicture.url
+        };
+        const plane = new ImagePlane(props.name, props);
+        await plane.init();
+        this.objects.push(plane);
+        this.onSceneObjectAdded(plane);
+      }
+  
+      {
+        const props = {
+          name: `test-plane-${this.projects[1].id}`,
+          position: {
+            x: screenConfig.camera.position[0] + scale.x / 4,
+            y: screenConfig.camera.position[1],
+            z: 0
+          },
+          scale: {
+            x: scale.x / 2,
+            y: scale.y
+          },
+          textureSize: {
+            x: 1920,
+            y: 1080
+          },
+          url: this.projects[1].profilePicture.url
+        };
+        const plane = new ImagePlane(props.name, props);
+        await plane.init();
+        this.objects.push(plane);
+        this.onSceneObjectAdded(plane);
+      }
+    }
 
-    const props = {
-      name: `test-shader-plane`,
-      position: {
-        x: screenConfig.camera.position[0],
-        y: screenConfig.camera.position[1] - 0.1,
-        z: 0
-      },
-      scale: calculateScaleForScreenConfig(screenConfig),
-      textureSize: {
-        x: 1920,
-        y: 1080
-      },
-      url: this.projects[0].profilePicture.url
-    };
-    const plane = new ImagePlane(props.name, props);
-    await plane.init();
-    this.objects.push(plane);
-    this.onSceneObjectAdded(plane);
+    {
+      const camera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE);
+      const screenConfig = this.screenConfigsById[camera.id];
+      const scale = calculateScaleForScreenConfig(screenConfig);
+  
+      {
+        const props = {
+          name: `test-plane-${this.projects[2].id}`,
+          position: {
+            x: screenConfig.camera.position[0],
+            y: screenConfig.camera.position[1] - scale.y / 4,
+            z: 0
+          },
+          scale: {
+            x: scale.x,
+            y: scale.y / 2
+          },
+          textureSize: {
+            x: 1920,
+            y: 1080
+          },
+          url: this.projects[2].profilePicture.url
+        };
+        const plane = new ImagePlane(props.name, props);
+        await plane.init();
+        this.objects.push(plane);
+        this.onSceneObjectAdded(plane);
+      }
+  
+      {
+        const props = {
+          name: `test-plane-${this.projects[3].id}`,
+          position: {
+            x: screenConfig.camera.position[0],
+            y: screenConfig.camera.position[1] + scale.y / 4,
+            z: 0
+          },
+          scale: {
+            x: scale.x,
+            y: scale.y / 2
+          },
+          textureSize: {
+            x: 1920,
+            y: 1080
+          },
+          url: this.projects[3].profilePicture.url
+        };
+        const plane = new ImagePlane(props.name, props);
+        await plane.init();
+        this.objects.push(plane);
+        this.onSceneObjectAdded(plane);
+      }
+    }
 
     return;
 

@@ -29,20 +29,19 @@ class ImagePlane extends VisualBase {
       //fill the width and adjust the height accordingly
       repeatX = 1;
       repeatY = h * w2 / (w * h2);
-      texture.repeat.set(repeatX, repeatY);
-      texture.offset.y = (repeatY - 1) / 2 * -1;
     } else {
       //fill the height and adjust the width accordingly
       repeatX = w * h2 / (h * w2);
       repeatY = 1;
-      texture.repeat.set(repeatX, repeatY);
-      texture.offset.x = (repeatX - 1) / 2 * -1;
     }
+    texture.repeat.set(repeatX, repeatY);
+    texture.offset.x = (repeatX - 1) * this.props.anchor.x * -1;
+    texture.offset.y = (repeatY - 1) * (1 - this.props.anchor.y) * -1;
   }
 
   applyProps(newProps) {
     super.applyProps(newProps);
-    if (newProps.scale) {
+    if (newProps.scale || newProps.anchor) {
       const texture = this.material.map;
       const image = texture.image;
       this.setTextureRepeatAndOffset(texture, image);
