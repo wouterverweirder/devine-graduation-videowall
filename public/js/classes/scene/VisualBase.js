@@ -19,6 +19,10 @@ class VisualBase extends SceneObject {
         x: 16,
         y: 9
       },
+      anchor:{
+        x: 0.5,
+        y: 0.5
+      },
       textureSize:{
         x: 1920,
         y: 1080
