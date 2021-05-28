@@ -36,7 +36,9 @@ class ProjectDetailScene extends SceneBase {
       this.circleAnimationPlane = circleAnimationPlane;
       this.addObject(circleAnimationPlane);
 
-      const circleAnimationTimeline = gsap.to(circleAnimationPlane, { progress: 1, duration: 0.5 });
+      gsap.to(circleAnimationPlane, { progress: 1, duration: 0.5, onComplete: () => {
+        this.removeObject(circleAnimationPlane);
+      } });
 
       const createProjectPlane = async (id, screenCamera, planeType, data) => {
         if (screenCamera) {
@@ -100,18 +102,7 @@ class ProjectDetailScene extends SceneBase {
 
       this.projectPlanes = projectPlanes;
 
-      // wait for the circle animation to finish
-      await new Promise((resolve) => {
-        circleAnimationTimeline.eventCallback("onComplete", () => {
-          console.log('animation complete');
-          resolve();
-        });
-      });
-
     } else if (stateName === SceneState.INTRO) {
-
-      const circleAnimationPlane = this.circleAnimationPlane;
-      this.removeObject(circleAnimationPlane);
 
       const projectPlanes = this.projectPlanes;
 
