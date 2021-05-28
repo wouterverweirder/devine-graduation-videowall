@@ -81,6 +81,12 @@ const createCamerasForConfig = async (config) => {
   return cameras;
 };
 
+const getScreenCamerasForRoles = (screenCameras, roles) => {
+  const applicableCameras = [];
+  roles.forEach(role => applicableCameras.push(...getScreenCamerasForRole(screenCameras, role)));
+  return Array.from(new Set(applicableCameras));
+};
+
 const getScreenCamerasForRole = (screenCameras, role) => {
   return screenCameras.filter(screenCamera => screenCamera.props.roles.includes(role));
 };
@@ -132,5 +138,6 @@ export {
   createCamerasForConfig,
   calculateBoundsOfAllScreenCameras,
   getScreenCamerasForRole,
-  getFirstScreenCameraForRole
+  getFirstScreenCameraForRole,
+  getScreenCamerasForRoles
 }
