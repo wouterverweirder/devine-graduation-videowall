@@ -10,7 +10,7 @@ class CircleAnimationPlane extends VisualBase {
   }
 
   async createGeometry() {
-    return new THREE.CircleGeometry(1, 64);
+    return new THREE.TorusGeometry(1, .3, 2, 64);
   }
 
   get progress() {
