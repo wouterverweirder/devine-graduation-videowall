@@ -5,6 +5,7 @@ import { ScreenRole } from "../../consts/ScreenRole.js";
 import { SceneBase, SceneState } from "./SceneBase.js";
 import { createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { PlaneType } from '../../consts/PlaneType.js';
+import { CircleAnimationPlane } from './objects/CircleAnimationPlane.js';
 
 class ProjectDetailScene extends SceneBase {
 
@@ -18,6 +19,19 @@ class ProjectDetailScene extends SceneBase {
     const project = this.project;
     if (stateName === SceneState.LOAD) {
       const idPrefix = `project-${project.id}`;
+
+      // circle animation
+      const circleAnimationPlane = new CircleAnimationPlane(`circle-project-${project.id}`, {
+        scale: {
+          x: 0.1,
+          y: 0.1
+        }
+      });
+      await circleAnimationPlane.init();
+      this.circleAnimationPlane = circleAnimationPlane;
+      this.addObject(circleAnimationPlane);
+
+      const circleAnimationTimeline = gsap.to(circleAnimationPlane, { progress: 1, duration: 0.5 });
 
       const createProjectPlane = async (id, screenCamera, planeType, data) => {
         if (screenCamera) {
@@ -81,7 +95,18 @@ class ProjectDetailScene extends SceneBase {
 
       this.projectPlanes = projectPlanes;
 
+      // wait for the circle animation to finish
+      await new Promise((resolve) => {
+        circleAnimationTimeline.eventCallback("onComplete", () => {
+          console.log('animation complete');
+          resolve();
+        });
+      });
+
     } else if (stateName === SceneState.INTRO) {
+
+      const circleAnimationPlane = this.circleAnimationPlane;
+      this.removeObject(circleAnimationPlane);
 
       const projectPlanes = this.projectPlanes;
 
@@ -107,6 +132,7 @@ class ProjectDetailScene extends SceneBase {
         this.addObject(plane);
       });
     } else if (stateName === SceneState.OUTRO) {
+
       const projectPlanes = this.projectPlanes;
       projectPlanes.forEach(plane => {
         this.removeObject(plane);
