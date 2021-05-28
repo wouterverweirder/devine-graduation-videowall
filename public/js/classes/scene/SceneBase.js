@@ -78,7 +78,7 @@ class SceneBase {
     // make sure all states until the target state have played out
     const currentStateIndex = SceneStateOrder.indexOf(this.stateName);
     const targetStateIndex = SceneStateOrder.indexOf(this.targetStateName);
-    const stateNamesToExecute = SceneStateOrder.slice(currentStateIndex, targetStateIndex + 1);
+    const stateNamesToExecute = SceneStateOrder.slice(currentStateIndex + 1, targetStateIndex + 1);
     if (stateNamesToExecute.length === 0) {
       console.log('no states to playout')
       return Promise.resolve();

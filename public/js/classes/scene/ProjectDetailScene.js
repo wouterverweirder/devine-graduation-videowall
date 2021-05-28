@@ -15,8 +15,8 @@ class ProjectDetailScene extends SceneBase {
   }
 
   async _executeStateName(stateName) {
-    console.log(stateName);
     const project = this.project;
+    console.log(`project-${project.id}: ${stateName}`);
     if (stateName === SceneState.LOAD) {
       const idPrefix = `project-${project.id}`;
 
