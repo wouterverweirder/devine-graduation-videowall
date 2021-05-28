@@ -5,10 +5,9 @@ import { gsap, Power1 } from '../gsap/src/index.js';
 import { ServerConnection } from './ServerConnection.js';
 import { calculateScaleForScreenConfig, createCamerasForConfig, calculateBoundsOfAllScreenCameras, getScreenCamerasForRole, getFirstScreenCameraForRole } from '../functions/screenUtils.js';
 import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
-import { ImagePlane } from './scene/ImagePlane.js';
 import { ScreenRole } from '../consts/ScreenRole.js';
 import { PlaneType } from '../consts/PlaneType.js';
-import { ShaderPlane } from './scene/ShaderPlane.js';
+import { ImagePlane } from './scene/objects/ImagePlane.js';
 
 class Application {
 

@@ -1,4 +1,4 @@
-import { ScreenCamera } from '../classes/scene/ScreenCamera.js';
+import { ScreenCamera } from '../classes/scene/objects/ScreenCamera.js';
 import * as THREE from '../three.js/build/three.module.js';
 
 const calculateScaleForScreenConfig = (screenConfig) => {
