@@ -9,7 +9,11 @@ class ProjectorApplication extends Application {
   setupApplicationSpecificUI() {
     this.scene = new THREE.Scene();
 
-    this.fullSceneCamera = new THREE.OrthographicCamera(this.fullBounds.left, this.fullBounds.right, this.fullBounds.top, this.fullBounds.bottom, -2, 2);
+    console.log(this.argv);
+
+    if (this.argv.projection === 'single') {
+      this.fullSceneCamera = new THREE.OrthographicCamera(this.fullBounds.left, this.fullBounds.right, this.fullBounds.top, this.fullBounds.bottom, -2, 2);
+    }
 
     const outputCanvas = document.getElementById('output-canvas');
     outputCanvas.width = this.config.appDimensions.width;
@@ -18,7 +22,7 @@ class ProjectorApplication extends Application {
   }
 
   applicationSpecificRender() {
-    {
+    if (this.argv.projection === 'single') {
       this.fullSceneCamera.left = this.fullBounds.left;
       this.fullSceneCamera.right = this.fullBounds.right;
       this.fullSceneCamera.top = this.fullBounds.top;
