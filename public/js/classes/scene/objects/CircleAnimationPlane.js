@@ -21,8 +21,8 @@ class CircleAnimationPlane extends VisualBase {
     this._progress = value;
     this.applyProps({
       scale: {
-        x: this._progress * 3,
-        y: this._progress * 3
+        x: this._progress * 4,
+        y: this._progress * 4
       }
     })
   }

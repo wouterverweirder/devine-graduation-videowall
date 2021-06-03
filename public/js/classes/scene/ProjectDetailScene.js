@@ -36,7 +36,7 @@ class ProjectDetailScene extends SceneBase {
       this.circleAnimationPlane = circleAnimationPlane;
       this.addObject(circleAnimationPlane);
 
-      gsap.to(circleAnimationPlane, { progress: 1, duration: 0.5, onComplete: () => {
+      gsap.to(circleAnimationPlane, { progress: 1, duration: 1, onComplete: () => {
         this.removeObject(circleAnimationPlane);
       } });
 
