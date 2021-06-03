@@ -27,6 +27,10 @@ class Application {
 
     const apiProjects = await (await fetch(`http://${this.getServerAddress()}/api/projects`)).json();
     this.projects = apiProjects.data;
+
+    // get the cli args
+    const apiArgv = await (await fetch(`http://${this.getServerAddress()}/api/argv`)).json();
+    this.argv = apiArgv.data;
     
     this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
     

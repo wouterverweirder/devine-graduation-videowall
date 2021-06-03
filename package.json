@@ -4,7 +4,9 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "debug": "electron . --devtools=true --editor=true",
+    "debug-local": "electron . --devtools=true --editor=true --projection=single"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -23,6 +25,7 @@
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "glob": "^7.1.6",
-    "websocket": "^1.0.33"
+    "websocket": "^1.0.33",
+    "yargs": "^17.0.1"
   }
 }

@@ -1,14 +1,37 @@
 // Modules to control application life and create native browser window
 
 import { app, BrowserWindow, screen, globalShortcut } from 'electron';
+import yargs from 'yargs';
 import path from 'path';
 
-import { init, goToNextProject } from './server.js';
+import { init as initServer, goToNextProject } from './server.js';
 
-init();
+const argv = yargs
+.option('devtools', {
+  description: 'Open devtools',
+  type: 'boolean',
+  default: false
+})
+.option('editor', {
+  description: 'Open editor',
+  type: 'boolean',
+  default: false
+})
+.option('projection', {
+  description: 'Choose a projection mode ',
+  choices: ['multi', 'single'],
+  default: 'multi'
+})
+.argv;
+
+console.log('devtools: ' + argv.devtools);
+console.log('editor: ' + argv.editor);
+console.log('projection: ' + argv.projection);
+
+initServer(argv);
 
 const createMainWindow = true;
-const createControlPanel = true;
+const createControlPanel = argv.editor;
 
 function createWindows () {
   let displays = screen.getAllDisplays()
@@ -48,8 +71,9 @@ function createWindows () {
     // mainWindow.loadFile('demo20-threejs-8-portrait.html')
     mainWindow.loadFile('public/main.html')
 
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools()
+    if (argv.devtools) {
+      mainWindow.webContents.openDevTools()
+    }
   }
 
   if (createControlPanel) {
@@ -64,7 +88,9 @@ function createWindows () {
       }
     });
     controlPanelWindow.loadFile('public/controlpanel.html');
-    controlPanelWindow.webContents.openDevTools()
+    if (argv.devtools) {
+      controlPanelWindow.webContents.openDevTools()
+    }
   }
 }
 

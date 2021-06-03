@@ -8,8 +8,10 @@ import { requestClearScene, requestShowBouncingDVDLogo, requestShowProject, requ
 let expressApp, server, port, wsServer;
 let extendedConnections = [];
 let currentProjectId;
+let argv;
 
-const init = () => {
+const init = (argvValue) => {
+  argv = argvValue;
   expressApp = express();
   server = http.Server(expressApp);
   port = process.env.PORT || 80;
@@ -90,6 +92,13 @@ const init = () => {
         'data': projects
       }));
     });
+  });
+
+  expressApp.get('/api/argv', (req, res) => {
+    return res.send(JSON.stringify({
+      'result': 'ok',
+      'data': argv
+    }));
   });
   
   expressApp.use(express.static('public'));
