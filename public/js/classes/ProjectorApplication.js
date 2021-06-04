@@ -6,6 +6,12 @@ const BLACK = new THREE.Color(0, 0, 0);
 
 class ProjectorApplication extends Application {
 
+  interactionTimeout = 60000;
+  interactionTimeoutId = false;
+
+  screensaverInterval = 30000;
+  screensaverIntervalId = false;
+
   setupApplicationSpecificUI() {
     this.scene = new THREE.Scene();
 
@@ -19,6 +25,24 @@ class ProjectorApplication extends Application {
     outputCanvas.width = this.config.appDimensions.width;
     outputCanvas.height = this.config.appDimensions.height;
     this.renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
+
+    this.resetScreensaver();
+  }
+
+  resetScreensaver() {
+    clearInterval(this.screensaverIntervalId);
+    clearTimeout(this.interactionTimeoutId);
+    this.interactionTimeoutId = setTimeout(() => {
+      this.startScreensaver();
+    }, this.interactionTimeout);
+  }
+
+  startScreensaver() {
+    clearInterval(this.screensaverIntervalId);
+    this.screensaverIntervalId = setInterval(() => {
+      this.serverConnection.requestShowNextProject();
+    }, this.screensaverInterval);
+    this.serverConnection.requestShowNextProject();
   }
 
   applicationSpecificRender() {
@@ -54,6 +78,11 @@ class ProjectorApplication extends Application {
 
   onSceneObjectRemoved(object) {
     this.scene.remove(object.object3D);
+  }
+
+  async onRequestKeyPressed(event) {
+    // reset the screen saver
+    this.resetScreensaver();
   }
 }
 

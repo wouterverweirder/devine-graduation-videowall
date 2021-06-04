@@ -4,7 +4,7 @@ import { app, BrowserWindow, screen, globalShortcut } from 'electron';
 import yargs from 'yargs';
 import path from 'path';
 
-import { init as initServer, goToNextProject } from './server.js';
+import { init as initServer, goToNextProject, sendKeyPressed } from './server.js';
 
 const argv = yargs
 .option('devtools', {
@@ -99,6 +99,7 @@ function createWindows () {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   globalShortcut.register('Right', () => {
+    sendKeyPressed({ key: 'right' });
     goToNextProject();
   });
 

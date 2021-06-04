@@ -21,6 +21,12 @@ const requestShowProject = (client, project) => {
   });
 };
 
+const requestShowNextProject = (client) => {
+  sendRequest(client, {
+    type: 'show-next-project'
+  });
+};
+
 const requestCreatePlaneOnScreen = (client, data) => {
   sendRequest(client, {
     type: 'create-plane-on-screen',
@@ -45,6 +51,13 @@ const requestSetObjectProps = (client, data) => {
 const requestShowBouncingDVDLogo = (client) => {
   sendRequest(client, {
     type: 'show-bouncing-dvd-logo'
+  });
+};
+
+const requestKeyPressed = (client, data) => {
+  sendRequest(client, {
+    type: 'key-pressed',
+    data
   });
 };
 
@@ -81,6 +94,10 @@ class ServerConnection {
     requestShowProject(this.client, project);
   }
 
+  requestShowNextProject(project) {
+    requestShowNextProject(this.client);
+  }
+
   requestCreatePlaneOnScreen(data) {
     requestCreatePlaneOnScreen(this.client, data);
   }
@@ -103,9 +120,11 @@ export {
   requestClearScene,
   requestShowProjectsOverview,
   requestShowProject,
+  requestShowNextProject,
   requestCreatePlaneOnScreen,
   requestRemoveObject,
   requestSetObjectProps,
   requestShowBouncingDVDLogo,
+  requestKeyPressed,
   ServerConnection
 };
