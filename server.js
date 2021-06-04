@@ -3,7 +3,7 @@ import http from 'http';
 import glob from 'glob';
 import express from 'express';
 import { server as WebSocketServer } from 'websocket';
-import { requestClearScene, requestShowBouncingDVDLogo, requestShowProject, requestShowProjectsOverview } from './public/js/classes/ServerConnection.js';
+import { requestKeyPressed, requestShowProject, requestShowProjectsOverview } from './public/js/classes/ServerConnection.js';
 
 let expressApp, server, port, wsServer;
 let extendedConnections = [];
@@ -112,6 +112,8 @@ const handleParsedMessage = parsedMessage => {
     fs.writeFileSync('public/config.json', JSON.stringify(parsedMessage.json, null, 2));
   } else if (parsedMessage.type === 'show-project' && parsedMessage.data && parsedMessage.data.id) {
     currentProjectId = parsedMessage.data.id;
+  } else if (parsedMessage.type === 'show-next-project') {
+    goToNextProject();
   }
 };
 
@@ -159,7 +161,14 @@ const goToNextProject = async () => {
   });
 };
 
+const sendKeyPressed = async ({ key }) => {
+  extendedConnections.forEach(extendedConnection => {
+    requestKeyPressed(extendedConnection.connection, { key });
+  });
+};
+
 export {
   init,
-  goToNextProject
+  goToNextProject,
+  sendKeyPressed
 }

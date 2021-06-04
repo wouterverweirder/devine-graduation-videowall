@@ -61,6 +61,8 @@ class Application {
             await this.onRequestShowProject(parsedMessage.data);
           } else if (parsedMessage.type === 'show-bouncing-dvd-logo') {
             await this.onRequestShowBouncingDVDLogo();
+          } else if (parsedMessage.type === 'key-pressed') {
+            await this.onRequestKeyPressed(parsedMessage.data);
           }
         }
       } catch (e) {
@@ -196,6 +198,9 @@ class Application {
 
     scene.animateToStateName(SceneState.PLAYING);
     this.visibleScenes.push(scene);
+  }
+
+  async onRequestKeyPressed(event) {
   }
 
   async onRequestShowBouncingDVDLogo() {
