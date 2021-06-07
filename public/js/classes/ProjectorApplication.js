@@ -15,8 +15,6 @@ class ProjectorApplication extends Application {
   setupApplicationSpecificUI() {
     this.scene = new THREE.Scene();
 
-    console.log(this.argv);
-
     if (this.argv.projection === 'single') {
       this.fullSceneCamera = new THREE.OrthographicCamera(this.fullBounds.left, this.fullBounds.right, this.fullBounds.top, this.fullBounds.bottom, -2, 2);
     }
@@ -40,9 +38,10 @@ class ProjectorApplication extends Application {
   startScreensaver() {
     clearInterval(this.screensaverIntervalId);
     this.screensaverIntervalId = setInterval(() => {
-      this.serverConnection.requestShowNextProject();
+      // this.serverConnection.requestShowNextProject();
     }, this.screensaverInterval);
-    this.serverConnection.requestShowNextProject();
+    // this.serverConnection.requestShowNextProject();
+    this.serverConnection.requestShowProjectsOverview();
   }
 
   applicationSpecificRender() {
