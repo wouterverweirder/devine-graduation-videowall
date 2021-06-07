@@ -48,6 +48,10 @@ class ProjectDetailScene extends SceneBase {
             data: {
               id,
               type: planeType,
+              anchor: {
+                x: 0.5,
+                y: 0
+              },
               data
             },
             screenConfig

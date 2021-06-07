@@ -3,12 +3,16 @@ import { VisualBase } from "./VisualBase.js";
 import { gsap, Cubic } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
 
+import { setTextureRepeatAndOffset } from "../../../functions/setTextureRepeatAndOffset.js";
+
 class ProjectBioPlane extends VisualBase {
   async createMaterial() {
 
     const canvas = new OffscreenCanvas(this.props.textureSize.x, this.props.textureSize.y);
     const ctx = canvas.getContext('2d');
     const texture = new THREE.CanvasTexture(canvas);
+
+    setTextureRepeatAndOffset(texture, canvas, this.props);
 
     this.canvas = canvas;
     this.ctx = ctx;
@@ -87,6 +91,15 @@ class ProjectBioPlane extends VisualBase {
     });
 
     return new THREE.MeshBasicMaterial( { map: texture } );
+  }
+
+  applyProps(newProps) {
+    super.applyProps(newProps);
+    if (newProps.scale || newProps.anchor) {
+      const texture = this.material.map;
+      const image = texture.image;
+      setTextureRepeatAndOffset(texture, image, this.props);
+    }
   }
 
   dispose() {
