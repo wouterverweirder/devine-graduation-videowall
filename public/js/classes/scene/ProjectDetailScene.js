@@ -6,6 +6,7 @@ import { SceneBase, SceneState } from "./SceneBase.js";
 import { createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { PlaneType } from '../../consts/PlaneType.js';
 import { CircleAnimationPlane } from './objects/CircleAnimationPlane.js';
+import { ImagePlane } from './objects/ImagePlane.js';
 
 class ProjectDetailScene extends SceneBase {
 
@@ -59,7 +60,26 @@ class ProjectDetailScene extends SceneBase {
       const projectPlanes = [];
 
       if (project.profilePicture) {
-        projectPlanes.push(await createProjectPlane(`${idPrefix}-profile-picture`, getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE), PlaneType.PROFILE_PICTURE, project));
+        const screenCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE);
+        const screenConfig = this.screenConfigsById[screenCamera.id];
+
+        const plane = await createPlaneForScreen({
+          data: {
+            id: `${idPrefix}-project-profile-picture`,
+            type: PlaneType.IMAGE,
+            url: project.profilePicture.url,
+            fixedRepeat: {
+              x: 9/16, // lock the x scale
+              y: false
+            },
+            anchor: {
+              x: 0.5,
+              y: 0
+            }
+          },
+          screenConfig
+        });
+        projectPlanes.push(plane);
       }
       if (project.description) {
         projectPlanes.push(await createProjectPlane(`${idPrefix}-project-description`, getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION), PlaneType.PROJECT_DESCRIPTION, project));
@@ -117,13 +137,15 @@ class ProjectDetailScene extends SceneBase {
         const startPropValues = JSON.parse(JSON.stringify(plane.props));
         const endPropValues = JSON.parse(JSON.stringify(plane.props));
 
-        startPropValues.scale.x *= 0;
+        // startPropValues.scale.x *= 0;
+        startPropValues.position.y -= startPropValues.scale.y / 2;
         startPropValues.scale.y *= 0;
 
         plane.applyProps(startPropValues);
 
         const delay = Power1.easeInOut(index / projectPlanes.length) * maxDelay;
-        tl.to(plane.props.scale, {x: endPropValues.scale.x, y: endPropValues.scale.y, ease: Power1.easeInOut, delay }, 0);
+        tl.to(plane.props.scale, {x: endPropValues.scale.x, y: endPropValues.scale.y, ease: Power1.easeInOut, delay, duration: 1}, 0);
+        tl.to(plane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: Power1.easeInOut, delay, duration: 1}, 0);
 
         this.addObject(plane);
       });
