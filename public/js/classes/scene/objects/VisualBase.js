@@ -23,6 +23,10 @@ class VisualBase extends SceneObject {
         x: 0.5,
         y: 0.5
       },
+      fixedRepeat:{
+        x: false,
+        y: false
+      },
       textureSize:{
         x: 1920,
         y: 1080

@@ -23,17 +23,42 @@ class ImagePlane extends VisualBase {
     const w2 = image.width;
     const h2 = image.height;
 
+    let fixedRepeatX = this.props.fixedRepeat.x;
+    let fixedRepeatY = this.props.fixedRepeat.y;
     let repeatX, repeatY;
+    let setRepeatXFromRepeatY = false;
+    let setRepeatYFromRepeatX = false;
+
     repeatX = w * h2 / (h * w2);
+    setRepeatXFromRepeatY = false;
+    setRepeatYFromRepeatX = true;
     if (repeatX > 1) {
-      //fill the width and adjust the height accordingly
       repeatX = 1;
-      repeatY = h * w2 / (w * h2);
-    } else {
-      //fill the height and adjust the width accordingly
-      repeatX = w * h2 / (h * w2);
+      setRepeatXFromRepeatY = false;
+      setRepeatYFromRepeatX = true;
+    } else if (repeatY > 1) {
       repeatY = 1;
+      setRepeatXFromRepeatY = true;
+      setRepeatYFromRepeatX = false;
     }
+    if (fixedRepeatX) {
+      repeatX = fixedRepeatX;
+      setRepeatXFromRepeatY = false;
+      setRepeatYFromRepeatX = true;
+    }
+    if (fixedRepeatY) {
+      repeatY = fixedRepeatY;
+      setRepeatXFromRepeatY = true;
+      setRepeatYFromRepeatX = false;
+    }
+
+    if (setRepeatYFromRepeatX) {
+      repeatY = repeatX * h * w2 / (w * h2);
+    }
+    if (setRepeatXFromRepeatY) {
+      repeatX = repeatY * w * h2 / (h * w2);
+    }
+    
     texture.repeat.set(repeatX, repeatY);
     texture.offset.x = (repeatX - 1) * this.props.anchor.x * -1;
     texture.offset.y = (repeatY - 1) * (1 - this.props.anchor.y) * -1;
