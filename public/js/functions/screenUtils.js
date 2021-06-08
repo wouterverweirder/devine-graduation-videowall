@@ -88,7 +88,7 @@ const getScreenCamerasForRoles = (screenCameras, roles) => {
 };
 
 const getScreenCamerasForRole = (screenCameras, role) => {
-  return screenCameras.filter(screenCamera => screenCamera.props.roles.includes(role));
+  return screenCameras.filter(screenCamera => doesScreenCameraHaveRole(screenCamera, role));
 };
 
 const getFirstScreenCameraForRole = (screenCameras, role) => {
@@ -97,6 +97,10 @@ const getFirstScreenCameraForRole = (screenCameras, role) => {
     return applicableCameras[0];
   }
   return null;
+};
+
+const doesScreenCameraHaveRole = (screenCamera, role) => {
+  return screenCamera.props.roles.includes(role);
 };
 
 const calculateBoundsOfAllScreenCameras = (screenCameras) => {
@@ -139,5 +143,6 @@ export {
   calculateBoundsOfAllScreenCameras,
   getScreenCamerasForRole,
   getFirstScreenCameraForRole,
-  getScreenCamerasForRoles
+  getScreenCamerasForRoles,
+  doesScreenCameraHaveRole
 }

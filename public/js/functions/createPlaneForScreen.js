@@ -31,15 +31,16 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
 
   const scale = (data.scale) ? data.scale : calculateScaleForScreenConfig(screenConfig);
   const textureSize = (data.textureSize) ? data.textureSize : calculateTextureSizeForScreen(screenConfig);
+  const zPosition = (data.position && data.position.z) ? data.position.z : 0;
 
   const props = {};
   Object.assign(props, data);
   Object.assign(props, {
-    name: `${data.type} plane ${screenConfig.id}`,
+    name: `${data.id}`,
     position: {
       x: screenConfig.camera.position[0],
       y: screenConfig.camera.position[1],
-      z: 0
+      z: zPosition
     },
     scale,
     textureSize
