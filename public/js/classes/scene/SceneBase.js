@@ -101,6 +101,10 @@ class SceneBase {
     return animationQueue;
   }
 
+  getIsCurrentStateStillActiveOrBefore(targetState) {
+    return (SceneStateOrder.indexOf(this.stateName) <= SceneStateOrder.indexOf(targetState));
+  }
+
   async _executeStateName(stateName) {
     console.log(stateName);
   }

@@ -10,6 +10,7 @@ class VisualBase extends SceneObject {
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
     const mergedProps = {
       name: 'visual',
+      color: 0xff0000,
       position:{
         x: 0,
         y: 0,
@@ -39,7 +40,7 @@ class VisualBase extends SceneObject {
   }
 
   async createMaterial() {
-    return new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+    return new THREE.MeshBasicMaterial( { color: this.props.color } );
   }
 
   async createGeometry() {
@@ -54,6 +55,9 @@ class VisualBase extends SceneObject {
     this.geometry = geometry;
 
     return new THREE.Mesh(geometry, material);
+  }
+
+  intro() {
   }
 
   dispose() {
