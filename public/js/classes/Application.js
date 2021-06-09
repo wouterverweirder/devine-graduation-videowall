@@ -162,6 +162,10 @@ class Application {
   }
 
   async onRequestShowProjectsOverview () {
+    const visibleSceneIsOverview = (this.visibleScenes.length === 1 && this.visibleScenes[0] instanceof ProjectsOverviewScene);
+    if (visibleSceneIsOverview) {
+      return;
+    }
     while (this.visibleScenes.length > 0) {
       const visibleScene = this.visibleScenes.shift();
       visibleScene.animateToStateName(SceneState.OUTRO).then(() => {

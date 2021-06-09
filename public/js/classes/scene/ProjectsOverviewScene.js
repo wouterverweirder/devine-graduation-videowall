@@ -70,7 +70,7 @@ class ProjectsOverviewScene extends SceneBase {
     }
   }
 
-  generatePropsForScreen = (camera, isFirstItemOnScreen) => {
+  generatePropsForScreen(camera, isFirstItemOnScreen) {
     const screenConfig = this.screenConfigsById[camera.id];
     const screenScale = calculateScaleForScreenConfig(screenConfig);
     const isLandscape = !(camera.props.rotation.z !== 0);
@@ -110,11 +110,11 @@ class ProjectsOverviewScene extends SceneBase {
     };
   };
 
-  killAnimationTimeout = () => {
+  killAnimationTimeout() {
     clearTimeout(this.animationTimeoutId);
   };
 
-  scheduleAnimationTimeout = () => {
+  scheduleAnimationTimeout() {
     console.log(this.config.scenes.projectsOverview.updateInterval);
     this.killAnimationTimeout();
     this.animationTimeoutId = setTimeout(() => {
@@ -122,7 +122,7 @@ class ProjectsOverviewScene extends SceneBase {
     }, this.config.scenes.projectsOverview.updateInterval);
   };
 
-  animationTimeoutCb = () => {
+  animationTimeoutCb() {
     if (this.nonVisiblePlanes.length === 0) {
       return;
     }
