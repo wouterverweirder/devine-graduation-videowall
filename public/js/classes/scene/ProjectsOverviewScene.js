@@ -35,26 +35,6 @@ class ProjectsOverviewScene extends SceneBase {
             height: el.height
           }
         };
-        const draw = function() {
-          if (!this.plane) {
-            return;
-          }
-          // this is reference to image
-          this.plane.ctx.save();
-          // create clipping path
-          this.plane.ctx.beginPath();
-          this.plane.ctx.rect(this.clip.x, this.clip.y, this.clip.width, this.clip.height);
-          this.plane.ctx.closePath();
-          this.plane.ctx.clip();
-          // position the image
-          this.plane.ctx.translate(this.x, this.y);
-          this.plane.ctx.scale(this.scale, this.scale);
-          this.plane.ctx.drawImage(this.el, 0, 0);
-          this.plane.ctx.restore();
-
-          this.plane.texture.needsUpdate = true;
-        };
-        image.draw = draw.bind(image);
         this.allProjectImages.push(image);
         this.nonVisibleImages.push(image);
       }
@@ -101,7 +81,18 @@ class ProjectsOverviewScene extends SceneBase {
           image.x = image.clip.x + (image.clip.width - image.el.width*image.scale) / 2;
           image.y = image.clip.y + (image.clip.height - image.el.height*image.scale) / 2;
 
-          image.draw();
+          // this is reference to image
+          image.plane.ctx.save();
+          // create clipping path
+          image.plane.ctx.beginPath();
+          image.plane.ctx.rect(image.clip.x, image.clip.y, image.clip.width, image.clip.height);
+          image.plane.ctx.closePath();
+          image.plane.ctx.clip();
+          // position the image
+          image.plane.ctx.translate(image.x, image.y);
+          image.plane.ctx.scale(image.scale, image.scale);
+          image.plane.ctx.drawImage(image.el, 0, 0);
+          image.plane.ctx.restore();
 
           this.visibleImages.push(image);
         }
@@ -176,12 +167,36 @@ class ProjectsOverviewScene extends SceneBase {
     newImage.plane = oldImage.plane;
 
     const camera = oldImage.camera;
+    const isFirstItemOnScreen = oldImage.isFirstItemOnScreen;
     const isLandscape = !(camera.props.rotation.z !== 0);
     // animate
     const tl = gsap.timeline({
       onUpdate: () => {
-        oldImage.draw();
-        newImage.draw();
+        // oldImage.draw();
+        // newImage.draw();
+        const plane = oldImage.plane;
+        const clip = oldImage.clip;
+        plane.ctx.save();
+        // create clipping path
+        plane.ctx.beginPath();
+        plane.ctx.rect(clip.x, clip.y, clip.width, clip.height);
+        plane.ctx.closePath();
+        plane.ctx.clip();
+        // draw the old image
+        plane.ctx.save();
+        plane.ctx.translate(oldImage.x, oldImage.y);
+        plane.ctx.scale(oldImage.scale, oldImage.scale);
+        plane.ctx.drawImage(oldImage.el, 0, 0);
+        plane.ctx.restore();
+        // draw the new image
+        plane.ctx.save();
+        plane.ctx.translate(newImage.x, newImage.y);
+        plane.ctx.scale(newImage.scale, newImage.scale);
+        plane.ctx.drawImage(newImage.el, 0, 0);
+        plane.ctx.restore();
+        plane.ctx.restore();
+
+        plane.texture.needsUpdate = true;
       },
       onComplete: () => {
         const indexToRemove = this.visibleImages.indexOf(oldImage);
@@ -195,11 +210,15 @@ class ProjectsOverviewScene extends SceneBase {
 
     newImage.x = oldImage.x;
     newImage.y = oldImage.y;
+
+    const props = this.generatePropsForScreen(camera, isFirstItemOnScreen);
+
+    newImage.clip.x = props.position.x;
+    newImage.clip.y = props.position.y;
+    newImage.clip.width = props.size.x;
+    newImage.clip.height = props.size.y;
+
     newImage.scale = oldImage.scale;
-    newImage.clip.x = oldImage.clip.x;
-    newImage.clip.x = oldImage.clip.x;
-    newImage.clip.width = oldImage.clip.width;
-    newImage.clip.height = oldImage.clip.height;
 
     const slideDuration = 2;
     const targetPropsOldImage = {};
@@ -211,69 +230,15 @@ class ProjectsOverviewScene extends SceneBase {
     if (isLandscape) {
       // move vertically
       targetPropsOldImage.y = direction * oldImage.el.height*oldImage.scale;
-      newImage.y = oldImage.y - direction * oldImage.el.height*oldImage.scale;
+      newImage.y -= direction * newImage.el.height*newImage.scale;
     } else {
       // move horizontally
       targetPropsOldImage.x = direction * oldImage.el.width*oldImage.scale;
-      newImage.x = oldImage.x - direction * oldImage.el.width*oldImage.scale;
+      newImage.x -= direction * newImage.el.width*newImage.scale;
     }
 
     tl.to(oldImage, {...targetPropsOldImage, duration: slideDuration, ease: Power1.easeInOut}, 0);
     tl.to(newImage, {...targetPropsNewImage, duration: slideDuration, ease: Power1.easeInOut}, 0);
-
-    // const targetPropsOldImage = {
-    //   position: {
-    //     x: oldImage.x,
-    //     y: oldImage.y,
-    //   },
-    //   scale: {
-    //     x: oldImage.props.scale.x,
-    //     y: oldImage.props.scale.y,
-    //   },
-    // };
-    // const setPropsOldImage = {
-    //   anchor: {
-    //     x: 0.5,
-    //     y: 0.5
-    //   }
-    // };
-    // const setPropsNewPlane = this.generatePropsForScreen(camera, newImage.isFirstItemOnScreen);
-    // const targetPropsNewPlane = JSON.parse(JSON.stringify(setPropsNewPlane));
-
-    // const slideDuration = 2;
-    // if (isLandscape) {
-    //   targetPropsOldImage.scale.y = 0;
-    //   if (setPropsNewPlane.anchor.y < .5) {
-    //     setPropsOldImage.anchor.y = 1;
-    //     targetPropsOldImage.position.y += oldImage.props.scale.y / 2;
-    //     setPropsNewPlane.position.y -= setPropsNewPlane.scale.y / 2;
-    //   } else {
-    //     setPropsOldImage.anchor.y = 0;
-    //     targetPropsOldImage.position.y -= oldImage.props.scale.y / 2;
-    //     setPropsNewPlane.position.y += setPropsNewPlane.scale.y / 2;
-    //   }
-    //   setPropsNewPlane.scale.y = 0;
-    // } else {
-    //   targetPropsOldImage.scale.x = 0;
-    //   if (setPropsNewPlane.anchor.x < .5) {
-    //     setPropsOldImage.anchor.x = 1;
-    //     targetPropsOldImage.position.x -= oldImage.props.scale.x / 2;
-    //     setPropsNewPlane.position.x += setPropsNewPlane.scale.x / 2;
-    //   } else {
-    //     setPropsOldImage.anchor.x = 0;
-    //     targetPropsOldImage.position.x += oldImage.props.scale.x / 2;
-    //     setPropsNewPlane.position.x -= setPropsNewPlane.scale.x / 2;
-    //   }
-    //   setPropsNewPlane.scale.x = 0;
-    // }
-    // oldImage.applyProps(setPropsOldImage);
-    // newImage.applyProps(setPropsNewPlane);
-
-    // tl.to(oldImage.props.scale, {...targetPropsOldImage.scale, duration: slideDuration, ease: Power1.easeInOut}, 0);
-    // tl.to(oldImage.props.position, {...targetPropsOldImage.position, duration: slideDuration, ease: Power1.easeInOut}, 0);
-
-    // tl.to(newImage.props.scale, {...targetPropsNewPlane.scale, duration: slideDuration, ease: Power1.easeInOut}, 0);
-    // tl.to(newImage.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: Power1.easeInOut}, 0);
 
     this.visibleImages.push(newImage);
 
