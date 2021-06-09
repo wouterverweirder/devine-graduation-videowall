@@ -57,6 +57,7 @@ const createCamerasForConfig = async (config) => {
 
     const camera = new ScreenCamera(screen.id, {
       name: `Screen ${ii}`,
+      layers: [ii],
       position: {
         x: screen.camera.position[0],
         y: screen.camera.position[1],

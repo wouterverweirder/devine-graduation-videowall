@@ -66,6 +66,19 @@ class SceneObject {
     if (newProps.roles) {
       Object.assign(this.props.roles, newProps.roles);
     }
+    if (newProps.layers !== undefined) {
+      if (newProps.layers.length) {
+        this.props.layers = [...newProps.layers];
+      } else {
+        this.props.layers = newProps.layers;
+      }
+      if (this.props.layers === false) {
+        this.object3D.layers.enableAll();
+      } else {
+        this.object3D.layers.disableAll();
+        this.props.layers.forEach(layer => this.object3D.layers.enable(layer));
+      }
+    }
     if (newProps.name) {
       this.props.name = newProps.name;
       this.object3D.name = this.props.name;

@@ -5,6 +5,7 @@ class ScreenCamera extends SceneObject {
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
     const mergedProps = {
       name: 'screen',
+      layers: false,
       position: {
         x: 0,
         y: 0,
