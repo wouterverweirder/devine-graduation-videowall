@@ -1,12 +1,33 @@
 import { gsap, Power1 } from '../../gsap/src/index.js';
 
-import { getScreenCamerasForRoles, calculateScaleForScreenConfig } from "../../functions/screenUtils.js";
+import { getScreenCamerasForRoles } from "../../functions/screenUtils.js";
 import { createPlaneForScreen } from "../../functions/createPlaneForScreen.js";
 import { ScreenRole } from "../../consts/ScreenRole.js";
 import { SceneBase, SceneState } from "./SceneBase.js";
-import { ImagePlane } from './objects/ImagePlane.js';
 import { loadImage } from '../../functions/loadImage.js';
 import { PlaneType } from '../../consts/PlaneType.js';
+
+const loadProfilePictureWithVariants = async (url) => {
+  const picture = {};
+  picture.orig = await loadImage(url);
+  // resized and scaled versions
+  const scale = 9 / 16;
+  picture.forLandscapeStack = new OffscreenCanvas(1920/2, 1080);
+  {
+    const ctx = picture.forLandscapeStack.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.translate((ctx.canvas.width - picture.orig.width * scale) / 2, (ctx.canvas.height - picture.orig.height * scale) / 2);
+    ctx.drawImage(picture.orig, 0, 0);
+  }
+  picture.forPortraitStack = new OffscreenCanvas(1080, 1920/2);
+  {
+    const ctx = picture.forPortraitStack.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.translate((ctx.canvas.width - picture.orig.width * scale) / 2, (ctx.canvas.height - picture.orig.height * scale) / 2);
+    ctx.drawImage(picture.orig, 0, 0);
+  }
+  return picture;
+};
 
 class ProjectsOverviewScene extends SceneBase {
 
@@ -22,18 +43,12 @@ class ProjectsOverviewScene extends SceneBase {
       // load all images
       for (let index = 0; index < this.projects.length; index++) {
         const project = this.projects[index];
-        const el = await loadImage(project.profilePicture.url);
+
+        const picture = await loadProfilePictureWithVariants(project.profilePicture.url);
         const image = {
-          el,
+          picture,
           x: 0,
-          y: 0,
-          scale: 9/16,
-          clip: {
-            x: 0,
-            y: 0,
-            width: el.width,
-            height: el.height
-          }
+          y: 0
         };
         this.allProjectImages.push(image);
         this.nonVisibleImages.push(image);
@@ -71,28 +86,18 @@ class ProjectsOverviewScene extends SceneBase {
           image.camera = camera;
           image.isFirstItemOnScreen = isFirstItemOnScreen;
 
+          const isLandscape = !(camera.props.rotation.z !== 0);
+
           const props = this.generatePropsForScreen(camera, isFirstItemOnScreen);
 
-          image.clip.x = props.position.x;
-          image.clip.y = props.position.y;
-          image.clip.width = props.size.x;
-          image.clip.height = props.size.y;
+          image.x = props.position.x;
+          image.y = props.position.y;
 
-          image.x = image.clip.x + (image.clip.width - image.el.width*image.scale) / 2;
-          image.y = image.clip.y + (image.clip.height - image.el.height*image.scale) / 2;
-
-          // this is reference to image
-          image.plane.ctx.save();
-          // create clipping path
-          image.plane.ctx.beginPath();
-          image.plane.ctx.rect(image.clip.x, image.clip.y, image.clip.width, image.clip.height);
-          image.plane.ctx.closePath();
-          image.plane.ctx.clip();
-          // position the image
-          image.plane.ctx.translate(image.x, image.y);
-          image.plane.ctx.scale(image.scale, image.scale);
-          image.plane.ctx.drawImage(image.el, 0, 0);
-          image.plane.ctx.restore();
+          if (isLandscape) {
+            image.plane.ctx.drawImage(image.picture.forLandscapeStack, image.x, image.y);
+          } else {
+            image.plane.ctx.drawImage(image.picture.forPortraitStack, image.x, image.y);
+          }
 
           this.visibleImages.push(image);
         }
@@ -172,31 +177,16 @@ class ProjectsOverviewScene extends SceneBase {
     // animate
     const tl = gsap.timeline({
       onUpdate: () => {
-        // oldImage.draw();
-        // newImage.draw();
-        const plane = oldImage.plane;
-        const clip = oldImage.clip;
-        plane.ctx.save();
-        // create clipping path
-        plane.ctx.beginPath();
-        plane.ctx.rect(clip.x, clip.y, clip.width, clip.height);
-        plane.ctx.closePath();
-        plane.ctx.clip();
-        // draw the old image
-        plane.ctx.save();
-        plane.ctx.translate(oldImage.x, oldImage.y);
-        plane.ctx.scale(oldImage.scale, oldImage.scale);
-        plane.ctx.drawImage(oldImage.el, 0, 0);
-        plane.ctx.restore();
-        // draw the new image
-        plane.ctx.save();
-        plane.ctx.translate(newImage.x, newImage.y);
-        plane.ctx.scale(newImage.scale, newImage.scale);
-        plane.ctx.drawImage(newImage.el, 0, 0);
-        plane.ctx.restore();
-        plane.ctx.restore();
 
-        plane.texture.needsUpdate = true;
+        if (isLandscape) {
+          oldImage.plane.ctx.drawImage(oldImage.picture.forLandscapeStack, oldImage.x, oldImage.y);
+          newImage.plane.ctx.drawImage(newImage.picture.forLandscapeStack, newImage.x, newImage.y);
+        } else {
+          oldImage.plane.ctx.drawImage(oldImage.picture.forPortraitStack, oldImage.x, oldImage.y);
+          newImage.plane.ctx.drawImage(newImage.picture.forPortraitStack, newImage.x, newImage.y);
+        }
+
+        newImage.plane.texture.needsUpdate = true;
       },
       onComplete: () => {
         const indexToRemove = this.visibleImages.indexOf(oldImage);
@@ -211,15 +201,6 @@ class ProjectsOverviewScene extends SceneBase {
     newImage.x = oldImage.x;
     newImage.y = oldImage.y;
 
-    const props = this.generatePropsForScreen(camera, isFirstItemOnScreen);
-
-    newImage.clip.x = props.position.x;
-    newImage.clip.y = props.position.y;
-    newImage.clip.width = props.size.x;
-    newImage.clip.height = props.size.y;
-
-    newImage.scale = oldImage.scale;
-
     const slideDuration = 2;
     const targetPropsOldImage = {};
     const targetPropsNewImage = {
@@ -229,12 +210,12 @@ class ProjectsOverviewScene extends SceneBase {
     const direction = (Math.random() < .5) ? 1 : -1;
     if (isLandscape) {
       // move vertically
-      targetPropsOldImage.y = direction * oldImage.el.height*oldImage.scale;
-      newImage.y -= direction * newImage.el.height*newImage.scale;
+      targetPropsOldImage.y = direction * oldImage.picture.forLandscapeStack.height;
+      newImage.y -= direction * newImage.picture.forLandscapeStack.height;
     } else {
       // move horizontally
-      targetPropsOldImage.x = direction * oldImage.el.width*oldImage.scale;
-      newImage.x -= direction * newImage.el.width*newImage.scale;
+      targetPropsOldImage.x = direction * oldImage.picture.forPortraitStack.width;
+      newImage.x -= direction * newImage.picture.forPortraitStack.width;
     }
 
     tl.to(oldImage, {...targetPropsOldImage, duration: slideDuration, ease: Power1.easeInOut}, 0);
