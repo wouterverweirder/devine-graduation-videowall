@@ -7,6 +7,7 @@ import { ProjectAssetsPlane } from '../classes/scene/objects/ProjectAssetsPlane.
 import { ProjectDescriptionPlane } from '../classes/scene/objects/ProjectDescriptionPlane.js';
 import { PlaneType } from '../consts/PlaneType.js';
 import { ProjectBioPlane } from '../classes/scene/objects/ProjectBioPlane.js';
+import { CanvasPlane } from '../classes/scene/objects/CanvasPlane.js';
 
 const calculateTextureSizeForScreen = (screenConfig) => {
   let rotation = 0;
@@ -49,6 +50,8 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
   let plane;
   if (data.type === PlaneType.IMAGE) {
     plane = new ImagePlane(data.id, props);
+  } else if (data.type === PlaneType.CANVAS) {
+    plane = new CanvasPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_ASSETS) {
     plane = new ProjectAssetsPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_DESCRIPTION) {
