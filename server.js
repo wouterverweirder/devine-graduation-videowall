@@ -124,10 +124,13 @@ const getProjects = (serverURL = 'http://localhost/') => {
       if (err) {
         return reject(err);
       }
-      const projects = JSON.parse(contents);
+      let projects = JSON.parse(contents);
       projects.forEach(project => {
         setProjectUrls(project, serverURL);
       });
+      // tmp: duplicate projects for extra content
+      projects = projects.concat(projects, projects, projects);
+      // end tmp
       resolve(projects);
     });
   });

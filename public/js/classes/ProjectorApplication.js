@@ -6,11 +6,7 @@ const BLACK = new THREE.Color(0, 0, 0);
 
 class ProjectorApplication extends Application {
 
-  interactionTimeout = 60000;
   interactionTimeoutId = false;
-
-  screensaverInterval = 30000;
-  screensaverIntervalId = false;
 
   setupApplicationSpecificUI() {
     this.scene = new THREE.Scene();
@@ -28,19 +24,13 @@ class ProjectorApplication extends Application {
   }
 
   resetScreensaver() {
-    clearInterval(this.screensaverIntervalId);
     clearTimeout(this.interactionTimeoutId);
     this.interactionTimeoutId = setTimeout(() => {
       this.startScreensaver();
-    }, this.interactionTimeout);
+    }, this.config.interactionTimeout);
   }
 
   startScreensaver() {
-    clearInterval(this.screensaverIntervalId);
-    this.screensaverIntervalId = setInterval(() => {
-      // this.serverConnection.requestShowNextProject();
-    }, this.screensaverInterval);
-    // this.serverConnection.requestShowNextProject();
     this.serverConnection.requestShowProjectsOverview();
   }
 

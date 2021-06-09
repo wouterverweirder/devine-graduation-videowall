@@ -1,4 +1,11 @@
 {
+  "interactionTimeout": 60000,
+  "scenes": {
+    "projectDetail": {},
+    "projectsOverview": {
+      "updateInterval": 4000
+    }
+  },
   "appDimensions": {
     "width": 7680,
     "height": 2160

@@ -26,6 +26,7 @@ const SceneStateOrder = [
 
 class SceneBase {
 
+  config = {};
   objects = [];
   stateName = SceneState.BOOT;
   targetStateName = SceneState.BOOT;
@@ -33,6 +34,7 @@ class SceneBase {
 
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
     const mergedProps = {
+      config: {},
       cameras: [],
       screenConfigsById: {},
       projects: [],
@@ -43,6 +45,7 @@ class SceneBase {
     props = mergedProps;
     this.id = id;
     this.props = props;
+    this.config = this.props.config;
     this.cameras = props.cameras;
     this.screenConfigsById = props.screenConfigsById;
     this.projects = props.projects;
