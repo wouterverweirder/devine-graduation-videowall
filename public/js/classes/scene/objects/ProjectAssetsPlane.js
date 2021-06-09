@@ -1,22 +1,9 @@
-import * as THREE from '../../../three.js/build/three.module.js';
-import { VisualBase } from "./VisualBase.js";
+import { CanvasPlane } from "./CanvasPlane.js";
 import { loadImage } from "../../../functions/loadImage.js";
 
-import { setTextureRepeatAndOffset } from "../../../functions/setTextureRepeatAndOffset.js";
+class ProjectAssetsPlane extends CanvasPlane {
 
-class ProjectAssetsPlane extends VisualBase {
-  async createMaterial() {
-
-    const canvas = new OffscreenCanvas(this.props.textureSize.x, this.props.textureSize.y);
-    const ctx = canvas.getContext('2d');
-    const texture = new THREE.CanvasTexture(canvas);
-
-    setTextureRepeatAndOffset(texture, canvas, this.props);
-
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.texture = texture;
-
+  async createInitalCanvasContent() {
     if (this.props.data && this.props.data.length > 0) {
       // take the first asset
       const asset = this.props.data[0];
@@ -52,17 +39,6 @@ class ProjectAssetsPlane extends VisualBase {
         this.video = video;
       }
     }
-
-    return new THREE.MeshBasicMaterial( { map: texture } );
-  }
-
-  applyProps(newProps) {
-    super.applyProps(newProps);
-    if (newProps.scale || newProps.anchor) {
-      const texture = this.material.map;
-      const image = texture.image;
-      setTextureRepeatAndOffset(texture, image, this.props);
-    }
   }
 
   dispose() {
@@ -72,7 +48,6 @@ class ProjectAssetsPlane extends VisualBase {
       video.removeAttribute('src');
       video.load();
     }
-    this.texture.dispose();
     super.dispose();
   }
 }

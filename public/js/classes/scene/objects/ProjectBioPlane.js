@@ -1,27 +1,13 @@
-import * as THREE from '../../../three.js/build/three.module.js';
-import { VisualBase } from "./VisualBase.js";
+import { CanvasPlane } from "./CanvasPlane.js";
 import { gsap, Cubic } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
 
-import { setTextureRepeatAndOffset } from "../../../functions/setTextureRepeatAndOffset.js";
-
-class ProjectBioPlane extends VisualBase {
+class ProjectBioPlane extends CanvasPlane {
 
   canvasObjects = [];
   tl = false;
 
-  async createMaterial() {
-
-    const canvas = new OffscreenCanvas(this.props.textureSize.x, this.props.textureSize.y);
-    const ctx = canvas.getContext('2d');
-    const texture = new THREE.CanvasTexture(canvas);
-
-    setTextureRepeatAndOffset(texture, canvas, this.props);
-
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.texture = texture;
-
+  async createInitalCanvasContent() {
     const marginLeft = 50;
     const marginRight = 50;
     const marginTop = 50;
@@ -61,17 +47,6 @@ class ProjectBioPlane extends VisualBase {
       });
       yPos += lineHeight / 2;
     });
-
-    return new THREE.MeshBasicMaterial( { map: texture } );
-  }
-
-  applyProps(newProps) {
-    super.applyProps(newProps);
-    if (newProps.scale || newProps.anchor) {
-      const texture = this.material.map;
-      const image = texture.image;
-      setTextureRepeatAndOffset(texture, image, this.props);
-    }
   }
 
   draw() {
@@ -110,7 +85,6 @@ class ProjectBioPlane extends VisualBase {
     if (this.tl) {
       this.tl.kill();
     }
-    this.texture.dispose();
     super.dispose();
   }
 }
