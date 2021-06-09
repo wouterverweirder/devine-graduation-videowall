@@ -3,6 +3,9 @@ import * as THREE from '../../../three.js/build/three.module.js';
 const Signal = signals.Signal;
 
 class SceneObject {
+
+  customData = {};
+
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
     const mergedProps = {
       name: 'sceneObject',
@@ -53,6 +56,12 @@ class SceneObject {
       Object.assign(this.props.scale, newProps.scale);
       this.object3D.scale.x = this.props.scale.x;
       this.object3D.scale.y = this.props.scale.y;
+    }
+    if (newProps.anchor) {
+      Object.assign(this.props.anchor, newProps.anchor);
+    }
+    if (newProps.fixedRepeat) {
+      Object.assign(this.props.fixedRepeat, newProps.fixedRepeat);
     }
     if (newProps.roles) {
       Object.assign(this.props.roles, newProps.roles);

@@ -169,6 +169,7 @@ class Application {
       });
     }
     const scene = new ProjectsOverviewScene('projects-overview', {
+      config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
       projects: this.projects,
@@ -188,6 +189,7 @@ class Application {
       });
     }
     const scene = new ProjectDetailScene(`project-detail-${project.id}`, {
+      config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
       projects: this.projects,
