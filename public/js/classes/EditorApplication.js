@@ -93,6 +93,11 @@ class EditorApplication extends Application {
     }
   }
 
+  onSceneObjectRender(object) {
+    // disable layers
+    object.object3D.layers.enableAll();
+  }
+
   onSceneObjectAdded(object) {
     this.editor.addObject(object.object3D);
   }

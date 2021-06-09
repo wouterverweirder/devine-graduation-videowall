@@ -11,6 +11,7 @@ class VisualBase extends SceneObject {
     const mergedProps = {
       name: 'visual',
       color: 0xff0000,
+      layers: false,
       position:{
         x: 0,
         y: 0,
