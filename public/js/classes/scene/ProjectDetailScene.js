@@ -123,14 +123,6 @@ class ProjectDetailScene extends SceneBase {
                 id: `${idPrefix}-profile-picture-${screenCamera.id}`,
                 type: PlaneType.IMAGE,
                 url: project.profilePicture.url,
-                fixedRepeat: {
-                  x: 9/16, // lock the x scale
-                  y: false
-                },
-                anchor: {
-                  x: 0.5,
-                  y: 0
-                },
                 layers: screenCamera.props.layers
               },
               screenConfig
@@ -214,8 +206,19 @@ class ProjectDetailScene extends SceneBase {
 
       this.tl = gsap.timeline({
         onUpdate: () => {
-          colorPlanes.forEach(plane => plane.applyProps(plane.props));
-          projectPlanes.forEach(plane => plane.applyProps(plane.props));
+          colorPlanes.forEach(plane => {
+            const props = {
+              scale: plane.props.scale,
+              position: plane.props.position,
+            };
+            plane.applyProps(props)
+          });
+          projectPlanes.forEach(plane => {
+            const props = {
+              position: plane.props.position,
+            };
+            plane.applyProps(props)
+          });
         }
       });
 
@@ -269,11 +272,9 @@ class ProjectDetailScene extends SceneBase {
 
           // startPropValues.scale.x *= 0;
           startPropValues.position.y -= .2;
-          startPropValues.scale.y *= 0.8;
 
           projectPlane.applyProps(startPropValues);
 
-          this.tl.to(projectPlane.props.scale, {x: endPropValues.scale.x, y: endPropValues.scale.y, ease: Power1.easeInOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
           this.tl.to(projectPlane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: Power1.easeInOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
         }
 
