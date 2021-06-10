@@ -1,5 +1,5 @@
 {
-  "interactionTimeout": 60000,
+  "interactionTimeout": 300000,
   "scenes": {
     "projectDetail": {},
     "projectsOverview": {
