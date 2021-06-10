@@ -158,7 +158,7 @@ class ProjectDescriptionPlane extends CanvasPlane {
     });
 
     if (this.textScrollAmount > 0) {
-      const totalScrollAmount = this.textScrollAmount + 200;
+      const totalScrollAmount = this.textScrollAmount + this.textureSize.y / 2;
       this.tl.to(this.textLinesOffset, {y: -totalScrollAmount, duration: totalScrollAmount / this.scrollSpeedFactor, ease: Linear.easeNone, delay: this.delayBeforeScrolling });
       const scrollEndTime = this.tl.duration();
       this.tl.to(this.textLines, { opacity: 0, duration: 2 }, scrollEndTime - 2);
