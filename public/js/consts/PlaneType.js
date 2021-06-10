@@ -4,7 +4,8 @@ const PlaneType = {
   PROJECT_ASSETS: 'project-assets',
   PROJECT_DESCRIPTION: 'project-description',
   PROFILE_PICTURE: 'profile-picture',
-  PROJECT_BIO: 'project-bio'
+  PROJECT_BIO: 'project-bio',
+  DEVINE_INFO: 'devine-info'
 }
 
 export { PlaneType };
