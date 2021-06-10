@@ -17,6 +17,8 @@ class ProjectDescriptionPlane extends CanvasPlane {
     x: 0,
     y: 0
   };
+  delayBeforeScrolling = 10;
+  scrollSpeedFactor = 30; // smaller is slower
 
   async createInitalCanvasContent() {
     const marginLeft = 50;
@@ -157,7 +159,7 @@ class ProjectDescriptionPlane extends CanvasPlane {
 
     if (this.textScrollAmount > 0) {
       const totalScrollAmount = this.textScrollAmount + 200;
-      this.tl.to(this.textLinesOffset, {y: -totalScrollAmount, duration: totalScrollAmount / 50, ease: Linear.easeNone, delay: 1 });
+      this.tl.to(this.textLinesOffset, {y: -totalScrollAmount, duration: totalScrollAmount / this.scrollSpeedFactor, ease: Linear.easeNone, delay: this.delayBeforeScrolling });
       const scrollEndTime = this.tl.duration();
       this.tl.to(this.textLines, { opacity: 0, duration: 2 }, scrollEndTime - 2);
     }
