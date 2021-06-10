@@ -88,26 +88,19 @@ class ProjectsOverviewScene extends SceneBase {
       x: 0.5,
       y: 0.5
     };
-    const fixedRepeat = {
-      x: 16/9/2,
-      y: 16/9/2
-    };
     if (isLandscape) {
       scale.x *= .5;
       position.x += isFirstItemOnScreen ? -scale.x/2 : scale.x/2;
-      fixedRepeat.y = false;
       anchor.y = (Math.random() < .5) ? 1 : 0;
     } else {
       scale.y *= .5;
       position.y += isFirstItemOnScreen ? -scale.y/2 : scale.y/2;
-      fixedRepeat.x = false;
       anchor.x = (Math.random() < .5) ? 1 : 0;
     }
     return {
       layers,
       position,
       scale,
-      fixedRepeat,
       anchor
     };
   };
