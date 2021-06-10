@@ -1,4 +1,5 @@
-import { gsap, Power4 } from '../../gsap/src/index.js';
+import { gsap, Power1, Power4 } from '../../gsap/src/index.js';
+import { CustomEase } from '../../gsap-member/src/CustomEase.js';
 
 import { calculateScaleForScreenConfig, doesScreenCameraHaveRole, getFirstScreenCameraForRole, getScreenCamerasForRole } from "../../functions/screenUtils.js";
 import { ScreenRole } from "../../consts/ScreenRole.js";
@@ -8,6 +9,9 @@ import { PlaneType } from '../../consts/PlaneType.js';
 import { CircleAnimationPlane } from './objects/CircleAnimationPlane.js';
 import { VisualBase } from './objects/VisualBase.js';
 import { StudentNamePlane } from './objects/StudentNamePlane.js';
+
+gsap.registerPlugin(CustomEase);
+CustomEase.create("color-plane-in", "M0,0 C0.188,0 0.238,0.446 0.3,0.6 0.42,0.9 0.7,1 1,1");
 
 class ProjectDetailScene extends SceneBase {
 
@@ -270,10 +274,10 @@ class ProjectDetailScene extends SceneBase {
         }
       });
 
-      const maxDelay = .5;
-      const introColorPlaneDuration = .5;
-      const outroColorPlaneDuration = .5;
-      const introProjectPlaneDuration = .5;
+      const maxDelay = 0.5;
+      const introColorPlaneDuration = 0.5;
+      const outroColorPlaneDuration = 0.5;
+      const introProjectPlaneDuration = 1.0;
       colorPlanes.forEach((colorPlane, index) => {
         const projectPlane = this.projectPlanes[index];
         if (!projectPlane) {
@@ -282,7 +286,7 @@ class ProjectDetailScene extends SceneBase {
           return;
         }
 
-        const colorPlaneIntroDelay = Power4.easeInOut(index / projectPlanes.length) * maxDelay;
+        const colorPlaneIntroDelay = Power4.easeOut(index / projectPlanes.length) * maxDelay;
         const projectPlaneIntroDelay = colorPlaneIntroDelay + introColorPlaneDuration;
 
         {
@@ -300,8 +304,8 @@ class ProjectDetailScene extends SceneBase {
           endPropValues.position.y += endPropValues.scale.y;
           endPropValues.scale.y *= 0;
   
-          this.tl.to(colorPlane.props.scale, {x: middlePropValues.scale.x, y: middlePropValues.scale.y, ease: Power4.easeInOut, delay: colorPlaneIntroDelay, duration: introColorPlaneDuration}, 0);
-          this.tl.to(colorPlane.props.position, {x: middlePropValues.position.x, y: middlePropValues.position.y, ease: Power4.easeInOut, delay: colorPlaneIntroDelay, duration: introColorPlaneDuration}, 0);
+          this.tl.to(colorPlane.props.scale, {x: middlePropValues.scale.x, y: middlePropValues.scale.y, ease: "color-plane-in", delay: colorPlaneIntroDelay, duration: introColorPlaneDuration}, 0);
+          this.tl.to(colorPlane.props.position, {x: middlePropValues.position.x, y: middlePropValues.position.y, ease: "color-plane-in", delay: colorPlaneIntroDelay, duration: introColorPlaneDuration}, 0);
   
           // add the project plane once the color plane has full scale
           this.tl.add(() => {
@@ -313,8 +317,8 @@ class ProjectDetailScene extends SceneBase {
           }, projectPlaneIntroDelay);
   
           // outro color plane
-          this.tl.to(colorPlane.props.scale, {x: endPropValues.scale.x, y: endPropValues.scale.y, ease: Power4.easeInOut, delay: projectPlaneIntroDelay, duration: outroColorPlaneDuration}, 0);
-          this.tl.to(colorPlane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: Power4.easeInOut, delay: projectPlaneIntroDelay, duration: outroColorPlaneDuration}, 0);
+          this.tl.to(colorPlane.props.scale, {x: endPropValues.scale.x, y: endPropValues.scale.y, ease: "color-plane-in", delay: projectPlaneIntroDelay, duration: outroColorPlaneDuration}, 0);
+          this.tl.to(colorPlane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: "color-plane-in", delay: projectPlaneIntroDelay, duration: outroColorPlaneDuration}, 0);
         }
         {
           // intro project plane
@@ -326,7 +330,7 @@ class ProjectDetailScene extends SceneBase {
 
           projectPlane.applyProps(startPropValues);
 
-          this.tl.to(projectPlane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: Power4.easeInOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
+          this.tl.to(projectPlane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: Power4.easeOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
         }
         if (projectPlane === this.profilePicturePlane) {
           // schedule the name animation as well
@@ -336,7 +340,7 @@ class ProjectDetailScene extends SceneBase {
           startPropValues.position.y -= .1;
           this.studentNamePlane.applyProps(startPropValues);
 
-          this.tl.to(this.studentNamePlane.props.position, {y: endPropValues.position.y, ease: Power4.easeInOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
+          this.tl.to(this.studentNamePlane.props.position, {y: endPropValues.position.y, ease: Power4.easeOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
         }
 
         this.addObject(colorPlane);
