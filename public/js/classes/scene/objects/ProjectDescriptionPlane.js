@@ -149,8 +149,9 @@ class ProjectDescriptionPlane extends CanvasPlane {
     });
     const maxDelay = 0.5;
     const delayOffset = 0.1;
-    this.tl.to(this.title, { y: this.title.y, opacity: 1, duration: 0.5, ease: Cubic.easeInOut }, 0);
-    this.title.y += 100;
+    this.title.opacity = 1;
+    // this.tl.to(this.title, { y: this.title.y, opacity: 1, duration: 0.5, ease: Cubic.easeInOut }, 0);
+    // this.title.y += 100;
     this.textLines.forEach((canvasObject, index) => {
       const delay = delayOffset + Cubic.easeInOut(index / this.textLines.length) * maxDelay;
       this.tl.to(canvasObject, { y: canvasObject.y, opacity: 1, delay, duration: 0.5, ease: Cubic.easeInOut }, 0);
