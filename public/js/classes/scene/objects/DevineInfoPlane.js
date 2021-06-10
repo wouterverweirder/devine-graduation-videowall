@@ -1,6 +1,9 @@
+import { gsap } from '../../../gsap/src/index.js';
+
+import { DevineEasing } from '../../../consts/DevineEasing.js';
+
 import { CanvasPlane } from "./CanvasPlane.js";
-import { gsap, Cubic } from '../../../gsap/src/index.js';
-import { getLines } from '../../../functions/getLines.js';
+import { loadImage } from '../../../functions/loadImage.js';
 
 class DevineInfoPlane extends CanvasPlane {
 
@@ -8,16 +11,17 @@ class DevineInfoPlane extends CanvasPlane {
   tl = false;
 
   async createInitalCanvasContent() {
-    const marginLeft = 50;
-    const marginRight = 50;
-    const marginTop = 50;
+    const marginLeft = 100;
+    const marginRight = 100;
+    const marginTop = 100;
+    const marginBottom = 100;
 
     const fontSize = 130;
     const lineHeight = 150;
 
     let yPos = fontSize + marginTop;
 
-    const bachelor = {
+    this.bachelor = {
       type: 'text',
       font: `${fontSize}px "Embedded Space Grotesk"`,
       fillStyle: 'white',
@@ -28,7 +32,7 @@ class DevineInfoPlane extends CanvasPlane {
     };
     yPos += lineHeight;
 
-    const digitalDesignAnd = {
+    this.digitalDesignAnd = {
       type: 'text',
       font: `${fontSize}px "Embedded Space Grotesk"`,
       fillStyle: 'white',
@@ -39,7 +43,7 @@ class DevineInfoPlane extends CanvasPlane {
     };
     yPos += lineHeight;
 
-    const development = {
+    this.development = {
       type: 'text',
       font: `${fontSize}px "Embedded Space Grotesk"`,
       fillStyle: 'white',
@@ -50,9 +54,30 @@ class DevineInfoPlane extends CanvasPlane {
     };
     yPos += lineHeight;
 
-    this.canvasObjects.push(bachelor);
-    this.canvasObjects.push(digitalDesignAnd);
-    this.canvasObjects.push(development);
+    this.www = {
+      type: 'text',
+      font: `70px "Embedded Space Grotesk"`,
+      fillStyle: 'white',
+      content: 'www.devine.be',
+      x: marginLeft,
+      y: this.props.textureSize.y - marginBottom - 34,
+      opacity: 0
+    };
+
+    const logo = await loadImage('assets/kask-conservatorium-hogent-howest.png');
+    this.logo = {
+      type: 'image',
+      image: logo,
+      x: this.props.textureSize.x - logo.width - marginRight,
+      y: this.props.textureSize.y - logo.height - marginBottom,
+      opacity: 0
+    };
+
+    this.canvasObjects.push(this.bachelor);
+    this.canvasObjects.push(this.digitalDesignAnd);
+    this.canvasObjects.push(this.development);
+    this.canvasObjects.push(this.logo);
+    this.canvasObjects.push(this.www);
   }
 
   draw() {
@@ -67,6 +92,11 @@ class DevineInfoPlane extends CanvasPlane {
         this.ctx.font = canvasObject.font;
         this.ctx.fillText(canvasObject.content, canvasObject.x, canvasObject.y );
         this.ctx.restore();
+      } else if (canvasObject.type === 'image') {
+        this.ctx.save();
+        this.ctx.globalAlpha = canvasObject.opacity;
+        this.ctx.drawImage(canvasObject.image, canvasObject.x, canvasObject.y);
+        this.ctx.restore();
       }
     });
     this.texture.needsUpdate = true;
@@ -79,12 +109,26 @@ class DevineInfoPlane extends CanvasPlane {
         this.draw();
       }
     });
-    const maxDelay = 0.5;
-    this.canvasObjects.forEach((canvasObject, index) => {
-      const delay = Cubic.easeInOut(index / this.canvasObjects.length) * maxDelay;
-      this.tl.to(canvasObject, { y: canvasObject.y, opacity: 1, delay, duration: 0.5, ease: Cubic.easeInOut }, 0);
-      canvasObject.y = canvasObject.y + 100;
-    });
+
+    const textDuration = 1;
+
+    this.tl.to(this.bachelor, { y: this.bachelor.y, opacity: 1, delay: 0, duration: textDuration, ease: DevineEasing.COLOR_PLANE }, 0);
+    this.tl.to(this.digitalDesignAnd, { y: this.digitalDesignAnd.y, opacity: 1, delay: 0.2, duration: textDuration, ease: DevineEasing.COLOR_PLANE }, 0);
+    this.tl.to(this.development, { y: this.development.y, opacity: 1, delay: 0.3, duration: textDuration, ease: DevineEasing.COLOR_PLANE }, 0);
+
+    this.tl.to(this.logo, { y: this.logo.y, opacity: 1, delay: 0, duration: textDuration + 0.3, ease: DevineEasing.COLOR_PLANE }, 0);
+
+    this.tl.to(this.www, { y: this.www.y, opacity: 1, delay: 0.4, duration: textDuration, ease: DevineEasing.COLOR_PLANE }, 0);
+
+    const textOffset = 200;
+    this.bachelor.y += textOffset;
+    this.digitalDesignAnd.y += textOffset;
+    this.development.y += textOffset;
+
+    this.logo.y += textOffset;
+
+    this.www.y += textOffset;
+
   }
 
   dispose() {
