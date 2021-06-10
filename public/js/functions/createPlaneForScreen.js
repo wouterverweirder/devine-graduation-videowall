@@ -8,6 +8,7 @@ import { ProjectDescriptionPlane } from '../classes/scene/objects/ProjectDescrip
 import { PlaneType } from '../consts/PlaneType.js';
 import { ProjectBioPlane } from '../classes/scene/objects/ProjectBioPlane.js';
 import { CanvasPlane } from '../classes/scene/objects/CanvasPlane.js';
+import { DevineInfoPlane } from '../classes/scene/objects/DevineInfoPlane.js';
 
 const calculateTextureSizeForScreen = (screenConfig) => {
   let rotation = 0;
@@ -60,6 +61,8 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
     plane = new ProjectStudentPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_BIO) {
     plane = new ProjectBioPlane(data.id, props);
+  } else if (data.type === PlaneType.DEVINE_INFO) {
+    plane = new DevineInfoPlane(data.id, props);
   } else {
     plane = new VisualBase(data.id, props);
   }

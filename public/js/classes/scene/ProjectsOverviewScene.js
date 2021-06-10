@@ -1,16 +1,20 @@
 import { gsap, Power1 } from '../../gsap/src/index.js';
 
-import { getScreenCamerasForRoles, calculateScaleForScreenConfig } from "../../functions/screenUtils.js";
+import { getScreenCamerasForRoles, calculateScaleForScreenConfig, getFirstScreenCameraForRole } from "../../functions/screenUtils.js";
+import { createPlaneForScreen } from "../../functions/createPlaneForScreen.js";
 import { ScreenRole } from "../../consts/ScreenRole.js";
 import { SceneBase, SceneState } from "./SceneBase.js";
 import { ImagePlane } from './objects/ImagePlane.js';
 import { delay } from '../../functions/delay.js';
+import { DevineInfoPlane } from './objects/DevineInfoPlane.js';
+import { PlaneType } from '../../consts/PlaneType.js';
 
 class ProjectsOverviewScene extends SceneBase {
 
   allProjectPlanes = [];
   nonVisiblePlanes = [];
   visiblePlanes = [];
+  devineInfoPlane = false;
   animationTimeoutId = false;
 
   async _executeStateName(stateName) {
@@ -32,6 +36,17 @@ class ProjectsOverviewScene extends SceneBase {
         this.allProjectPlanes.push(plane);
         this.nonVisiblePlanes.push(plane);
       }
+      // create the devine info plane
+      const mainCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
+      const screenConfig = this.screenConfigsById[mainCamera.id];
+      this.devineInfoPlane = await createPlaneForScreen({
+        data: {
+          id: 'devine-info',
+          type: PlaneType.DEVINE_INFO
+        },
+        screenConfig
+      });
+
     } else if (stateName === SceneState.INTRO) {
       const cameras = getScreenCamerasForRoles(this.cameras, [
         ScreenRole.PROFILE_PICTURE,
@@ -60,6 +75,9 @@ class ProjectsOverviewScene extends SceneBase {
         this.addObject(plane);
       });
 
+      this.addObject(this.devineInfoPlane);
+      this.devineInfoPlane.intro();
+
       // start the animation timeout
       this.scheduleAnimationTimeout();
 
@@ -71,6 +89,8 @@ class ProjectsOverviewScene extends SceneBase {
       this.visiblePlanes.forEach(plane => {
         this.removeObject(plane);
       });
+
+      this.removeObject(this.devineInfoPlane);
     }
   }
 
