@@ -28,6 +28,8 @@ console.log('devtools: ' + argv.devtools);
 console.log('editor: ' + argv.editor);
 console.log('projection: ' + argv.projection);
 
+const isSingleProjection = (argv.projection === 'single');
+
 initServer(argv);
 
 const createMainWindow = true;
@@ -41,7 +43,7 @@ function createWindows () {
   
   if (displays.length === 0) {
     // no 4K window? (eg developping locally) span over all displays
-    displays = screen.getAllDisplays();
+    displays = [screen.getAllDisplays().sort((a, b) => (a.size.width > b.size.width) ? -1 : 1)[0]];
   }
   
   const spannedDisplay = displays.reduce((prev, curr) => ({ bounds: { x: Math.min(prev.bounds.x, curr.bounds.x), y: Math.min(prev.bounds.y, curr.bounds.y)}, size: { width: prev.size.width + curr.size.width, height: Math.max(prev.size.height, curr.size.height)}}), { size: { width: 0, height: 0 }, bounds: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }});  
@@ -50,22 +52,25 @@ function createWindows () {
 
   if (createMainWindow) {
     // Create the output window, make it span all displays
-    const mainWindow = new BrowserWindow({
+    const windowSettings = {
       x: spannedDisplay.bounds.x,
       y: spannedDisplay.bounds.y,
       width: spannedDisplay.size.width,
       height: spannedDisplay.size.height,
-      frame: false,
-      titleBarStyle: 'customButtonsOnHover',
       webPreferences: {
         nodeIntegration: false, // is default value after Electron v5
         contextIsolation: true, // protect against prototype pollution
         enableRemoteModule: false, // turn off remote
         preload: path.join(__dirname, 'preload.js')
       }
-    })
+    }
+    if (!isSingleProjection) {
+      windowSettings.frame = false;
+      windowSettings.titleBarStyle = 'customButtonsOnHover';
+    }
+    const mainWindow = new BrowserWindow(windowSettings);
 
-    mainWindow.setSize(spannedDisplay.size.width, spannedDisplay.size.height);
+    mainWindow.setSize(windowSettings.width, windowSettings.height);
 
     // and load the index.html of the app.
     // mainWindow.loadFile('demo20-threejs-8-portrait.html')
