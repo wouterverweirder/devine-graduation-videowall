@@ -6,8 +6,8 @@ import { ScreenRole } from "../../consts/ScreenRole.js";
 import { SceneBase, SceneState } from "./SceneBase.js";
 import { ImagePlane } from './objects/ImagePlane.js';
 import { delay } from '../../functions/delay.js';
-import { DevineInfoPlane } from './objects/DevineInfoPlane.js';
 import { PlaneType } from '../../consts/PlaneType.js';
+import { DevineEasing } from '../../consts/DevineEasing.js';
 
 class ProjectsOverviewScene extends SceneBase {
 
@@ -204,8 +204,8 @@ class ProjectsOverviewScene extends SceneBase {
     oldPlane.applyProps(setPropsOldPlane);
     newPlane.applyProps(setPropsNewPlane);
 
-    tl.to(oldPlane.props.position, {...targetPropsOldPlane.position, duration: slideDuration, ease: Power1.easeInOut}, 0);
-    tl.to(newPlane.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: Power1.easeInOut}, 0);
+    tl.to(oldPlane.props.position, {...targetPropsOldPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE}, 0);
+    tl.to(newPlane.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE}, 0);
 
     this.visiblePlanes.push(newPlane);
     this.addObject(newPlane);
