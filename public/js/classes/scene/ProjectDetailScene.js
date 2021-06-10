@@ -9,6 +9,7 @@ import { PlaneType } from '../../consts/PlaneType.js';
 import { CircleAnimationPlane } from './objects/CircleAnimationPlane.js';
 import { VisualBase } from './objects/VisualBase.js';
 import { StudentNamePlane } from './objects/StudentNamePlane.js';
+import { delay } from '../../functions/delay.js';
 
 gsap.registerPlugin(CustomEase);
 CustomEase.create("color-plane-in", "M0,0 C0.188,0 0.238,0.446 0.3,0.6 0.42,0.9 0.7,1 1,1");
@@ -351,6 +352,8 @@ class ProjectDetailScene extends SceneBase {
       if (this.tl) {
         this.tl.kill();
       }
+
+      await delay(1000);
 
       this.colorPlanes.forEach(plane => {
         this.removeObject(plane);

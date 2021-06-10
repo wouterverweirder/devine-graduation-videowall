@@ -4,6 +4,7 @@ import { getScreenCamerasForRoles, calculateScaleForScreenConfig } from "../../f
 import { ScreenRole } from "../../consts/ScreenRole.js";
 import { SceneBase, SceneState } from "./SceneBase.js";
 import { ImagePlane } from './objects/ImagePlane.js';
+import { delay } from '../../functions/delay.js';
 
 class ProjectsOverviewScene extends SceneBase {
 
@@ -64,6 +65,9 @@ class ProjectsOverviewScene extends SceneBase {
 
     } else if (stateName === SceneState.OUTRO) {
       this.killAnimationTimeout();
+
+      await delay(1000);
+
       this.visiblePlanes.forEach(plane => {
         this.removeObject(plane);
       });
