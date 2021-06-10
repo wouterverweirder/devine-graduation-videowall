@@ -17,6 +17,11 @@ class ProjectDetailScene extends SceneBase {
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
     super(id, props);
     this.project = props.project;
+
+    // sort cameras from bottom to top
+    this.camerasFromBottomToTop = this.cameras.sort((a, b) => {
+      return (a.props.position.y < b.props.position.y) ? -1 : 1;
+    });
   }
 
   async _executeStateName(stateName) {
@@ -75,7 +80,7 @@ class ProjectDetailScene extends SceneBase {
         });
       });
 
-      for (const screenCamera of this.cameras) {
+      for (const screenCamera of this.camerasFromBottomToTop) {
         const screenConfig = this.screenConfigsById[screenCamera.id];
         const colorPlane = await createPlaneForScreen({
           data: {
@@ -83,7 +88,8 @@ class ProjectDetailScene extends SceneBase {
             color: 0xffffff,
             position: {
               z: 0.1
-            }
+            },
+            layers: screenCamera.props.layers
           },
           screenConfig
         });
@@ -104,7 +110,8 @@ class ProjectDetailScene extends SceneBase {
               data: {
                 id: `${idPrefix}-main-video-${screenCamera.id}`,
                 type: PlaneType.PROJECT_ASSETS,
-                data: [project.mainAsset]
+                data: [project.mainAsset],
+                layers: screenCamera.props.layers
               },
               screenConfig
             }); 
@@ -123,7 +130,8 @@ class ProjectDetailScene extends SceneBase {
                 anchor: {
                   x: 0.5,
                   y: 0
-                }
+                },
+                layers: screenCamera.props.layers
               },
               screenConfig
             }); 
@@ -134,7 +142,8 @@ class ProjectDetailScene extends SceneBase {
               data: {
                 id: `${idPrefix}-assets-${screenCamera.id}`,
                 type: PlaneType.PROJECT_ASSETS,
-                data: assetsperCameraId[screenCamera.id]
+                data: assetsperCameraId[screenCamera.id],
+                layers: screenCamera.props.layers
               },
               screenConfig
             }); 
@@ -145,7 +154,8 @@ class ProjectDetailScene extends SceneBase {
               data: {
                 id: `${idPrefix}-bio-${screenCamera.id}`,
                 type: PlaneType.PROJECT_BIO,
-                data: project
+                data: project,
+                layers: screenCamera.props.layers
               },
               screenConfig
             }); 
@@ -156,7 +166,8 @@ class ProjectDetailScene extends SceneBase {
               data: {
                 id: `${idPrefix}-description-${screenCamera.id}`,
                 type: PlaneType.PROJECT_DESCRIPTION,
-                data: project
+                data: project,
+                layers: screenCamera.props.layers
               },
               screenConfig
             }); 
@@ -167,7 +178,8 @@ class ProjectDetailScene extends SceneBase {
           projectPlane = await createPlaneForScreen({
             data: {
               id: `${idPrefix}-empty-${screenCamera.id}`,
-              color: 0x000000
+              color: 0x000000,
+              layers: screenCamera.props.layers
             },
             screenConfig
           });
