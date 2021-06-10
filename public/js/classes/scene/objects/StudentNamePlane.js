@@ -5,7 +5,7 @@ class StudentNamePlane extends CanvasPlane {
   canvasObjects = [];
 
   async createInitalCanvasContent() {
-    const marginLeft = 50;
+    const marginLeft = 100;
     const marginTop = 50;
 
     const fontSize = 70;

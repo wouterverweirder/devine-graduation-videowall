@@ -65,6 +65,7 @@ function createWindows () {
       }
     }
     if (!isSingleProjection) {
+      windowSettings.alwaysOnTop = true;
       windowSettings.frame = false;
       windowSettings.titleBarStyle = 'customButtonsOnHover';
     }
