@@ -10,6 +10,8 @@ import { PlaneType } from '../../consts/PlaneType.js';
 import { CircleAnimationPlane } from './objects/CircleAnimationPlane.js';
 import { VisualBase } from './objects/VisualBase.js';
 import { StudentNamePlane } from './objects/StudentNamePlane.js';
+import { ImagePlane } from './objects/ImagePlane.js';
+import { PlaneSlider } from './PlaneSlider.js';
 import { delay } from '../../functions/delay.js';
 
 class ProjectDetailScene extends SceneBase {
@@ -24,6 +26,16 @@ class ProjectDetailScene extends SceneBase {
   portraitScreenshots = [];
   landscapeScreenshots = [];
   videos = [];
+
+  allPortraitScreenshotPlanes = [];
+  nonVisiblePortraitScreenshotPlanes = [];
+  visiblePortraitScreenshotPlanes = [];
+  portraitPlaneSlider = false;
+
+  allLandscapeScreenshotPlanes = [];
+  nonVisibleLandscapeScreenshotPlanes = [];
+  visibleLandscapeScreenshotPlanes = [];
+  landscapePlaneSlider = false;
 
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
     super(id, props);
@@ -45,7 +57,7 @@ class ProjectDetailScene extends SceneBase {
       this.colorPlanes = [];
       this.projectPlanes = [];
 
-      // assets
+      // 
       this.portraitScreenshots = project.assets.filter(asset => {
         if (asset.mime.indexOf('image') === -1) {
           return false;
@@ -66,9 +78,6 @@ class ProjectDetailScene extends SceneBase {
       const portraitScreenshotScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS);
       const landscapeScreenshotScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS);
       const videoScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.VIDEOS);
-
-      
-
 
       const assetsperCameraId = {};
       for (const screenCamera of this.cameras) {
@@ -95,6 +104,39 @@ class ProjectDetailScene extends SceneBase {
           }
         });
       });
+
+      // create a plane for portrait screenshots
+      for (let index = 0; index < this.portraitScreenshots.length; index++) {
+        const portraitScreenshot = this.portraitScreenshots[index];
+        const props = {
+          name: `project-asset-${project.id}-${index}`,
+          textureSize: {
+            x: 1080,
+            y: 1920
+          },
+          url: portraitScreenshot.url
+        };
+        const plane = new ImagePlane(props.name, props);
+        await plane.init();
+        this.allPortraitScreenshotPlanes.push(plane);
+        this.nonVisiblePortraitScreenshotPlanes.push(plane);
+      }
+      // create a plane for landscape screenshots
+      for (let index = 0; index < this.landscapeScreenshots.length; index++) {
+        const landscapeScreenshot = this.landscapeScreenshots[index];
+        const props = {
+          name: `project-asset-${project.id}-${index}`,
+          textureSize: {
+            x: 1920,
+            y: 1080
+          },
+          url: landscapeScreenshot.url
+        };
+        const plane = new ImagePlane(props.name, props);
+        await plane.init();
+        this.allLandscapeScreenshotPlanes.push(plane);
+        this.nonVisibleLandscapeScreenshotPlanes.push(plane);
+      }
 
       {
         const screenConfig = this.screenConfigsById[profilePictureCamera.id];
@@ -165,18 +207,20 @@ class ProjectDetailScene extends SceneBase {
               screenConfig
             }); 
           }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.LANDSCAPE_SCREENSHOTS) || doesScreenCameraHaveRole(screenCamera, ScreenRole.PORTRAIT_SCREENSHOTS)) {
-          if (assetsperCameraId[screenCamera.id].length > 0) {
-            projectPlane = await createPlaneForScreen({
-              data: {
-                id: `${idPrefix}-assets-${screenCamera.id}`,
-                type: PlaneType.IMAGE,
-                url: assetsperCameraId[screenCamera.id][0].url,
-                layers: screenCamera.props.layers
-              },
-              screenConfig
-            }); 
-          }          
+        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PORTRAIT_SCREENSHOTS)) {
+          if (this.nonVisiblePortraitScreenshotPlanes.length > 0) {
+            projectPlane = this.nonVisiblePortraitScreenshotPlanes.shift();
+            projectPlane.applyProps(this.generatePropsForScreen(screenCamera));
+            projectPlane.customData.camera = screenCamera;
+            this.visiblePortraitScreenshotPlanes.push(projectPlane);
+          }      
+        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.LANDSCAPE_SCREENSHOTS)) {
+          if (this.nonVisibleLandscapeScreenshotPlanes.length > 0) {
+            projectPlane = this.nonVisibleLandscapeScreenshotPlanes.shift();
+            projectPlane.applyProps(this.generatePropsForScreen(screenCamera));
+            projectPlane.customData.camera = screenCamera;
+            this.visibleLandscapeScreenshotPlanes.push(projectPlane);
+          }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.VIDEOS)) {
           if (assetsperCameraId[screenCamera.id].length > 0) {
             projectPlane = await createPlaneForScreen({
@@ -366,10 +410,97 @@ class ProjectDetailScene extends SceneBase {
         this.addObject(colorPlane);
       });
 
+      this.landscapePlaneSlider = new PlaneSlider();
+      this.landscapePlaneSlider.start({
+        addObject: (o) => {
+          this.addObject(o);
+          this.visibleLandscapeScreenshotPlanes.push(o);
+        },
+        removeObject: (o) => {
+          const indexToRemove = this.visibleLandscapeScreenshotPlanes.indexOf(o);
+          if (indexToRemove >= this.visibleLandscapeScreenshotPlanes.length) {
+            return;
+          }
+          this.visibleLandscapeScreenshotPlanes.splice(indexToRemove, 1);
+          this.removeObject(o);
+          this.nonVisibleLandscapeScreenshotPlanes.push(o);
+        },
+        getNewPlane: ({ oldPlane }) => {
+          const newPlane = this.nonVisibleLandscapeScreenshotPlanes.shift();
+          const setPropsNewPlane = this.generatePropsForScreen(oldPlane.customData.camera);
+          newPlane.customData.camera = oldPlane.customData.camera;
+          newPlane.applyProps(setPropsNewPlane);
+          return newPlane;
+        },
+        getOldPlane: () => {
+          // choose a random item to replace
+          const index = Math.floor(Math.random() * this.visibleLandscapeScreenshotPlanes.length);
+          if (index >= this.visibleLandscapeScreenshotPlanes.length) {
+            return;
+          }
+          return this.visibleLandscapeScreenshotPlanes[index];
+        },
+        getAxis: ({ oldPlane, newPlane }) => {
+          const camera = oldPlane.customData.camera;
+          const isLandscape = !(camera.props.rotation.z !== 0);
+          return (isLandscape) ? 'vertical' : 'horizontal';
+        },
+        getDirection: ({ oldPlane, newPlane }) => -1,
+        getDelayForNextAnimation: () => 2000,
+        getSlideDuration: () => 1
+      });
+
+      this.portraitPlaneSlider = new PlaneSlider();
+      this.portraitPlaneSlider.start({
+        addObject: (o) => {
+          this.addObject(o);
+          this.visiblePortraitScreenshotPlanes.push(o);
+        },
+        removeObject: (o) => {
+          const indexToRemove = this.visiblePortraitScreenshotPlanes.indexOf(o);
+          if (indexToRemove >= this.visiblePortraitScreenshotPlanes.length) {
+            return;
+          }
+          this.visiblePortraitScreenshotPlanes.splice(indexToRemove, 1);
+          this.removeObject(o);
+          this.nonVisiblePortraitScreenshotPlanes.push(o);
+        },
+        getNewPlane: ({ oldPlane }) => {
+          const newPlane = this.nonVisiblePortraitScreenshotPlanes.shift();
+          const setPropsNewPlane = this.generatePropsForScreen(oldPlane.customData.camera);
+          newPlane.customData.camera = oldPlane.customData.camera;
+          newPlane.applyProps(setPropsNewPlane);
+          return newPlane;
+        },
+        getOldPlane: () => {
+          // choose a random item to replace
+          const index = Math.floor(Math.random() * this.visiblePortraitScreenshotPlanes.length);
+          if (index >= this.visiblePortraitScreenshotPlanes.length) {
+            return;
+          }
+          return this.visiblePortraitScreenshotPlanes[index];
+        },
+        getAxis: ({ oldPlane, newPlane }) => {
+          const camera = oldPlane.customData.camera;
+          const isPortrait = !(camera.props.rotation.z !== 0);
+          return (isPortrait) ? 'vertical' : 'horizontal';
+        },
+        getDirection: ({ oldPlane, newPlane }) => -1,
+        getDelayForNextAnimation: () => 2000,
+        getSlideDuration: () => 1
+      });
+
     } else if (stateName === SceneState.OUTRO) {
 
       if (this.tl) {
         this.tl.kill();
+      }
+
+      if (this.portraitPlaneSlider) {
+        this.portraitPlaneSlider.stop();
+      }
+      if (this.landscapePlaneSlider) {
+        this.landscapePlaneSlider.stop();
       }
 
       await delay(1000);
@@ -385,6 +516,26 @@ class ProjectDetailScene extends SceneBase {
       this.removeObject(this.studentNamePlane);
     }
   }
+
+  generatePropsForScreen(camera) {
+    const screenConfig = this.screenConfigsById[camera.id];
+    const screenScale = calculateScaleForScreenConfig(screenConfig);
+    const layers = (camera.props.layers) ? camera.props.layers.concat() : false;
+    const position = {
+      x: screenConfig.camera.position[0],
+      y: screenConfig.camera.position[1],
+      z: 0
+    };
+    const scale = {
+      x: screenScale.x,
+      y: screenScale.y
+    };
+    return {
+      layers,
+      position,
+      scale
+    };
+  };
 }
 
 export { ProjectDetailScene }
