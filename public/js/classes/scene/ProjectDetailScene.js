@@ -285,6 +285,7 @@ class ProjectDetailScene extends SceneBase {
             }
           });
         }
+
         this.projectPlanes.push(projectPlane);
       };
 
@@ -510,6 +511,20 @@ class ProjectDetailScene extends SceneBase {
       });
 
       this.projectPlanes.forEach(plane => {
+        this.removeObject(plane);
+      });
+
+      this.visiblePortraitScreenshotPlanes.forEach(plane => {
+        if (this.projectPlanes.includes(plane)) {
+          return;
+        }
+        this.removeObject(plane);
+      });
+
+      this.visibleLandscapeScreenshotPlanes.forEach(plane => {
+        if (this.projectPlanes.includes(plane)) {
+          return;
+        }
         this.removeObject(plane);
       });
 
