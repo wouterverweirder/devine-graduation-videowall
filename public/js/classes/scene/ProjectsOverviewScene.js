@@ -1,5 +1,3 @@
-import { gsap, Power1 } from '../../gsap/src/index.js';
-
 import { getScreenCamerasForRoles, calculateScaleForScreenConfig, getFirstScreenCameraForRole } from "../../functions/screenUtils.js";
 import { createPlaneForScreen } from "../../functions/createPlaneForScreen.js";
 import { ScreenRole } from "../../consts/ScreenRole.js";
@@ -7,7 +5,7 @@ import { SceneBase, SceneState } from "./SceneBase.js";
 import { ImagePlane } from './objects/ImagePlane.js';
 import { delay } from '../../functions/delay.js';
 import { PlaneType } from '../../consts/PlaneType.js';
-import { DevineEasing } from '../../consts/DevineEasing.js';
+import { PlaneSlider } from './PlaneSlider.js';
 
 class ProjectsOverviewScene extends SceneBase {
 
@@ -78,11 +76,52 @@ class ProjectsOverviewScene extends SceneBase {
       this.addObject(this.devineInfoPlane);
       this.devineInfoPlane.intro();
 
+      this.planeSlider = new PlaneSlider();
+      this.planeSlider.start({
+        addObject: (o) => {
+          this.addObject(o);
+          this.visiblePlanes.push(o);
+        },
+        removeObject: (o) => {
+          const indexToRemove = this.visiblePlanes.indexOf(o);
+          if (indexToRemove >= this.visiblePlanes.length) {
+            return;
+          }
+          this.visiblePlanes.splice(indexToRemove, 1);
+          this.removeObject(o);
+          this.nonVisiblePlanes.push(o);
+        },
+        getNewPlane: ({ oldPlane }) => {
+          const newPlane = this.nonVisiblePlanes.shift();
+          const setPropsNewPlane = this.generatePropsForScreen(oldPlane.customData.camera, oldPlane.customData.isFirstItemOnScreen);
+          newPlane.customData.camera = oldPlane.customData.camera;
+          newPlane.customData.isFirstItemOnScreen = oldPlane.customData.isFirstItemOnScreen;
+          newPlane.applyProps(setPropsNewPlane);
+          return newPlane;
+        },
+        getOldPlane: () => {
+          // choose a random item to replace
+          const index = Math.floor(Math.random() * this.visiblePlanes.length);
+          if (index >= this.visiblePlanes.length) {
+            return;
+          }
+          return this.visiblePlanes[index];
+        },
+        getAxis: ({ oldPlane, newPlane }) => {
+          const camera = oldPlane.customData.camera;
+          const isLandscape = !(camera.props.rotation.z !== 0);
+          return (isLandscape) ? 'vertical' : 'horizontal';
+        },
+        getDirection: ({ oldPlane, newPlane }) => (Math.random() < .5) ? 1 : -1,
+        getDelayForNextAnimation: () => this.config.scenes.projectsOverview.updateInterval,
+      });
+
       // start the animation timeout
-      this.scheduleAnimationTimeout();
+      // this.scheduleAnimationTimeout();
 
     } else if (stateName === SceneState.OUTRO) {
-      this.killAnimationTimeout();
+      
+      this.planeSlider.stop();
 
       await delay(1000);
 
@@ -127,90 +166,6 @@ class ProjectsOverviewScene extends SceneBase {
       scale,
       anchor
     };
-  };
-
-  killAnimationTimeout() {
-    clearTimeout(this.animationTimeoutId);
-  };
-
-  scheduleAnimationTimeout() {
-    console.log(this.config.scenes.projectsOverview.updateInterval);
-    this.killAnimationTimeout();
-    this.animationTimeoutId = setTimeout(() => {
-      this.animationTimeoutCb();
-    }, this.config.scenes.projectsOverview.updateInterval);
-  };
-
-  animationTimeoutCb() {
-    if (this.nonVisiblePlanes.length === 0) {
-      return;
-    }
-    // choose a random item to replace
-    const index = Math.floor(Math.random() * this.visiblePlanes.length);
-    if (index >= this.visiblePlanes.length) {
-      return;
-    }
-    const oldPlane = this.visiblePlanes[index];
-    const newPlane = this.nonVisiblePlanes.shift();
-    newPlane.customData.camera = oldPlane.customData.camera;
-    newPlane.customData.isFirstItemOnScreen = oldPlane.customData.isFirstItemOnScreen;
-    const camera = oldPlane.customData.camera;
-    const isLandscape = !(camera.props.rotation.z !== 0);
-    // animate
-    console.log(oldPlane.props);
-    const tl = gsap.timeline({
-      onUpdate: () => {
-        oldPlane.applyProps(oldPlane.props);
-        newPlane.applyProps(newPlane.props);
-      },
-      onComplete: () => {
-        const indexToRemove = this.visiblePlanes.indexOf(oldPlane);
-        if (indexToRemove >= this.visiblePlanes.length) {
-          return;
-        }
-        this.visiblePlanes.splice(indexToRemove, 1);
-        this.removeObject(oldPlane);
-        this.nonVisiblePlanes.push(oldPlane);
-      }
-    });
-    const targetPropsOldPlane = {
-      position: {
-        x: oldPlane.props.position.x,
-        y: oldPlane.props.position.y,
-      }
-    };
-    const setPropsOldPlane = {};
-    const setPropsNewPlane = this.generatePropsForScreen(camera, newPlane.customData.isFirstItemOnScreen);
-    const targetPropsNewPlane = JSON.parse(JSON.stringify(setPropsNewPlane));
-
-    const slideDuration = 1;
-    if (isLandscape) {
-      if (setPropsNewPlane.anchor.y < .5) {
-        targetPropsOldPlane.position.y += oldPlane.props.scale.y;
-        setPropsNewPlane.position.y -= setPropsNewPlane.scale.y;
-      } else {
-        targetPropsOldPlane.position.y -= oldPlane.props.scale.y;
-        setPropsNewPlane.position.y += setPropsNewPlane.scale.y;
-      }
-    } else {
-      if (setPropsNewPlane.anchor.x < .5) {
-        targetPropsOldPlane.position.x -= oldPlane.props.scale.x;
-        setPropsNewPlane.position.x += setPropsNewPlane.scale.x;
-      } else {
-        targetPropsOldPlane.position.x += oldPlane.props.scale.x;
-        setPropsNewPlane.position.x -= setPropsNewPlane.scale.x;
-      }
-    }
-    oldPlane.applyProps(setPropsOldPlane);
-    newPlane.applyProps(setPropsNewPlane);
-
-    tl.to(oldPlane.props.position, {...targetPropsOldPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE}, 0);
-    tl.to(newPlane.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE}, 0);
-
-    this.visiblePlanes.push(newPlane);
-    this.addObject(newPlane);
-
-    this.scheduleAnimationTimeout();
   };
 }
 
