@@ -14,11 +14,16 @@ import { delay } from '../../functions/delay.js';
 
 class ProjectDetailScene extends SceneBase {
 
+  planeSliders = [];
   projectPlanes = [];
   colorPlanes = [];
   profilePicturePlane = false;
   studentNamePlane = false;
   tl = false;
+
+  portraitScreenshots = [];
+  landscapeScreenshots = [];
+  videos = [];
 
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
     super(id, props);
@@ -41,46 +46,50 @@ class ProjectDetailScene extends SceneBase {
       this.projectPlanes = [];
 
       // assets
-      const portraitScreenshots = project.assets.filter(asset => {
+      this.portraitScreenshots = project.assets.filter(asset => {
         if (asset.mime.indexOf('image') === -1) {
           return false;
         }
         return asset.width < asset.height;
       });
-      const landscapeScreenshots = project.assets.filter(asset => {
+      this.landscapeScreenshots = project.assets.filter(asset => {
         if (asset.mime.indexOf('image') === -1) {
           return false;
         }
         return asset.width > asset.height;
       });
-      const videos = project.assets.filter(asset => {
+      this.videos = project.assets.filter(asset => {
         return (asset.mime.indexOf('video') === 0);
       });
-      // divide assets over screens
+
       const profilePictureCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE);
       const portraitScreenshotScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS);
       const landscapeScreenshotScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS);
       const videoScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.VIDEOS);
+
+      
+
+
       const assetsperCameraId = {};
       for (const screenCamera of this.cameras) {
         assetsperCameraId[screenCamera.id] = [];
       }
       portraitScreenshotScreenCameras.forEach((screenCamera, cameraIndex) => {
-        portraitScreenshots.forEach((asset, assetIndex) => {
+        this.portraitScreenshots.forEach((asset, assetIndex) => {
           if (assetIndex % portraitScreenshotScreenCameras.length === cameraIndex) {
             assetsperCameraId[screenCamera.id].push(asset);
           }
         });
       });
       landscapeScreenshotScreenCameras.forEach((screenCamera, cameraIndex) => {
-        landscapeScreenshots.forEach((asset, assetIndex) => {
+        this.landscapeScreenshots.forEach((asset, assetIndex) => {
           if (assetIndex % landscapeScreenshotScreenCameras.length === cameraIndex) {
             assetsperCameraId[screenCamera.id].push(asset);
           }
         });
       });
       videoScreenCameras.forEach((screenCamera, cameraIndex) => {
-        videos.forEach((asset, assetIndex) => {
+        this.videos.forEach((asset, assetIndex) => {
           if (assetIndex % videoScreenCameras.length === cameraIndex) {
             assetsperCameraId[screenCamera.id].push(asset);
           }
@@ -137,8 +146,8 @@ class ProjectDetailScene extends SceneBase {
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-main-video-${screenCamera.id}`,
-                type: PlaneType.PROJECT_ASSETS,
-                data: [project.mainAsset],
+                type: PlaneType.VIDEO,
+                url: project.mainAsset.url,
                 layers: screenCamera.props.layers
               },
               screenConfig
@@ -156,18 +165,30 @@ class ProjectDetailScene extends SceneBase {
               screenConfig
             }); 
           }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.LANDSCAPE_SCREENSHOTS) || doesScreenCameraHaveRole(screenCamera, ScreenRole.PORTRAIT_SCREENSHOTS) || doesScreenCameraHaveRole(screenCamera, ScreenRole.VIDEOS)) {
+        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.LANDSCAPE_SCREENSHOTS) || doesScreenCameraHaveRole(screenCamera, ScreenRole.PORTRAIT_SCREENSHOTS)) {
           if (assetsperCameraId[screenCamera.id].length > 0) {
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-assets-${screenCamera.id}`,
-                type: PlaneType.PROJECT_ASSETS,
-                data: assetsperCameraId[screenCamera.id],
+                type: PlaneType.IMAGE,
+                url: assetsperCameraId[screenCamera.id][0].url,
                 layers: screenCamera.props.layers
               },
               screenConfig
             }); 
           }          
+        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.VIDEOS)) {
+          if (assetsperCameraId[screenCamera.id].length > 0) {
+            projectPlane = await createPlaneForScreen({
+              data: {
+                id: `${idPrefix}-assets-${screenCamera.id}`,
+                type: PlaneType.VIDEO,
+                url: assetsperCameraId[screenCamera.id][0].url,
+                layers: screenCamera.props.layers
+              },
+              screenConfig
+            }); 
+          }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_BIO)) {
           if (project.bio) {
             projectPlane = await createPlaneForScreen({

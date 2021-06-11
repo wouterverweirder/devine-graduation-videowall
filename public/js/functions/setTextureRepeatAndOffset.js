@@ -1,8 +1,8 @@
 const setTextureRepeatAndOffset = (texture, image, props) => {
   const w = props.scale.x;
   const h = props.scale.y;
-  const w2 = image.width;
-  const h2 = image.height;
+  const w2 = (image.videoWidth) ? image.videoWidth : image.width;
+  const h2 = (image.videoHeight) ? image.videoHeight : image.height;
 
   let fixedRepeatX = props.fixedRepeat.x;
   let fixedRepeatY = props.fixedRepeat.y;
