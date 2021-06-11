@@ -53,13 +53,13 @@ class PlaneSlider {
   } = params) {
 
     const oldPlane = getOldPlane();
+    if (!oldPlane) {
+      console.warn('no oldPlane to animate from');
+      return;
+    }
     const newPlane = getNewPlane({ oldPlane });
     if (!newPlane) {
       console.warn('no newPlane to animate to');
-      return;
-    }
-    if (!oldPlane) {
-      console.warn('no oldPlane to animate from');
       return;
     }
 
@@ -118,9 +118,19 @@ class PlaneSlider {
     const tl = gsap.timeline({
       onUpdate: () => {
         if (oldPlane) {
-          oldPlane.applyProps(oldPlane.props);
+          oldPlane.applyProps({
+            position: {
+              x: oldPlane.props.position.x,
+              y: oldPlane.props.position.y
+            }
+          });
         }
-        newPlane.applyProps(newPlane.props);
+        newPlane.applyProps({
+          position: {
+            x: newPlane.props.position.x,
+            y: newPlane.props.position.y
+          }
+        });
       },
       onComplete: () => {
         removeObject(oldPlane);
