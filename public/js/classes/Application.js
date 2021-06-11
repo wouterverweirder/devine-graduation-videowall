@@ -152,6 +152,12 @@ class Application {
   }
 
   onRequestClearScene() {
+    while (this.visibleScenes.length > 0) {
+      const visibleScene = this.visibleScenes.shift();
+      visibleScene.animateToStateName(SceneState.OUTRO).then(() => {
+        visibleScene.dispose();
+      });
+    }
     this.objects.forEach(object => {
       this.onSceneObjectRemoved(object);
       if (object.dispose) {
