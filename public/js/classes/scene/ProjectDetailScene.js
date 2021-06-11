@@ -447,7 +447,7 @@ class ProjectDetailScene extends SceneBase {
           return (isLandscape) ? 'vertical' : 'horizontal';
         },
         getDirection: ({ oldPlane, newPlane }) => -1,
-        getDelayForNextAnimation: () => 2000,
+        getDelayForNextAnimation: () => this.config.scenes.projectDetail.screenshotSlideInterval,
         getSlideDuration: () => 1
       });
 
@@ -487,8 +487,9 @@ class ProjectDetailScene extends SceneBase {
           return (isPortrait) ? 'vertical' : 'horizontal';
         },
         getDirection: ({ oldPlane, newPlane }) => -1,
-        getDelayForNextAnimation: () => 2000,
-        getSlideDuration: () => 1
+        getDelayForNextAnimation: () => this.config.scenes.projectDetail.screenshotSlideInterval,
+        getSlideDuration: () => 1,
+        getSlideDelay: () => this.config.scenes.projectDetail.screenshotSlideInterval / 2000
       });
 
     } else if (stateName === SceneState.OUTRO) {
