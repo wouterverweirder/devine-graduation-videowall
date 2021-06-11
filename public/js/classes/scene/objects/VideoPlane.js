@@ -1,34 +1,28 @@
-import * as THREE from '../../../three.js/build/three.module.js';
-import { VisualBase } from "./VisualBase.js";
+import { CanvasPlane } from "./CanvasPlane.js";
 
-import { setTextureRepeatAndOffset } from "../../../functions/setTextureRepeatAndOffset.js";
-
-class VideoPlane extends VisualBase {
-  async createMaterial() {
-
+class VideoPlane extends CanvasPlane {
+  async createInitalCanvasContent() {
     const video = document.createElement('video');
-    this.video = video;
-
     video.autoplay = true;
     video.loop = true;
     video.muted = true; // tmp set to muted
-    const texture = new THREE.VideoTexture(video);
-
-    video.requestVideoFrameCallback(() => {
-      // first frame, set correct size
-      setTextureRepeatAndOffset(texture, video, this.props);
-    });
     video.src = this.props.url;
-    return new THREE.MeshBasicMaterial( { map: texture } )
-  }
 
-  applyProps(newProps) {
-    super.applyProps(newProps);
-    if (newProps.scale || newProps.anchor) {
-      const texture = this.material.map;
-      const image = texture.image;
-      setTextureRepeatAndOffset(texture, image, this.props);
+    const updateVideo = () => {
+
+      const offsetX = (this.canvas.width - video.videoWidth) / 2;
+      const offsetY = (this.canvas.height - video.videoHeight) / 2;
+      this.ctx.drawImage(video, offsetX, offsetY);
+
+      this.texture.needsUpdate = true;
+      video.requestVideoFrameCallback( updateVideo );
     }
+
+    if ( 'requestVideoFrameCallback' in video ) {
+      video.requestVideoFrameCallback( updateVideo );
+    }
+
+    this.video = video;
   }
 
   dispose() {
@@ -38,7 +32,6 @@ class VideoPlane extends VisualBase {
       video.removeAttribute('src');
       video.load();
     }
-    this.material.map.dispose();
     super.dispose();
   }
 }
