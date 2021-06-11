@@ -48,8 +48,9 @@ class PlaneSlider {
     getNewPlane = ({ oldPlane }) => {},
     getOldPlane = () => {},
     getAxis = ({ oldPlane, newPlane }) => 'horizontal',
-    getDirection = ({ oldPlane, newPlane }) => -1
-  }) {
+    getDirection = ({ oldPlane, newPlane }) => -1,
+    getSlideDuration = () => 1
+  } = params) {
 
     const oldPlane = getOldPlane();
     const newPlane = getNewPlane({ oldPlane });
@@ -60,6 +61,7 @@ class PlaneSlider {
 
     const axis = getAxis({ oldPlane, newPlane });
     const direction = getDirection({ oldPlane, newPlane });
+    const slideDuration = getSlideDuration();
 
     const distanceXOldPlane = (oldPlane) ? oldPlane.props.scale.x : 0;
     const distanceYOldPlane = (oldPlane) ? oldPlane.props.scale.y : 0;
@@ -89,7 +91,6 @@ class PlaneSlider {
 
     const isVertical = (axis === 'vertical');
 
-    const slideDuration = 1;
     if (isVertical) {
       if (direction < 0) {
         targetPropsOldPlane.position.y += distanceYOldPlane;

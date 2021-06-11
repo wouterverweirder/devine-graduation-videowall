@@ -114,10 +114,8 @@ class ProjectsOverviewScene extends SceneBase {
         },
         getDirection: ({ oldPlane, newPlane }) => (Math.random() < .5) ? 1 : -1,
         getDelayForNextAnimation: () => this.config.scenes.projectsOverview.updateInterval,
+        getSlideDuration: () => 1
       });
-
-      // start the animation timeout
-      // this.scheduleAnimationTimeout();
 
     } else if (stateName === SceneState.OUTRO) {
       
