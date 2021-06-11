@@ -58,6 +58,10 @@ class PlaneSlider {
       console.warn('no newPlane to animate to');
       return;
     }
+    if (!oldPlane) {
+      console.warn('no oldPlane to animate from');
+      return;
+    }
 
     const axis = getAxis({ oldPlane, newPlane });
     const direction = getDirection({ oldPlane, newPlane });
