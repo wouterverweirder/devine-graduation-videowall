@@ -15,13 +15,14 @@ class PlaneSlider {
 
   /**
     {
-      addObject = () => {},
-      removeObject = () => {},
-      getNewPlane = ({ oldPlane }) => {},
-      getOldPlane = () => {},
-      getAxis = ({ oldPlane, newPlane }) => 'horizontal',
-      getDirection = ({ oldPlane, newPlane }) => -1,
-      getDelayForNextAnimation = () => -1,
+    addObject = () => {},
+    removeObject = () => {},
+    getNewPlane = ({ oldPlane }) => {},
+    getOldPlane = () => {},
+    getAxis = ({ oldPlane, newPlane }) => 'horizontal',
+    getDirection = ({ oldPlane, newPlane }) => -1,
+    getSlideDuration = () => 1,
+    getSlideDelay = () => 0,
     }
    */
   start(params) {
@@ -49,7 +50,8 @@ class PlaneSlider {
     getOldPlane = () => {},
     getAxis = ({ oldPlane, newPlane }) => 'horizontal',
     getDirection = ({ oldPlane, newPlane }) => -1,
-    getSlideDuration = () => 1
+    getSlideDuration = () => 1,
+    getSlideDelay = () => 0,
   } = params) {
 
     const oldPlane = getOldPlane();
@@ -137,10 +139,12 @@ class PlaneSlider {
       }
     });
 
+    const delay = getSlideDelay();
+
     if (oldPlane) {
-      tl.to(oldPlane.props.position, {...targetPropsOldPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE}, 0);
+      tl.to(oldPlane.props.position, {...targetPropsOldPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE, delay}, 0);
     }
-    tl.to(newPlane.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE}, 0);
+    tl.to(newPlane.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE, delay}, 0);
 
     addObject(newPlane);
   }

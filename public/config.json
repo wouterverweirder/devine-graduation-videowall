@@ -1,7 +1,9 @@
 {
   "interactionTimeout": 300000,
   "scenes": {
-    "projectDetail": {},
+    "projectDetail": {
+      "screenshotSlideInterval": 4000
+    },
     "projectsOverview": {
       "updateInterval": 4000
     }
