@@ -82,12 +82,7 @@ function createWindows () {
 
     if (!isSingleProjection) {
       mainWindow.once('ready-to-show', () => {
-        mainWindow.setAlwaysOnTop(true);
-        mainWindow.focus();
-      });
-      mainWindow.on("blur", () => {
-        console.log("force focus");
-        mainWindow.setAlwaysOnTop(true);
+        mainWindow.setAlwaysOnTop(true, "normal");
         mainWindow.focus();
       });
     }
