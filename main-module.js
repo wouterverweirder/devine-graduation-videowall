@@ -65,7 +65,6 @@ function createWindows () {
       }
     }
     if (!isSingleProjection) {
-      windowSettings.alwaysOnTop = true;
       windowSettings.frame = false;
       windowSettings.titleBarStyle = 'customButtonsOnHover';
     }
@@ -79,6 +78,18 @@ function createWindows () {
 
     if (argv.devtools) {
       mainWindow.webContents.openDevTools()
+    }
+
+    if (!isSingleProjection) {
+      mainWindow.once('ready-to-show', () => {
+        mainWindow.setAlwaysOnTop(true);
+        mainWindow.focus();
+      });
+      mainWindow.on("blur", () => {
+        console.log("force focus");
+        mainWindow.setAlwaysOnTop(true);
+        mainWindow.focus();
+      });
     }
   }
 
