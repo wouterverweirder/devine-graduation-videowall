@@ -128,9 +128,6 @@ const getProjects = (serverURL = 'http://localhost/') => {
       projects.forEach(project => {
         setProjectUrls(project, serverURL);
       });
-      // tmp: duplicate projects for extra content
-      projects = projects.concat(projects, projects, projects);
-      // end tmp
       resolve(projects);
     });
   });
