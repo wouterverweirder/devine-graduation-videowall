@@ -13,7 +13,11 @@ class StudentNamePlane extends CanvasPlane {
 
     let yPos = fontSize + marginTop;
 
-    const tagLine = `Expert Design`;
+    let expert = 'Design';
+    if (this.props.data.expert) {
+      expert = this.props.data.expert.name;
+    }
+    const tagLine = `Expert ${expert}`;
 
     this.canvasObjects.push({
       type: 'text',
