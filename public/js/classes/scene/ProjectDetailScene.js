@@ -105,6 +105,7 @@ class ProjectDetailScene extends SceneBase {
         });
       });
 
+
       // create a plane for portrait screenshots
       for (let index = 0; index < this.portraitScreenshots.length; index++) {
         const portraitScreenshot = this.portraitScreenshots[index];
@@ -232,6 +233,14 @@ class ProjectDetailScene extends SceneBase {
               },
               screenConfig
             }); 
+          } else {
+            // no videos - take landscape screenshots
+            console.log('no videos, take landscape screenshot');
+            if (this.nonVisibleLandscapeScreenshotPlanes.length > 0) {
+              projectPlane = this.nonVisibleLandscapeScreenshotPlanes.shift();
+              projectPlane.applyProps(this.generatePropsForScreen(screenCamera));
+              projectPlane.customData.camera = screenCamera;
+            }
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_BIO)) {
           if (project.bio) {
@@ -428,6 +437,9 @@ class ProjectDetailScene extends SceneBase {
         },
         getNewPlane: ({ oldPlane }) => {
           const newPlane = this.nonVisibleLandscapeScreenshotPlanes.shift();
+          if (!newPlane) {
+            return null;
+          }
           const setPropsNewPlane = this.generatePropsForScreen(oldPlane.customData.camera);
           newPlane.customData.camera = oldPlane.customData.camera;
           newPlane.applyProps(setPropsNewPlane);
