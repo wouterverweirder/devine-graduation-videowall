@@ -2,10 +2,11 @@ import { CanvasPlane } from "./CanvasPlane.js";
 
 class VideoPlane extends CanvasPlane {
   async createInitalCanvasContent() {
+    console.log(this.props);
     const video = document.createElement('video');
     video.autoplay = true;
     video.loop = true;
-    video.muted = true; // tmp set to muted
+    video.muted = !(this.props.muted === false);
     video.src = this.props.url;
 
     const updateVideo = () => {

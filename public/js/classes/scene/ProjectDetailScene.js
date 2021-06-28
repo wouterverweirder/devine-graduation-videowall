@@ -191,7 +191,8 @@ class ProjectDetailScene extends SceneBase {
                 id: `${idPrefix}-main-video-${screenCamera.id}`,
                 type: PlaneType.VIDEO,
                 url: project.mainAsset.url,
-                layers: screenCamera.props.layers
+                layers: screenCamera.props.layers,
+                muted: false
               },
               screenConfig
             }); 
