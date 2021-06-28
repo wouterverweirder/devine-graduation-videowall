@@ -114,6 +114,8 @@ const handleParsedMessage = parsedMessage => {
     currentProjectId = parsedMessage.data.id;
   } else if (parsedMessage.type === 'show-next-project') {
     goToNextProject();
+  } else if (parsedMessage.type === 'show-projects-overview') {
+    currentProjectIndex = -1;
   }
 };
 
