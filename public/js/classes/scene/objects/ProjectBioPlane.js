@@ -51,7 +51,7 @@ class ProjectBioPlane extends CanvasPlane {
 
     this.title = {
       type: 'text',
-      font: `${fontSize}px "Embedded Space Grotesk"`,
+      font: `700 ${fontSize}px "Embedded Space Grotesk"`,
       fillStyle: 'white',
       content: 'Bio',
       x: marginLeft,
