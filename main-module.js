@@ -41,6 +41,9 @@ udpServer.on('error', (err) => {
 
 udpServer.on('message', (msg, rinfo) => {
   console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
+  if (rinfo.port === 8888) {
+    console.log("shutdown");
+  }
 });
 
 udpServer.on('listening', () => {
@@ -48,7 +51,7 @@ udpServer.on('listening', () => {
   console.log(`server listening ${address.address}:${address.port}`);
 });
 
-udpServer.bind(41234);
+udpServer.bind(7);
 
 const createMainWindow = true;
 const createControlPanel = argv.editor;
