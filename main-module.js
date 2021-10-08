@@ -3,6 +3,7 @@
 import { app, BrowserWindow, screen, globalShortcut } from 'electron';
 import yargs from 'yargs';
 import path from 'path';
+import dgram from 'dgram';
 
 import { init as initServer, goToNextProject, sendKeyPressed } from './server.js';
 
@@ -31,6 +32,23 @@ console.log('projection: ' + argv.projection);
 const isSingleProjection = (argv.projection === 'single');
 
 initServer(argv);
+
+const udpServer = dgram.createSocket('udp4');
+udpServer.on('error', (err) => {
+  console.log(`server error:\n${err.stack}`);
+  udpServer.close();
+});
+
+udpServer.on('message', (msg, rinfo) => {
+  console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
+});
+
+udpServer.on('listening', () => {
+  const address = udpServer.address();
+  console.log(`server listening ${address.address}:${address.port}`);
+});
+
+udpServer.bind(41234);
 
 const createMainWindow = true;
 const createControlPanel = argv.editor;
