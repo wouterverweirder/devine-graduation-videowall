@@ -6,6 +6,7 @@ import path from 'path';
 import dgram from 'dgram';
 
 import { init as initServer, goToNextProject, sendKeyPressed } from './server.js';
+import shutDownWin from './node-shutdown-windows.js';
 
 const argv = yargs
 .option('devtools', {
@@ -43,6 +44,7 @@ udpServer.on('message', (msg, rinfo) => {
   console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
   if (rinfo.port === 8888) {
     console.log("shutdown");
+    shutDownWin.shutdown(1, true);
   }
 });
 
