@@ -1,6 +1,8 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
+const int lightsPin = 9;
+
 const int pedalButtonPin = 7;
 int pedalButtonState;
 int lastPedalButtonState = LOW;
@@ -17,16 +19,32 @@ static byte g_abyMyMacAddress[] = {0xA8,0x61,0x0A,0xAE,0x6F,0x0D};
 static IPAddress g_MyIPAddress(192,168,15,44);
 static byte g_TargetMacAddress[] = {0x30,0x24,0xA9,0x88,0x29,0xEE};
 
+EthernetUDP powerUdp;
+EthernetUDP communicationUdp;
+int incomingByte = 0;
+
 void setup() {
   Ethernet.begin(g_abyMyMacAddress, g_MyIPAddress);
+  powerUdp.begin(8888);
+  communicationUdp.begin(8889);
   
   Serial.begin(9600);
   Serial.println("listening for button input");
   pinMode(pedalButtonPin, INPUT);
   pinMode(powerButtonPin, INPUT);
+  pinMode(lightsPin, OUTPUT);
 }
 
 void loop() {
+  while (Serial.available() > 0) {
+    incomingByte = Serial.read();
+    if (incomingByte == 97) {
+      digitalWrite(lightsPin, HIGH);
+    } else if (incomingByte == 98) {
+      digitalWrite(lightsPin, LOW);
+    }
+  }
+  // buttons
   int reading;
   reading = digitalRead(powerButtonPin);
   bool powerButtonWasPushed = false;
@@ -81,22 +99,18 @@ void SendPedalMessage(byte * pMacAddress)
 {
   byte abyTargetIPAddress[] = { 255, 255, 255, 255 };
   const int nWOLPort = 7;
-  const int nLocalPort = 8889;
 
-  byte packet[] = { 0 };
+  byte packet[] = { 1 };
 
-  EthernetUDP Udp;
-  Udp.begin(nLocalPort);
-  Udp.beginPacket(abyTargetIPAddress, nWOLPort);
-  Udp.write(packet, sizeof packet);
-  Udp.endPacket();
+  communicationUdp.beginPacket(abyTargetIPAddress, nWOLPort);
+  communicationUdp.write(packet, sizeof packet);
+  communicationUdp.endPacket();
 }
 
 void SendWOLMagicPacket(byte * pMacAddress)
 {
   byte abyTargetIPAddress[] = { 255, 255, 255, 255 }; // don't seem to need a real ip address.
   const int nWOLPort = 7;
-  const int nLocalPort = 8888; // to "listen" on (only needed to initialize udp)
 
   byte magicPacket[102];
   int i,c1,j=0;
@@ -108,10 +122,8 @@ void SendWOLMagicPacket(byte * pMacAddress)
       for( c1 = 0; c1 < 6; c1++,j++)
         magicPacket[j] = pMacAddress[c1];
   }
-
-  EthernetUDP Udp;
-  Udp.begin(nLocalPort);
-  Udp.beginPacket(abyTargetIPAddress, nWOLPort);
-  Udp.write(magicPacket, sizeof magicPacket);
-  Udp.endPacket();
+  
+  powerUdp.beginPacket(abyTargetIPAddress, nWOLPort);
+  powerUdp.write(magicPacket, sizeof magicPacket);
+  powerUdp.endPacket();
 }

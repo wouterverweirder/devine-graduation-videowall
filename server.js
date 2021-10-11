@@ -4,13 +4,19 @@ import glob from 'glob';
 import express from 'express';
 import { server as WebSocketServer } from 'websocket';
 import { requestKeyPressed, requestShowProject, requestShowProjectsOverview } from './public/js/classes/ServerConnection.js';
+import dgram from 'dgram';
+import SerialPort from 'serialport';
+import shutDownWin from './node-shutdown-windows.js';
 
 let expressApp, server, port, wsServer;
 let extendedConnections = [];
 let currentProjectId;
 let argv;
 
-const init = (argvValue) => {
+let udpServer;
+let arduinoPort;
+
+const init = async (argvValue) => {
   argv = argvValue;
   expressApp = express();
   server = http.Server(expressApp);
@@ -105,6 +111,37 @@ const init = (argvValue) => {
   server.listen(port, () => {
    console.log(`App listening on port ${port}!`);
   });
+
+  udpServer = dgram.createSocket('udp4');
+  udpServer.on('error', (err) => {
+    console.log(`server error:\n${err.stack}`);
+    udpServer.close();
+  });
+
+  udpServer.on('message', (msg, rinfo) => {
+    console.log(`udp got: ${msg} from ${rinfo.address}:${rinfo.port}`);
+    if (rinfo.port === 8888) {
+      console.log("shutdown");
+      shutDownWin.shutdown(1, true);
+    } else if (rinfo.port === 8889) {
+      console.log("go to next");
+      sendKeyPressed({ key: 'right' });
+      goToNextProject();
+    }
+  });
+
+  udpServer.on('listening', () => {
+    const address = udpServer.address();
+    console.log(`server listening ${address.address}:${address.port}`);
+  });
+
+  udpServer.bind(7);
+
+  const serialPorts = await SerialPort.list();
+  const autoDetectedPort = serialPorts.find(port => port.manufacturer && port.manufacturer.toLowerCase().indexOf("arduino") > -1);
+  if (autoDetectedPort) {
+    arduinoPort = new SerialPort(autoDetectedPort.path, { baudRate: 9600 });
+  }
 };
 
 const handleParsedMessage = parsedMessage => {
@@ -117,6 +154,7 @@ const handleParsedMessage = parsedMessage => {
   } else if (parsedMessage.type === 'show-projects-overview') {
     console.log('reset current project id');
     currentProjectId = false;
+    sendToArduino("a");
   }
 };
 
@@ -156,6 +194,8 @@ const goToNextProject = async () => {
     currentProjectIndex = 0;
   }
   currentProjectId = projects[currentProjectIndex].id;
+  // turn lights off
+  sendToArduino("b");
   // show the next project
   extendedConnections.forEach(extendedConnection => {
     const project = JSON.parse(JSON.stringify(projects[currentProjectIndex]));
@@ -169,6 +209,13 @@ const sendKeyPressed = async ({ key }) => {
     requestKeyPressed(extendedConnection.connection, { key });
   });
 };
+
+const sendToArduino = (messageString) => {
+  console.log("send to arduino: " + messageString);
+  if (arduinoPort) {
+    arduinoPort.write(messageString);
+  }
+}
 
 export {
   init,

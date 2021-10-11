@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "debug": "electron . --devtools=true --editor=true",
-    "debug-local": "electron . --devtools=true --editor=true --projection=single"
+    "debug-local": "electron . --devtools=true --editor=true --projection=single",
+    "rebuild": "electron-rebuild ."
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -22,9 +23,11 @@
     "electron": "^13.0.1"
   },
   "dependencies": {
+    "electron-rebuild": "^3.2.3",
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "glob": "^7.1.6",
+    "serialport": "^9.2.4",
     "websocket": "^1.0.33",
     "yargs": "^17.0.1"
   }

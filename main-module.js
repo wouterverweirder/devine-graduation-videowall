@@ -3,10 +3,8 @@
 import { app, BrowserWindow, screen, globalShortcut } from 'electron';
 import yargs from 'yargs';
 import path from 'path';
-import dgram from 'dgram';
 
 import { init as initServer, goToNextProject, sendKeyPressed } from './server.js';
-import shutDownWin from './node-shutdown-windows.js';
 
 const argv = yargs
 .option('devtools', {
@@ -33,31 +31,6 @@ console.log('projection: ' + argv.projection);
 const isSingleProjection = (argv.projection === 'single');
 
 initServer(argv);
-
-const udpServer = dgram.createSocket('udp4');
-udpServer.on('error', (err) => {
-  console.log(`server error:\n${err.stack}`);
-  udpServer.close();
-});
-
-udpServer.on('message', (msg, rinfo) => {
-  console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-  if (rinfo.port === 8888) {
-    console.log("shutdown");
-    shutDownWin.shutdown(1, true);
-  } else if (rinfo.port === 8889) {
-    console.log("go to next");
-    sendKeyPressed({ key: 'right' });
-    goToNextProject();
-  }
-});
-
-udpServer.on('listening', () => {
-  const address = udpServer.address();
-  console.log(`server listening ${address.address}:${address.port}`);
-});
-
-udpServer.bind(7);
 
 const createMainWindow = true;
 const createControlPanel = argv.editor;
