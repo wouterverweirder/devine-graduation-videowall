@@ -71,6 +71,7 @@ const init = async (argvValue) => {
     // initial commands
     // requestShowBouncingDVDLogo(connection);
     requestShowProjectsOverview(connection);
+    sendToArduino("a");
     // getProjects(`http://${request.host}/`).then(projects => {
     //   if (projects.length === 0) {
     //     return;
