@@ -1,106 +1,117 @@
 #include <SPI.h>
 #include <Ethernet.h>
-#include <utility/socket.h>
 
-const int buttonPin = 8;
+const int pedalButtonPin = 7;
+int pedalButtonState;
+int lastPedalButtonState = LOW;
+unsigned long lastPedalDebounceTime = 0;
 
-// Variables will change:
-int ledState = HIGH;         // the current state of the output pin
-int buttonState;             // the current reading from the input pin
-int lastButtonState = LOW;   // the previous reading from the input pin
+const int powerButtonPin = 8;
+int powerButtonState;
+int lastPowerButtonState = LOW;
+unsigned long lastPowerDebounceTime = 0;
 
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
+unsigned long debounceDelay = 50;
 
-// Make up a mac Address & an IP address. Both should be globally unique or
-// at least unique on the local network. 
-static byte g_abyMyMacAddress[] = {0x00,0x1A,0x4B,0x38,0x0C,0x5C};
+static byte g_abyMyMacAddress[] = {0xA8,0x61,0x0A,0xAE,0x6F,0x0D};
 static IPAddress g_MyIPAddress(192,168,15,44);
-
-// The machine to wake up. WOL should already be configured for the target machine. 
-// The free windows program "Wake On LAN Ex 2" by Joseph Cox can be useful for testing the remote
-// machine is properly configured. Download it here: http://software.bootblock.co.uk/?id=wakeonlanex2
 static byte g_TargetMacAddress[] = {0x30,0x24,0xA9,0x88,0x29,0xEE};
 
 void setup() {
   Ethernet.begin(g_abyMyMacAddress, g_MyIPAddress);
   
   Serial.begin(9600);
-  pinMode(buttonPin, INPUT);
+  Serial.println("listening for button input");
+  pinMode(pedalButtonPin, INPUT);
+  pinMode(powerButtonPin, INPUT);
 }
 
 void loop() {
-  int reading = digitalRead(buttonPin);
-  bool buttonWasPushed = false;
+  int reading;
+  reading = digitalRead(powerButtonPin);
+  bool powerButtonWasPushed = false;
 
-  if (reading != lastButtonState) {
-    lastDebounceTime = millis();
+  if (reading != lastPowerButtonState) {
+    lastPowerDebounceTime = millis();
   }
 
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    if (reading != buttonState) {
-      buttonState = reading;
-      if (buttonState == HIGH) {
-        buttonWasPushed = true;
+  if ((millis() - lastPowerDebounceTime) > debounceDelay) {
+    if (reading != powerButtonState) {
+      powerButtonState = reading;
+      if (powerButtonState == HIGH) {
+        powerButtonWasPushed = true;
       }
     }
   }
 
-  if (buttonWasPushed) {
-    Serial.println("pushed");
+  // save the reading. Next time through the loop, it'll be the lastPowerButtonState:
+  lastPowerButtonState = reading;
+
+  reading = digitalRead(pedalButtonPin);
+  bool pedalButtonWasPushed = false;
+
+  if (reading != lastPedalButtonState) {
+    lastPedalDebounceTime = millis();
+  }
+
+  if ((millis() - lastPedalDebounceTime) > debounceDelay) {
+    if (reading != pedalButtonState) {
+      pedalButtonState = reading;
+      if (pedalButtonState == HIGH) {
+        pedalButtonWasPushed = true;
+      }
+    }
+  }
+
+  // save the reading. Next time through the loop, it'll be the lastPedalButtonState:
+  lastPedalButtonState = reading;
+
+  if (powerButtonWasPushed) {
+    Serial.println("power button");
     SendWOLMagicPacket(g_TargetMacAddress);
   }
 
-  // save the reading. Next time through the loop, it'll be the lastButtonState:
-  lastButtonState = reading;
+  if (pedalButtonWasPushed) {
+    Serial.println("pedal button");
+    SendPedalMessage(g_TargetMacAddress);
+  }
+}
+
+void SendPedalMessage(byte * pMacAddress)
+{
+  byte abyTargetIPAddress[] = { 255, 255, 255, 255 };
+  const int nWOLPort = 7;
+  const int nLocalPort = 8889;
+
+  byte packet[] = { 0 };
+
+  EthernetUDP Udp;
+  Udp.begin(nLocalPort);
+  Udp.beginPacket(abyTargetIPAddress, nWOLPort);
+  Udp.write(packet, sizeof packet);
+  Udp.endPacket();
 }
 
 void SendWOLMagicPacket(byte * pMacAddress)
 {
-  // The magic packet data sent to wake the remote machine. Target machine's
-  // MAC address will be composited in here.
-  const int nMagicPacketLength = 102;
-  byte abyMagicPacket[nMagicPacketLength] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
   byte abyTargetIPAddress[] = { 255, 255, 255, 255 }; // don't seem to need a real ip address.
   const int nWOLPort = 7;
   const int nLocalPort = 8888; // to "listen" on (only needed to initialize udp)
 
-  
-  // Compose magic packet to wake remote machine. 
-  for (int ix=6; ix<102; ix++)
-    abyMagicPacket[ix]=pMacAddress[ix%6];
-  
-  if (UDP_RawSendto(abyMagicPacket, nMagicPacketLength, nLocalPort, 
-  abyTargetIPAddress, nWOLPort) != nMagicPacketLength)
-    Serial.println("Error sending WOL packet");
-}
-
-int UDP_RawSendto(byte* pDataPacket, int nPacketLength, int nLocalPort, byte* pRemoteIP, int nRemotePort)
-{
-  int nResult;
-  int nSocketId; // Socket ID for Wiz5100
-
-  // Find a free socket id.
-  nSocketId = MAX_SOCK_NUM;
-  for (int i = 0; i < MAX_SOCK_NUM; i++) 
-  {
-    uint8_t s = W5100.readSnSR(i);
-    if (s == SnSR::CLOSED || s == SnSR::FIN_WAIT) 
-    {
-      nSocketId = i;
-      break;
-    }
+  byte magicPacket[102];
+  int i,c1,j=0;
+             
+  for(i = 0; i < 6; i++,j++){
+      magicPacket[j] = 0xFF;
+  }
+  for(i = 0; i < 16; i++){
+      for( c1 = 0; c1 < 6; c1++,j++)
+        magicPacket[j] = pMacAddress[c1];
   }
 
-  if (nSocketId == MAX_SOCK_NUM)
-    return 0; // couldn't find one. 
-
-  if (socket(nSocketId, SnMR::UDP, nLocalPort, 0))
-  {
-    nResult = sendto(nSocketId,(unsigned char*)pDataPacket,nPacketLength,(unsigned char*)pRemoteIP,nRemotePort);
-    close(nSocketId);
-  } else
-    nResult = 0;
-
-  return nResult;
+  EthernetUDP Udp;
+  Udp.begin(nLocalPort);
+  Udp.beginPacket(abyTargetIPAddress, nWOLPort);
+  Udp.write(magicPacket, sizeof magicPacket);
+  Udp.endPacket();
 }
