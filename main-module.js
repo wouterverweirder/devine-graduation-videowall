@@ -45,6 +45,10 @@ udpServer.on('message', (msg, rinfo) => {
   if (rinfo.port === 8888) {
     console.log("shutdown");
     shutDownWin.shutdown(1, true);
+  } else if (rinfo.port === 8889) {
+    console.log("go to next");
+    sendKeyPressed({ key: 'right' });
+    goToNextProject();
   }
 });
 
