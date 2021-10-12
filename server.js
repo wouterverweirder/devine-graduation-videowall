@@ -142,7 +142,9 @@ const init = async (argvValue) => {
   const autoDetectedPort = serialPorts.find(port => port.manufacturer && port.manufacturer.toLowerCase().indexOf("arduino") > -1);
   if (autoDetectedPort) {
     arduinoPort = new SerialPort(autoDetectedPort.path, { baudRate: 9600 });
-    sendToArduino("a");
+    arduinoPort.on('open', () => {
+      sendToArduino("a");
+    });
   }
 };
 
