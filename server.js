@@ -8,6 +8,8 @@ import dgram from 'dgram';
 import SerialPort from 'serialport';
 import shutDownWin from './node-shutdown-windows.js';
 
+const isWindows = process.platform === "win32";
+
 let expressApp, server, port, wsServer;
 let extendedConnections = [];
 let currentProjectId;
@@ -123,7 +125,9 @@ const init = async (argvValue) => {
     console.log(`udp got: ${msg} from ${rinfo.address}:${rinfo.port}`);
     if (rinfo.port === 8888) {
       console.log("shutdown");
-      shutDownWin.shutdown(1, true);
+      if (isWindows) {
+        shutDownWin.shutdown(1, true);
+      }
     } else if (rinfo.port === 8889) {
       console.log("go to next");
       sendKeyPressed({ key: 'right' });

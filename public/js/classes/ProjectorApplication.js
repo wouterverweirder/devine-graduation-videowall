@@ -9,8 +9,15 @@ class ProjectorApplication extends Application {
 
   interactionTimeoutId = false;
   isSingleProjection = false;
+  ambientAudio = false;
 
   setupApplicationSpecificUI() {
+
+    this.ambientAudio = document.createElement('audio');
+    this.ambientAudio.src = 'assets/ambient-01.mp3';
+    this.ambientAudio.loop = true;
+    this.ambientAudio.volume = 0.1;
+
     this.isSingleProjection = (this.argv.projection === 'single');
     this.scene = new THREE.Scene();
 
@@ -116,6 +123,21 @@ class ProjectorApplication extends Application {
   async onRequestKeyPressed(event) {
     // reset the screen saver
     this.resetScreensaver();
+  }
+
+  async onRequestShowProjectsOverview () {
+    await super.onRequestShowProjectsOverview();
+
+    if (this.ambientAudio) {
+      this.ambientAudio.play();
+    }
+  }
+
+  async onRequestShowProject(project) {
+    if (this.ambientAudio) {
+      this.ambientAudio.pause();
+    }
+    await super.onRequestShowProject(project);
   }
 }
 
