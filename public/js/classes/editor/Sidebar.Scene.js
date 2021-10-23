@@ -186,6 +186,13 @@ function SidebarScene( editor ) {
   dvdButtonRow.add(dvdButton);
 	container.add(dvdButtonRow);
 
+	const crashButtonRow = new UIRow();
+	const crashButton = new UIButton().setLabel('Crash').onClick(() => {
+		serverConnection.requestCrash();
+	});
+  crashButtonRow.add(crashButton);
+	container.add(crashButtonRow);
+
 	// navigate betweeon project details and overview
 	//
 

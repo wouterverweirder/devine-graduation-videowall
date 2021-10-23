@@ -163,6 +163,9 @@ const handleParsedMessage = parsedMessage => {
     console.log('reset current project id');
     currentProjectId = false;
     sendToArduino("a");
+  } else if (parsedMessage.type === 'crash') {
+    console.log('requested crash');
+    process.exit();
   }
 };
 

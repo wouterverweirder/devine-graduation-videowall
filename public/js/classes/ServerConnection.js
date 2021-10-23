@@ -61,6 +61,12 @@ const requestKeyPressed = (client, data) => {
   });
 };
 
+const requestCrash = (client) => {
+  sendRequest(client, {
+    type: 'crash'
+  });
+};
+
 class ServerConnection {
   constructor() {
     this.messageQueue = Promise.resolve();
@@ -113,6 +119,10 @@ class ServerConnection {
   requestShowBouncingDVDLogo() {
     requestShowBouncingDVDLogo(this.client);
   }
+
+  requestCrash() {
+    requestCrash(this.client);
+  }
 }
 
 export {
@@ -126,5 +136,6 @@ export {
   requestSetObjectProps,
   requestShowBouncingDVDLogo,
   requestKeyPressed,
+  requestCrash,
   ServerConnection
 };

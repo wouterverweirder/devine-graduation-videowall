@@ -1,1 +1,1 @@
-call npm start
+call pm2 start npm -- start
