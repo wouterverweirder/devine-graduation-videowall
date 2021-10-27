@@ -70,16 +70,7 @@ const init = async (argvValue) => {
       }
     });
   
-    // initial commands
-    // requestShowBouncingDVDLogo(connection);
-    requestShowProjectsOverview(connection);
-    sendToArduino("a");
-    // getProjects(`http://${request.host}/`).then(projects => {
-    //   if (projects.length === 0) {
-    //     return;
-    //   }
-    //   requestShowProject(connection, projects[0]);
-    // });
+    initializeProjectOverview();
   });
 
   expressApp.get('/api/images', (req, res) => {
@@ -143,13 +134,26 @@ const init = async (argvValue) => {
   udpServer.bind(7);
 
   const serialPorts = await SerialPort.list();
-  const autoDetectedPort = serialPorts.find(port => port.manufacturer && port.manufacturer.toLowerCase().indexOf("arduino") > -1);
+  console.log(serialPorts);
+  const autoDetectedPort = serialPorts.find(port => port.manufacturer && port.manufacturer.toLowerCase().indexOf("arduino") > -1 && port.serialNumber !== 'HIDPC');
+  console.log(autoDetectedPort);
   if (autoDetectedPort) {
     arduinoPort = new SerialPort(autoDetectedPort.path, { baudRate: 9600 });
+    console.log(arduinoPort);
     arduinoPort.on('open', () => {
-      sendToArduino("a");
+      console.log("arduinoport opened");
+      initializeProjectOverview();
     });
+  } else {
+    initializeProjectOverview();
   }
+};
+
+const initializeProjectOverview = () => {
+  extendedConnections.forEach(extendedConnection => {
+    requestShowProjectsOverview(extendedConnection.connection);
+  });
+  sendToArduino("a");
 };
 
 const handleParsedMessage = parsedMessage => {
@@ -157,6 +161,7 @@ const handleParsedMessage = parsedMessage => {
     fs.writeFileSync('public/config.json', JSON.stringify(parsedMessage.json, null, 2));
   } else if (parsedMessage.type === 'show-project' && parsedMessage.data && parsedMessage.data.id) {
     currentProjectId = parsedMessage.data.id;
+    sendToArduino("b");
   } else if (parsedMessage.type === 'show-next-project') {
     goToNextProject();
   } else if (parsedMessage.type === 'show-projects-overview') {
