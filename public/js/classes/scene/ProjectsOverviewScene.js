@@ -14,6 +14,7 @@ class ProjectsOverviewScene extends SceneBase {
   visiblePlanes = [];
   devineInfoPlane = false;
   animationTimeoutId = false;
+  instructionsPlane = false;
 
   async _executeStateName(stateName) {
     if (stateName === SceneState.LOAD) {
@@ -34,22 +35,38 @@ class ProjectsOverviewScene extends SceneBase {
         this.allProjectPlanes.push(plane);
         this.nonVisiblePlanes.push(plane);
       }
-      // create the devine info plane
-      const mainCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
-      const screenConfig = this.screenConfigsById[mainCamera.id];
-      this.devineInfoPlane = await createPlaneForScreen({
-        data: {
-          id: 'devine-info',
-          type: PlaneType.DEVINE_INFO
-        },
-        screenConfig
-      });
+      {
+        // create the devine info plane
+        const mainCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
+        const screenConfig = this.screenConfigsById[mainCamera.id];
+        this.instructionsPlane = await createPlaneForScreen({
+          data: {
+            id: 'devine-info',
+            type: PlaneType.DEVINE_INFO
+          },
+          screenConfig
+        });
+      }
+      {
+        // create the instructions plane
+        const descriptionCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION);
+        const screenConfig = this.screenConfigsById[descriptionCamera.id];
+        this.devineInfoPlane = await createPlaneForScreen({
+          data: {
+            id: 'instructions',
+            type: PlaneType.VIDEO,
+            url: 'assets/footswitch.mp4',
+            layers: descriptionCamera.props.layers
+          },
+          screenConfig
+        });
+      }
+
 
     } else if (stateName === SceneState.INTRO) {
       const cameras = getScreenCamerasForRoles(this.cameras, [
         ScreenRole.PROFILE_PICTURE,
         ScreenRole.PROJECT_BIO,
-        ScreenRole.PROJECT_DESCRIPTION,
         ScreenRole.PORTRAIT_SCREENSHOTS,
         ScreenRole.LANDSCAPE_SCREENSHOTS,
         ScreenRole.VIDEOS,
@@ -75,6 +92,9 @@ class ProjectsOverviewScene extends SceneBase {
 
       this.addObject(this.devineInfoPlane);
       this.devineInfoPlane.intro();
+
+      this.addObject(this.instructionsPlane);
+      this.instructionsPlane.intro();
 
       this.planeSlider = new PlaneSlider();
       this.planeSlider.start({
@@ -128,6 +148,7 @@ class ProjectsOverviewScene extends SceneBase {
       });
 
       this.removeObject(this.devineInfoPlane);
+      this.removeObject(this.instructionsPlane);
     }
   }
 
