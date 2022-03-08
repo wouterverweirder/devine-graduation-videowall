@@ -38,6 +38,7 @@ class SceneBase {
       cameras: [],
       screenConfigsById: {},
       projects: [],
+      students: [],
       addObject: () => {},
       removeObject: () => {},
     };
@@ -49,6 +50,7 @@ class SceneBase {
     this.cameras = props.cameras;
     this.screenConfigsById = props.screenConfigsById;
     this.projects = props.projects;
+    this.students = props.students;
 
     this.addObject = props.addObject;
     this.removeObject = props.removeObject;

@@ -108,21 +108,24 @@ function SidebarNew( editor ) {
   const updateProjectAssetsList = () => {
     const project = getSelectedProject();
     const items = [];
-    items.push({
-      id: project.mainAsset.id,
-      name: new URL(project.mainAsset.url).pathname
-    });
-    project.assets.forEach(asset => {
+    console.log(project.attributes.mainAsset.data.attributes)
+    if (project.attributes.mainAsset.data) {
+      items.push({
+        id: project.attributes.mainAsset.data.id,
+        name: new URL(project.attributes.mainAsset.data.attributes.url).pathname
+      });
+    }
+    project.attributes.assets.data.forEach(asset => {
       items.push({
         id: asset.id,
-        name: new URL(asset.url).pathname
+        name: new URL(asset.attributes.url).pathname
       });
     });
     projectAssetsList.setItems(items);
   };
 
   const getSelectedProject = () => {
-    const projectId = parseInt(projectSelect.getValue());
+    const projectId = projectSelect.getValue();
     return projects.find(project => project.id === projectId);
   };
 
@@ -151,9 +154,9 @@ function SidebarNew( editor ) {
     images = data.data;
   };
 
-  const fetchProjectsList = async () => {
+	const fetchProjectsList = async () => {
     const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
-    projects = data.data;
+    projects = data.data.projects.data;
   };
 
   refreshUI();

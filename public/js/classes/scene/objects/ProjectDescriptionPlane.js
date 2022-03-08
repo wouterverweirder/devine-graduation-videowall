@@ -61,7 +61,7 @@ class ProjectDescriptionPlane extends CanvasPlane {
 
     yPos += 200;
 
-    const paragraphs = this.props.data.description.split("\n");
+    const paragraphs = this.props.data.attributes.description.split("\n");
 
     const textStartY = yPos;
 

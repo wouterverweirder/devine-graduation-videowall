@@ -19,16 +19,16 @@ class ProjectsOverviewScene extends SceneBase {
   async _executeStateName(stateName) {
     if (stateName === SceneState.LOAD) {
 
-      // create a plane for each project
-      for (let index = 0; index < this.projects.length; index++) {
-        const project = this.projects[index];
+      // create a plane for each student
+      for (let index = 0; index < this.students.length; index++) {
+        const student = this.students[index];
         const props = {
-          name: `project-overview-${project.id}-${index}`,
+          name: `project-overview-${student.id}-${index}`,
           textureSize: {
             x: 1920,
             y: 1920
           },
-          url: project.profilePicture.url
+          url: student.attributes.profilePicture.data.attributes.url
         };
         const plane = new ImagePlane(props.name, props);
         await plane.init();
@@ -113,6 +113,7 @@ class ProjectsOverviewScene extends SceneBase {
         },
         getNewPlane: ({ oldPlane }) => {
           const newPlane = this.nonVisiblePlanes.shift();
+          if (!newPlane) return;
           const setPropsNewPlane = this.generatePropsForScreen(oldPlane.customData.camera, oldPlane.customData.isFirstItemOnScreen);
           newPlane.customData.camera = oldPlane.customData.camera;
           newPlane.customData.isFirstItemOnScreen = oldPlane.customData.isFirstItemOnScreen;

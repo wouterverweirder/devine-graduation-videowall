@@ -14,8 +14,8 @@ class StudentNamePlane extends CanvasPlane {
     let yPos = fontSize + marginTop;
 
     let expert = 'Design';
-    if (this.props.data.expert) {
-      expert = this.props.data.expert.name;
+    if (this.props.data.attributes.expert.data) {
+      expert = this.props.data.attributes.expert.data.attributes.name;
     }
     const tagLine = `Expert ${expert}`;
 
@@ -23,7 +23,7 @@ class StudentNamePlane extends CanvasPlane {
       type: 'text',
       font: `${fontSize}px "Embedded Space Grotesk"`,
       fillStyle: 'black',
-      content: `${this.props.data.firstName} ${this.props.data.lastName}`,
+      content: `${this.props.data.attributes.firstName} ${this.props.data.attributes.lastName}`,
       x: marginLeft,
       y: yPos,
       opacity: 1

@@ -17,6 +17,11 @@ const argv = yargs
   type: 'boolean',
   default: false
 })
+.option('only-server', {
+  description: 'Run server only',
+  type: 'boolean',
+  default: false
+})
 .option('projection', {
   description: 'Choose a projection mode ',
   choices: ['multi', 'single'],
@@ -26,9 +31,11 @@ const argv = yargs
 
 console.log('devtools: ' + argv.devtools);
 console.log('editor: ' + argv.editor);
+console.log('only-server: ' + argv.onlyServer);
 console.log('projection: ' + argv.projection);
 
 const isSingleProjection = (argv.projection === 'single');
+const isServerOnly = argv.onlyServer;
 
 initServer(argv);
 
@@ -36,6 +43,9 @@ const createMainWindow = true;
 const createControlPanel = argv.editor;
 
 function createWindows () {
+  if (isServerOnly) {
+    return;
+  }
   let displays = screen.getAllDisplays()
 
   // try to limit to 4K windows

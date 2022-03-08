@@ -325,7 +325,7 @@ function SidebarScene( editor ) {
 
 	const fetchProjectsList = async () => {
     const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
-    projects = data.data;
+    projects = data.data.projects.data;
   };
 
 	fetchProjectsList()

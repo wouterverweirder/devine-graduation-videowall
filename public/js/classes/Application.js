@@ -18,6 +18,7 @@ class Application {
   objects = [];
   serverConnection = new ServerConnection();
   projects;
+  students;
 
   constructor(config) {
     this.config = config;
@@ -26,7 +27,13 @@ class Application {
   async init() {
 
     const apiProjects = await (await fetch(`http://${this.getServerAddress()}/api/projects`)).json();
-    this.projects = apiProjects.data;
+    this.projects = apiProjects.data.projects.data;
+    this.students = [];
+    this.projects.forEach(project => {
+      project.attributes.students.data.forEach(student => {
+        this.students.push(student);
+      });
+    });
 
     // get the cli args
     const apiArgv = await (await fetch(`http://${this.getServerAddress()}/api/argv`)).json();
@@ -183,6 +190,7 @@ class Application {
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
       projects: this.projects,
+      students: this.students,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this)
     });
@@ -203,6 +211,7 @@ class Application {
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
       projects: this.projects,
+      students: this.students,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this),
       project

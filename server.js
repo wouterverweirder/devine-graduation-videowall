@@ -181,40 +181,42 @@ const getProjects = (serverURL = 'http://localhost/') => {
       if (err) {
         return reject(err);
       }
-      let projects = JSON.parse(contents);
-      projects.forEach(project => {
+      const { data } = JSON.parse(contents);
+      data.projects.data.forEach(project => {
         setProjectUrls(project, serverURL);
       });
-      resolve(projects);
+      resolve(data);
     });
   });
 };
 
 const setProjectUrls = (project, serverURL) => {
-  if (project.profilePicture) {
-    project.profilePicture.url = serverURL + project.profilePicture.url;
+  if (project.attributes.mainAsset.data) {
+    project.attributes.mainAsset.data.attributes.url  = serverURL + project.attributes.mainAsset.data.attributes.url;
   }
-  if (project.mainAsset) {
-    project.mainAsset.url = serverURL + project.mainAsset.url;
-  }
-  project.assets.forEach(asset => asset.url = serverURL + asset.url);
+  project.attributes.assets.data.forEach(asset => asset.attributes.url = serverURL + asset.attributes.url);
+  project.attributes.students.data.forEach(student => {
+    if (student.attributes.profilePicture.data) {
+      student.attributes.profilePicture.data.attributes.url = serverURL + student.attributes.profilePicture.data.attributes.url;
+    }
+  });
 };
 
 const goToNextProject = async () => {
-  const projects = await getProjects('');
-  let currentProjectIndex = projects.findIndex(project => {
+  const { projects } = await getProjects('');
+  let currentProjectIndex = projects.data.findIndex(project => {
     return project.id === currentProjectId
   });
   currentProjectIndex++;
-  if (currentProjectIndex >= projects.length) {
+  if (currentProjectIndex >= projects.data.length) {
     currentProjectIndex = 0;
   }
-  currentProjectId = projects[currentProjectIndex].id;
+  currentProjectId = projects.data[currentProjectIndex].id;
   // turn lights off
   sendToArduino("b");
   // show the next project
   extendedConnections.forEach(extendedConnection => {
-    const project = JSON.parse(JSON.stringify(projects[currentProjectIndex]));
+    const project = JSON.parse(JSON.stringify(projects.data[currentProjectIndex]));
     setProjectUrls(project, `http://${extendedConnection.request.host}/`);
     requestShowProject(extendedConnection.connection, project);
   });
