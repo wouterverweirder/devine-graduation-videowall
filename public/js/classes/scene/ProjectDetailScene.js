@@ -541,6 +541,9 @@ class ProjectDetailScene extends SceneBase {
         },
         getNewPlane: ({ oldPlane }) => {
           const newPlane = this.nonVisibleProfilePicturePlanes.shift();
+          if (!newPlane) {
+            return;
+          }
           const setPropsNewPlane = this.generatePropsForScreen(oldPlane.customData.camera);
           newPlane.customData.camera = oldPlane.customData.camera;
           newPlane.applyProps(setPropsNewPlane);
@@ -591,6 +594,9 @@ class ProjectDetailScene extends SceneBase {
         },
         getNewPlane: ({ oldPlane }) => {
           const newPlane = this.nonVisibleStudentNamePlanes.shift();
+          if (!newPlane) {
+            return;
+          }
           newPlane.customData.camera = oldPlane.customData.camera;
 
           const screenConfig = this.screenConfigsById[newPlane.customData.camera.id];
