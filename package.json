@@ -8,7 +8,7 @@
     "debug": "electron . --devtools=true --editor=true",
     "debug-local": "electron . --devtools=true --editor=true --projection=single",
     "server": "electron . --only-server",
-    "rebuild": "electron-rebuild ."
+    "build": "vite build"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -21,10 +21,10 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^13.0.1"
+    "electron": "^13.0.1",
+    "vite": "^3.0.7"
   },
   "dependencies": {
-    "electron-rebuild": "^3.2.3",
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "glob": "^7.1.6",

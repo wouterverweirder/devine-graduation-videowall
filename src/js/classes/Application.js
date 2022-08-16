@@ -181,7 +181,7 @@ class Application {
 
   getServerAddress() {
     if (window.location.protocol === 'http:') {
-      return window.location.domain;
+      return window.location.hostname;
     }
     return '127.0.0.1';
   }
