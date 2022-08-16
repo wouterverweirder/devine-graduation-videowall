@@ -1,7 +1,5 @@
 import * as THREE from '../../three.js/build/three.module.js';
 
-const Signal = signals.Signal;
-
 const StateProgress = {
   START: -1,
   PROGRESS: 0,
@@ -54,6 +52,8 @@ class SceneBase {
 
     this.addObject = props.addObject;
     this.removeObject = props.removeObject;
+
+    const Signal = window.signals.Signal;
 
     this.signals = {
       stateStart: new Signal(),

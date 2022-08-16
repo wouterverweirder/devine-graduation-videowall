@@ -1,7 +1,5 @@
 import * as THREE from '../../../three.js/build/three.module.js';
 
-const Signal = signals.Signal;
-
 class SceneObject {
 
   customData = {};
@@ -21,6 +19,7 @@ class SceneObject {
     this.type = 'sceneObject';
     this.props = props;
     this.signals = {};
+    const Signal = window.signals.Signal;
     this.signals.onPropsApplied = new Signal();
   }
 
