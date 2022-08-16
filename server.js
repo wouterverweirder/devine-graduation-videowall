@@ -5,7 +5,7 @@ import express from 'express';
 import { server as WebSocketServer } from 'websocket';
 import { requestKeyPressed, requestShowProject, requestShowProjectsOverview } from './public/js/classes/ServerConnection.js';
 import dgram from 'dgram';
-import SerialPort from 'serialport';
+import { SerialPort } from 'serialport';
 import shutDownWin from './node-shutdown-windows.js';
 
 const isWindows = process.platform === "win32";
@@ -134,12 +134,12 @@ const init = async (argvValue) => {
   udpServer.bind(7);
 
   const serialPorts = await SerialPort.list();
-  console.log(serialPorts);
+  console.log(serialPorts.map(serialPort => `${serialPort.path} (${serialPort.manufacturer})`));
   const autoDetectedPort = serialPorts.find(port => port.manufacturer && port.manufacturer.toLowerCase().indexOf("arduino") > -1 && port.serialNumber !== 'HIDPC');
-  console.log(autoDetectedPort);
   if (autoDetectedPort) {
-    arduinoPort = new SerialPort(autoDetectedPort.path, { baudRate: 9600 });
-    console.log(arduinoPort);
+    console.log(`Connecting To: ${autoDetectedPort.path} (${autoDetectedPort.manufacturer})`);
+    arduinoPort = new SerialPort({ path: autoDetectedPort.path, baudRate: 9600 });
+    // console.log(arduinoPort);
     arduinoPort.on('open', () => {
       console.log("arduinoport opened");
       initializeProjectOverview();

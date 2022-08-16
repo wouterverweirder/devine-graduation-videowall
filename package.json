@@ -28,7 +28,7 @@
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "glob": "^7.1.6",
-    "serialport": "^9.2.4",
+    "serialport": "^10.4.0",
     "websocket": "^1.0.33",
     "yargs": "^17.0.1"
   }
