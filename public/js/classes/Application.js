@@ -25,8 +25,7 @@ class Application {
   }
 
   async init() {
-
-    const apiProjects = await (await fetch(`http://${this.getServerAddress()}/api/projects`)).json();
+    const apiProjects = await this.fetchProjects();
     this.projects = apiProjects.data.projects.data;
     this.students = [];
     this.projects.forEach(project => {
@@ -36,7 +35,7 @@ class Application {
     });
 
     // get the cli args
-    const apiArgv = await (await fetch(`http://${this.getServerAddress()}/api/argv`)).json();
+    const apiArgv = await (await fetch(`${this.getServerPath()}/api/argv`)).json();
     this.argv = apiArgv.data;
     
     this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
@@ -77,12 +76,113 @@ class Application {
       }
     };
 
-    this.connectToServer();
+    if (this.argv['no-websocket']) {
+      this.onRequestShowProjectsOverview();
+      // keyboard interaction
+      let currentProjectIndex = -1
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowRight') {
+          currentProjectIndex++;
+          if (currentProjectIndex >= this.projects.length) {
+            currentProjectIndex = 0;
+          }
+          this.onRequestShowProject(this.projects[currentProjectIndex]);
+        }
+      });
+    } else {
+      this.connectToServer();
+    }
 
     requestAnimationFrame(() => this.render());
   }
 
+  async fetchProjects() {
+    const query = `query{
+      projects{
+        data {
+          id,
+          attributes {
+            Name,
+            description,
+            mainAsset {
+              data {
+                id,
+                attributes {
+                  url,
+                  width,
+                  height,
+                  mime
+                }
+              }
+            },
+            assets {
+              data {
+                id,
+                attributes {
+                  url,
+                  width,
+                  height,
+                  mime
+                }
+              }
+            },
+            students {
+              data {
+                id,
+                attributes {
+                  firstName,
+                  lastName,
+                  expert {
+                    data {
+                      id,
+                      attributes {
+                        name
+                      }
+                    }
+                  },
+                  bio,
+                  profilePicture {
+                    data {
+                      id,
+                      attributes {
+                        url,
+                        width,
+                        height,
+                        mime
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`;
+    return await (await fetch(`${this.getServerPath()}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        variables: {
+        },
+      }),
+    })).json();
+  }
+
+  getServerPath() {
+    if (window.location.protocol === 'http:') {
+      return '';
+    }
+    return `http://${this.getServerAddress()}`;
+  }
+
   getServerAddress() {
+    if (window.location.protocol === 'http:') {
+      return window.location.domain;
+    }
     return '127.0.0.1';
   }
 

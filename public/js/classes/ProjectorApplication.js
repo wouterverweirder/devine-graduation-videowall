@@ -43,6 +43,9 @@ class ProjectorApplication extends Application {
   applicationSpecificRender() {
     if (this.argv.projection === 'single') {
       this.renderer.setSize( this.fullBounds.width * 500, this.fullBounds.height * 500 );
+      document.body.style.width = '100vw';
+      document.body.style.height = '100vh';
+      document.body.style.overflow = 'hidden';
 
       this.cameras.forEach(camera => {
         const screenConfig = this.screenConfigsById[camera.id];

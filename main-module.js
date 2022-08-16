@@ -26,6 +26,11 @@ const argv = yargs
   choices: ['multi', 'single'],
   default: 'multi'
 })
+.option('no-websocket', {
+  description: 'No control via websocket',
+  type: 'boolean',
+  default: false
+})
 .argv;
 
 console.log('devtools: ' + argv.devtools);

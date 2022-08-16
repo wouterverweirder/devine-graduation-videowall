@@ -30,25 +30,6 @@
     <canvas id="output-canvas"></canvas>
   </div>
   <script src="js/three.js/editor/js/libs/signals.min.js"></script>
-  <script type="module">
-    
-    import { ProjectorApplication } from './js/classes/ProjectorApplication.js';
-
-    let application;
-
-    const init = async () => {
-      const config = await loadConfig();
-      application = new ProjectorApplication(config);
-      await application.init();
-    };
-
-    const loadConfig = async () => {
-      return await (await fetch('config.json')).json();
-    };
-
-    init();
-
-    
-  </script>
+  <script type="module" src="frontend.js"></script>
 </body>
 </html>

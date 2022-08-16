@@ -94,6 +94,16 @@ const init = async (argvValue) => {
     });
   });
 
+  // fallback for graphql call to projects - is alias for above
+  expressApp.post('/graphql', (req, res) => {
+    getProjects(req.protocol + '://' + req.get('host') + '/').then((projects) => {
+      return res.send(JSON.stringify({
+        'result': 'ok',
+        'data': projects
+      }));
+    });
+  });
+
   expressApp.get('/api/argv', (req, res) => {
     return res.send(JSON.stringify({
       'result': 'ok',
