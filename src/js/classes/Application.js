@@ -25,18 +25,27 @@ class Application {
   }
 
   async init() {
+    // get the cli args
+    // parse the querystring into this.argv using URLSearchParams
+    this.argv = Object.fromEntries(new URLSearchParams(window.location.search));
+    //replace the argv properties with string values "true" and "false" with boolean values
+    Object.keys(this.argv).forEach(key => {
+      if (this.argv[key] === 'true') {
+        this.argv[key] = true;
+      } else if (this.argv[key] === 'false') {
+        this.argv[key] = false;
+      }
+    });
+
     const apiProjects = await this.fetchProjects();
     this.projects = apiProjects.data.projects.data;
+    console.log(this.projects);
     this.students = [];
     this.projects.forEach(project => {
       project.attributes.students.data.forEach(student => {
         this.students.push(student);
       });
     });
-
-    // get the cli args
-    const apiArgv = await (await fetch(`${this.getServerPath()}/api/argv`)).json();
-    this.argv = apiArgv.data;
     
     this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
     
@@ -76,7 +85,9 @@ class Application {
       }
     };
 
-    if (this.argv['no-websocket']) {
+    if (this.argv['websocket']) {
+      this.connectToServer();
+    } else {
       this.onRequestShowProjectsOverview();
       // keyboard interaction
       let currentProjectIndex = -1
@@ -89,8 +100,6 @@ class Application {
           this.onRequestShowProject(this.projects[currentProjectIndex]);
         }
       });
-    } else {
-      this.connectToServer();
     }
 
     requestAnimationFrame(() => this.render());
@@ -98,7 +107,7 @@ class Application {
 
   async fetchProjects() {
     const query = `query{
-      projects{
+      projects(pagination: { page: 1, pageSize: 100 }){
         data {
           id,
           attributes {
@@ -159,7 +168,7 @@ class Application {
         }
       }
     }`;
-    return await (await fetch(`${this.getServerPath()}/graphql`, {
+    return await (await fetch(`${this.getServerURL()}/graphql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -172,7 +181,10 @@ class Application {
     })).json();
   }
 
-  getServerPath() {
+  getServerURL() {
+    if (this.argv['server-url']) {
+      return this.argv['server-url'];
+    }
     if (window.location.protocol === 'http:') {
       return '';
     }

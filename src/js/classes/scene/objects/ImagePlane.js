@@ -7,21 +7,30 @@ import { setTextureRepeatAndOffset } from "../../../functions/setTextureRepeatAn
 class ImagePlane extends VisualBase {
   async createMaterial() {
 
-    const image = await loadImage(this.props.url);
-    const texture = new THREE.Texture(image);
+    let image, texture, material;
+    if (this.props.url) {
+      try {
+        image = await loadImage(this.props.url);
+        texture = new THREE.Texture(image);
+        setTextureRepeatAndOffset(texture, image, this.props);
+        const isJPEG = this.props.url.search( /\.jpe?g($|\?)/i ) > 0 || this.props.url.search( /^data\:image\/jpeg/ ) === 0;
+        texture.format = isJPEG ? THREE.RGBFormat : THREE.RGBAFormat;
+        texture.needsUpdate = true;
+        material = new THREE.MeshBasicMaterial( { map: texture } );
+      } catch (error) {
+        console.error(error);
+        material = new THREE.MeshBasicMaterial( {} );
+      }
+    } else {
+      material = new THREE.MeshBasicMaterial( {} );
+    }
 
-    setTextureRepeatAndOffset(texture, image, this.props);
-
-    const isJPEG = this.props.url.search( /\.jpe?g($|\?)/i ) > 0 || this.props.url.search( /^data\:image\/jpeg/ ) === 0;
-    texture.format = isJPEG ? THREE.RGBFormat : THREE.RGBAFormat;
-    texture.needsUpdate = true;
-
-    return new THREE.MeshBasicMaterial( { map: texture } );
+    return material;
   }
 
   applyProps(newProps) {
     super.applyProps(newProps);
-    if (newProps.scale || newProps.anchor) {
+    if ((newProps.scale || newProps.anchor) && this.material.map) {
       const texture = this.material.map;
       const image = texture.image;
       setTextureRepeatAndOffset(texture, image, this.props);
@@ -29,7 +38,9 @@ class ImagePlane extends VisualBase {
   }
 
   dispose() {
-    this.material.map.dispose();
+    if (this.material.map) {
+      this.material.map.dispose();
+    }
     // this.texture.dispose();
     super.dispose();
   }

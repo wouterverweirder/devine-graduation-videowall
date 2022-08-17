@@ -180,7 +180,7 @@ class ProjectDetailScene extends SceneBase {
             x: 1080,
             y: 1920
           },
-          url: student.attributes.profilePicture.data.attributes.url
+          url: student.attributes.profilePicture.data?.attributes.url
         };
         const plane = new ImagePlane(props.name, props);
         await plane.init();

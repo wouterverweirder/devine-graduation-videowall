@@ -18,7 +18,7 @@ class ProjectorApplication extends Application {
     this.ambientAudio.loop = true;
     this.ambientAudio.volume = 0.1;
 
-    this.isSingleProjection = (this.argv.projection === 'single');
+    this.isSingleProjection = (this.argv.projection !== 'multi');
     this.scene = new THREE.Scene();
 
     const outputCanvas = document.getElementById('output-canvas');
@@ -41,7 +41,7 @@ class ProjectorApplication extends Application {
   }
 
   applicationSpecificRender() {
-    if (this.argv.projection === 'single') {
+    if (this.isSingleProjection) {
       this.renderer.setSize( this.fullBounds.width * 500, this.fullBounds.height * 500 );
       document.body.style.width = '100vw';
       document.body.style.height = '100vh';

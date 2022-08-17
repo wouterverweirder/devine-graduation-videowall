@@ -4,9 +4,9 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "debug": "electron . --devtools=true --editor=true",
-    "debug-local": "electron . --devtools=true --editor=true --projection=single",
+    "start": "electron . --projection=multi --websocket=true",
+    "debug": "electron . --projection=multi --websocket=true --devtools=true --editor=true",
+    "debug-local": "electron . --websocket=true --devtools=true --editor=true",
     "server": "electron . --only-server",
     "build": "vite build"
   },
