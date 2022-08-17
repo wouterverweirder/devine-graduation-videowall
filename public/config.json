@@ -26,12 +26,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.698,
-          "height": 0.392
+          "width": 0.8546938775510204,
+          "height": 0.48
         },
         "position": [
           -1.66,
-          0.77,
+          0.907827719187495,
           1
         ],
         "rotation": -1.5707963267948966
@@ -40,7 +40,7 @@
     {
       "id": "screen-1",
       "roles": [
-        "portrait-screenshots"
+        "project-bio"
       ],
       "output": {
         "left": 0.25,
@@ -50,12 +50,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 0.628,
+          "height": 0.35341422594142263
         },
         "position": [
           -1.1,
-          1.15,
+          0.8808111596676305,
           1
         ],
         "rotation": -1.5707963267948966
@@ -74,12 +74,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.698,
-          "height": 0.392
+          "width": 0.688,
+          "height": 0.38638395415472776
         },
         "position": [
-          -0.81,
-          0.16,
+          -0.9355247444325069,
+          0.2641917791338868,
           1
         ],
         "rotation": 0
@@ -102,7 +102,7 @@
           "height": 0.678
         },
         "position": [
-          -0.14,
+          0.1789955032556803,
           1.14,
           1
         ],
@@ -122,12 +122,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 0.688,
+          "height": 0.38717991631799165
         },
         "position": [
-          0.89,
-          1.04,
+          0.5550981763648869,
+          0.4091665235868287,
           1
         ],
         "rotation": 0
@@ -135,30 +135,6 @@
     },
     {
       "id": "screen-5",
-      "roles": [
-        "portrait-screenshots"
-      ],
-      "output": {
-        "left": 0.75,
-        "bottom": 0.5,
-        "width": 0.25,
-        "height": 0.5
-      },
-      "camera": {
-        "size": {
-          "width": 0.698,
-          "height": 0.392
-        },
-        "position": [
-          1.46,
-          1.07,
-          1
-        ],
-        "rotation": -1.5707963267948966
-      }
-    },
-    {
-      "id": "screen-6",
       "roles": [
         "project-description"
       ],
@@ -170,39 +146,15 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 0.628,
+          "height": 0.35341422594142263
         },
         "position": [
-          0.16,
-          0.14,
+          -0.12528324303380925,
+          0.3723339019441727,
           1
         ],
         "rotation": -1.5707963267948966
-      }
-    },
-    {
-      "id": "screen-7",
-      "roles": [
-        "videos"
-      ],
-      "output": {
-        "left": 0.75,
-        "bottom": 0,
-        "width": 0.25,
-        "height": 0.5
-      },
-      "camera": {
-        "size": {
-          "width": 0.698,
-          "height": 0.392
-        },
-        "position": [
-          1.05,
-          0.17,
-          1
-        ],
-        "rotation": 0
       }
     }
   ]

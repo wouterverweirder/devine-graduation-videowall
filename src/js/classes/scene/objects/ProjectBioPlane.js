@@ -25,15 +25,16 @@ class ProjectBioPlane extends CanvasPlane {
     const marginRight = 50;
     const marginTop = 50;
 
-    const fontSize = 55;
+    const fontSizeTitle = 40 * 1.3333; // pt to px
+    const fontSize = 36 * 1.3333; // pt to px
     const lineHeight = 70;
 
     const gradientTop = new OffscreenCanvas(this.props.textureSize.x, this.gradientTopHeight);
     {
       const ctx = gradientTop.getContext('2d');
       const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
@@ -41,19 +42,19 @@ class ProjectBioPlane extends CanvasPlane {
     {
       const ctx = gradientBottom.getContext('2d');
       const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 1)');
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
 
-    let yPos = fontSize + marginTop;
+    let yPos = fontSizeTitle + marginTop;
 
     this.title = {
       type: 'text',
-      font: `700 ${fontSize}px "Embedded Space Grotesk"`,
-      fillStyle: 'white',
-      content: 'Bio',
+      font: `700 ${fontSizeTitle}px "Embedded VAGRounded"`,
+      fillStyle: 'rgb(68, 200, 245)',
+      content: 'BIO',
       x: marginLeft,
       y: yPos,
       opacity: 0
@@ -61,18 +62,18 @@ class ProjectBioPlane extends CanvasPlane {
 
     yPos += 200;
 
-    const paragraphs = this.props.data.bio.split("\n");
+    const paragraphs = this.props.data.attributes.bio.split("\n");
 
     const textStartY = yPos;
 
     paragraphs.forEach(paragraph => {
-      this.ctx.font = `${fontSize}px "Embedded Space Grotesk"`;
+      this.ctx.font = `400 ${fontSize}px "Embedded OpenSans"`;
       const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
       lines.forEach(line => {
         const textLine = {
           type: 'text',
           font: this.ctx.font,
-          fillStyle: 'white',
+          fillStyle: 'black',
           content: line,
           x: marginLeft,
           y: yPos,
@@ -106,7 +107,7 @@ class ProjectBioPlane extends CanvasPlane {
 
   draw() {
     // draw my basic displaylist to the screen
-    this.ctx.fillStyle = 'black';
+    this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     const drawCanvasObject = canvasObject => {
@@ -131,7 +132,7 @@ class ProjectBioPlane extends CanvasPlane {
       drawCanvasObject(canvasObject);
     });
     this.ctx.restore();
-    this.ctx.fillStyle = 'black';
+    this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.props.textureSize.x, this.gradientTop.y);
     drawCanvasObject(this.gradientTop);
     drawCanvasObject(this.gradientBottom);

@@ -38,14 +38,7 @@ class Application {
     });
 
     const apiProjects = await this.fetchProjects();
-    this.projects = apiProjects.data.projects.data;
-    console.log(this.projects);
-    this.students = [];
-    this.projects.forEach(project => {
-      project.attributes.students.data.forEach(student => {
-        this.students.push(student);
-      });
-    });
+    this.students = apiProjects.data.students.data;
     
     this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
     
@@ -94,10 +87,10 @@ class Application {
       document.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowRight') {
           currentProjectIndex++;
-          if (currentProjectIndex >= this.projects.length) {
+          if (currentProjectIndex >= this.students.length) {
             currentProjectIndex = 0;
           }
-          this.onRequestShowProject(this.projects[currentProjectIndex]);
+          this.onRequestShowProject(this.students[currentProjectIndex]);
         }
       });
     }
@@ -106,61 +99,39 @@ class Application {
   }
 
   async fetchProjects() {
-    const query = `query{
-      projects(pagination: { page: 1, pageSize: 100 }){
+    const query = `# Write your query or mutation here
+    query{
+      students(pagination: { page: 1, pageSize: 100 }){
         data {
           id,
           attributes {
-            Name,
-            description,
-            mainAsset {
+            firstName,
+            lastName,
+            curriculum {
               data {
                 id,
                 attributes {
-                  url,
-                  width,
-                  height,
-                  mime
-                }
-              }
-            },
-            assets {
-              data {
-                id,
-                attributes {
-                  url,
-                  width,
-                  height,
-                  mime
-                }
-              }
-            },
-            students {
-              data {
-                id,
-                attributes {
-                  firstName,
-                  lastName,
-                  expert {
+                  name
+                  pillar {
                     data {
-                      id,
                       attributes {
                         name
-                      }
-                    }
-                  },
-                  bio,
-                  profilePicture {
-                    data {
-                      id,
-                      attributes {
-                        url,
-                        width,
-                        height,
-                        mime
+                        color
                       }
                     }
                   }
+                }
+              }
+            },
+            bio,
+            profilePicture {
+              data {
+                id,
+                attributes {
+                  url,
+                  width,
+                  height,
+                  mime
                 }
               }
             }
@@ -301,7 +272,6 @@ class Application {
       config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
-      projects: this.projects,
       students: this.students,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this)
@@ -322,7 +292,6 @@ class Application {
       config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
-      projects: this.projects,
       students: this.students,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this),

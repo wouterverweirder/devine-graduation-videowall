@@ -51,7 +51,7 @@ class ProjectDescriptionPlane extends CanvasPlane {
 
     this.title = {
       type: 'text',
-      font: `700 ${fontSize}px "Embedded Space Grotesk"`,
+      font: `700 ${fontSize}px "Embedded VAGRounded"`,
       fillStyle: 'white',
       content: 'Project Info',
       x: marginLeft,
@@ -66,7 +66,7 @@ class ProjectDescriptionPlane extends CanvasPlane {
     const textStartY = yPos;
 
     paragraphs.forEach(paragraph => {
-      this.ctx.font = `${fontSize}px "Embedded Space Grotesk"`;
+      this.ctx.font = `${fontSize}px "Embedded VAGRounded"`;
       const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
       lines.forEach(line => {
         const textLine = {

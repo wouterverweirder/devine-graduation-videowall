@@ -13,15 +13,15 @@ class StudentNamePlane extends CanvasPlane {
 
     let yPos = fontSize + marginTop;
 
-    let expert = 'Design';
-    if (this.props.data.attributes.expert.data) {
-      expert = this.props.data.attributes.expert.data.attributes.name;
+    let curriculum = 'Design';
+    if (this.props.data.attributes.curriculum.data) {
+      curriculum = this.props.data.attributes.curriculum.data.attributes.name;
     }
-    const tagLine = `Expert ${expert}`;
+    const tagLine = `Alumnus ${curriculum}`;
 
     this.canvasObjects.push({
       type: 'text',
-      font: `${fontSize}px "Embedded Space Grotesk"`,
+      font: `${fontSize}px "Embedded VAGRounded"`,
       fillStyle: 'black',
       content: `${this.props.data.attributes.firstName} ${this.props.data.attributes.lastName}`,
       x: marginLeft,
@@ -32,7 +32,7 @@ class StudentNamePlane extends CanvasPlane {
 
     this.canvasObjects.push({
       type: 'text',
-      font: `50px "Embedded Space Grotesk"`,
+      font: `50px "Embedded VAGRounded"`,
       fillStyle: '#797979',
       content: `${tagLine}`,
       x: marginLeft,
