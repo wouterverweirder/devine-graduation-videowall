@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'Embedded VAGRounded';
   src: url('../fonts/VAGRoundedStd-Light.woff2') format('woff2');
-  font-weight: lighter;
+  font-weight: 300;
   font-style: normal;
 }
 
@@ -15,7 +15,7 @@
 @font-face {
   font-family: 'Embedded OpenSans';
   src: url('../fonts/OpenSans.woff2') format('woff2');
-  font-weight: regular;
+  font-weight: normal;
   font-style: normal;
 }
 

@@ -112,6 +112,16 @@ class Application {
                 id,
                 attributes {
                   name
+                  image {
+                    data {
+                      attributes {
+                        url,
+                        width,
+                        height,
+                        mime
+                      }
+                    }
+                  }
                   pillar {
                     data {
                       attributes {
