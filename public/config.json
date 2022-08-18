@@ -64,7 +64,7 @@
     {
       "id": "screen-2",
       "roles": [
-        "videos"
+        "curriculum-picture"
       ],
       "output": {
         "left": 0,
@@ -112,7 +112,7 @@
     {
       "id": "screen-4",
       "roles": [
-        "landscape-screenshots"
+        "project-quote"
       ],
       "output": {
         "left": 0.5,

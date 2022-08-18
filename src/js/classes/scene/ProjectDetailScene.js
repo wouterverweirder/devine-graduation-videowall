@@ -293,6 +293,18 @@ class ProjectDetailScene extends SceneBase {
               screenConfig
             }); 
           }
+        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.CURRICULUM_PICTURE)) {
+          if (project.attributes.curriculum.data?.attributes.image.data?.attributes.url) {
+            projectPlane = await createPlaneForScreen({
+              data: {
+                id: `${idPrefix}-curriculum-picture-${screenCamera.id}`,
+                type: PlaneType.IMAGE,
+                url: project.attributes.curriculum.data.attributes.image.data.attributes.url,
+                layers: screenCamera.props.layers
+              },
+              screenConfig
+            }); 
+          }
         }
         if (!projectPlane) {
           // add an empty plane on the screen when we have no plane on that screen
