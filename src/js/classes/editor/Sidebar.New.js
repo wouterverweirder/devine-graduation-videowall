@@ -88,7 +88,7 @@ function SidebarNew( editor ) {
 
     const projectOptions = {};
     projects.forEach((project) => {
-      projectOptions[project.id] = `${project.firstName} ${project.lastName}`;
+      projectOptions[project.id] = `${project.attributes.firstName} ${project.attributes.lastName}`;
     })
     projectSelect.setOptions(projectOptions);
     if (!firstProject && projects.length > 0) {
@@ -108,19 +108,19 @@ function SidebarNew( editor ) {
   const updateProjectAssetsList = () => {
     const project = getSelectedProject();
     const items = [];
-    console.log(project.attributes.mainAsset.data.attributes)
-    if (project.attributes.mainAsset.data) {
-      items.push({
-        id: project.attributes.mainAsset.data.id,
-        name: new URL(project.attributes.mainAsset.data.attributes.url).pathname
-      });
-    }
-    project.attributes.assets.data.forEach(asset => {
-      items.push({
-        id: asset.id,
-        name: new URL(asset.attributes.url).pathname
-      });
-    });
+    console.warn('TODO: get assets from project in Editor Sidebar');
+    // if (project.attributes.mainAsset.data) {
+    //   items.push({
+    //     id: project.attributes.mainAsset.data.id,
+    //     name: new URL(project.attributes.mainAsset.data.attributes.url).pathname
+    //   });
+    // }
+    // project.attributes.assets.data.forEach(asset => {
+    //   items.push({
+    //     id: asset.id,
+    //     name: new URL(asset.attributes.url).pathname
+    //   });
+    // });
     projectAssetsList.setItems(items);
   };
 
@@ -156,7 +156,7 @@ function SidebarNew( editor ) {
 
 	const fetchProjectsList = async () => {
     const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
-    projects = data.data.projects.data;
+    projects = data.data.students.data;
   };
 
   refreshUI();
