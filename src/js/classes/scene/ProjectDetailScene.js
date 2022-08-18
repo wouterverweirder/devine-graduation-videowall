@@ -10,6 +10,9 @@ import { StudentNamePlane } from './objects/StudentNamePlane.js';
 import { PlaneSlider } from './PlaneSlider.js';
 import { SceneBase, SceneState } from "./SceneBase.js";
 
+const studentNameHeight = 280;
+const studentNameTriangleMaxHeight = 80;
+
 class ProjectDetailScene extends SceneBase {
 
   planeSliders = [];
@@ -153,7 +156,7 @@ class ProjectDetailScene extends SceneBase {
         const screenConfig = this.screenConfigsById[profilePictureCamera.id];
         const screenScale = calculateScaleForScreenConfig(screenConfig);
         const scale = {...screenScale};
-        scale.y *= (280 / 1920);
+        scale.y *= ((studentNameHeight+studentNameTriangleMaxHeight) / 1920);
 
         const student = project;
         const plane = new StudentNamePlane(`student-name-${student.id}`, {
@@ -165,7 +168,7 @@ class ProjectDetailScene extends SceneBase {
           scale,
           textureSize: {
             x: 1080,
-            y: 280,
+            y: (studentNameHeight+studentNameTriangleMaxHeight),
           },
           data: student
         });
@@ -334,12 +337,12 @@ class ProjectDetailScene extends SceneBase {
           // profile picture is less high
           const screenScale = calculateScaleForScreenConfig(screenConfig);
           const scale = {...screenScale};
-          scale.y *= (280 / 1920);
+          scale.y *= (studentNameHeight / 1920);
           projectPlane.applyProps({
             position: {
               x: projectPlane.props.position.x,
               y: projectPlane.props.position.y + (scale.y / 2),
-              z: projectPlane.props.position.z
+              z: -0.2
             },
             scale: {
               x: projectPlane.props.scale.x,
@@ -434,6 +437,9 @@ class ProjectDetailScene extends SceneBase {
              this.addObject(studentNamePlane);
             }
             projectPlane.intro();
+            if(studentNamePlane) {
+              studentNamePlane.intro();
+            }
           }, projectPlaneIntroDelay);
   
           // outro color plane
@@ -577,7 +583,7 @@ class ProjectDetailScene extends SceneBase {
           const screenConfig = this.screenConfigsById[newPlane.customData.camera.id];
           const screenScale = calculateScaleForScreenConfig(screenConfig);
           const scale = {...screenScale};
-          scale.y *= (280 / 1920);
+          scale.y *= (studentNameHeight / 1920);
           newPlane.applyProps({
             position: {
               x: newPlane.props.position.x,
@@ -628,7 +634,7 @@ class ProjectDetailScene extends SceneBase {
           const screenConfig = this.screenConfigsById[newPlane.customData.camera.id];
           const screenScale = calculateScaleForScreenConfig(screenConfig);
           const scale = {...screenScale};
-          scale.y *= (280 / 1920);
+          scale.y *= ((studentNameHeight+studentNameTriangleMaxHeight) / 1920);
 
           const setPropsNewPlane = {
             position: {
@@ -639,7 +645,7 @@ class ProjectDetailScene extends SceneBase {
             scale,
             textureSize: {
               x: 1080,
-              y: 280,
+              y: (studentNameHeight+studentNameTriangleMaxHeight),
             }
           }
           newPlane.applyProps(setPropsNewPlane);

@@ -1,17 +1,26 @@
 import { CanvasPlane } from "./CanvasPlane.js";
+import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 
 class StudentNamePlane extends CanvasPlane {
 
+  tl = false;
+  introProgress = 0;
   canvasObjects = [];
+  maxTriangleHeight = 80;
+
+  async createMaterial() {
+    this.transparent = true;
+    return await super.createMaterial();
+  }
 
   async createInitalCanvasContent() {
     const marginLeft = 100;
     const marginTop = 50;
 
-    const fontSize = 70;
+    const fontSize = 60 * 1.333;
     const lineHeight = 70;
 
-    let yPos = fontSize + marginTop;
+    let yPos = fontSize + marginTop + this.maxTriangleHeight;
 
     let curriculum = 'Design';
     if (this.props.data.attributes.curriculum.data) {
@@ -21,8 +30,8 @@ class StudentNamePlane extends CanvasPlane {
 
     this.canvasObjects.push({
       type: 'text',
-      font: `${fontSize}px "Embedded VAGRounded"`,
-      fillStyle: 'black',
+      font: `700 ${fontSize}px "Embedded VAGRounded"`,
+      fillStyle: 'rgb(68,200,245)',
       content: `${this.props.data.attributes.firstName} ${this.props.data.attributes.lastName}`,
       x: marginLeft,
       y: yPos,
@@ -32,8 +41,8 @@ class StudentNamePlane extends CanvasPlane {
 
     this.canvasObjects.push({
       type: 'text',
-      font: `50px "Embedded VAGRounded"`,
-      fillStyle: '#797979',
+      font: `400 ${36*1.333}px "Embedded VAGRounded"`,
+      fillStyle: 'black',
       content: `${tagLine}`,
       x: marginLeft,
       y: yPos,
@@ -45,8 +54,17 @@ class StudentNamePlane extends CanvasPlane {
 
   draw() {
     // draw my basic displaylist to the screen
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.fillStyle = 'white';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(0, this.maxTriangleHeight, this.canvas.width, this.canvas.height - this.maxTriangleHeight);
+    // draw triangle
+    const triangleHeight = this.maxTriangleHeight * this.introProgress;
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, this.maxTriangleHeight);
+    this.ctx.lineTo(this.canvas.width, this.maxTriangleHeight);
+    this.ctx.lineTo(this.canvas.width, this.maxTriangleHeight - triangleHeight);
+    this.ctx.closePath();
+    this.ctx.fill();
     this.canvasObjects.forEach(canvasObject => {
       if (canvasObject.type === 'text') {
         this.ctx.save();
@@ -58,6 +76,24 @@ class StudentNamePlane extends CanvasPlane {
       }
     });
     this.texture.needsUpdate = true;
+  }
+
+  intro() {
+    // setup timeline
+    this.tl = gsap.timeline({
+      onUpdate: () => {
+        this.draw();
+      }
+    });
+    console.log('intro');
+    this.tl.to(this, { introProgress: 1, duration: 0.5, delay: 0.1, ease: 'power1.out' });
+  }
+
+  dispose() {
+    if (this.tl) {
+      this.tl.kill();
+    }
+    super.dispose();
   }
 }
 
