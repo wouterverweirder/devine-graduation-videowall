@@ -7,6 +7,7 @@ import { ProjectAssetsPlane } from '../classes/scene/objects/ProjectAssetsPlane.
 import { ProjectDescriptionPlane } from '../classes/scene/objects/ProjectDescriptionPlane.js';
 import { PlaneType } from '../consts/PlaneType.js';
 import { ProjectBioPlane } from '../classes/scene/objects/ProjectBioPlane.js';
+import { ProjectQuotePlane } from '../classes/scene/objects/ProjectQuotePlane.js';
 import { CanvasPlane } from '../classes/scene/objects/CanvasPlane.js';
 import { DevineInfoPlane } from '../classes/scene/objects/DevineInfoPlane.js';
 import { VideoPlane } from '../classes/scene/objects/VideoPlane.js';
@@ -64,6 +65,8 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
     plane = new ProjectStudentPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_BIO) {
     plane = new ProjectBioPlane(data.id, props);
+  } else if (data.type === PlaneType.PROJECT_QUOTE) {
+    plane = new ProjectQuotePlane(data.id, props);
   } else if (data.type === PlaneType.DEVINE_INFO) {
     plane = new DevineInfoPlane(data.id, props);
   } else {

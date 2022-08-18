@@ -293,6 +293,18 @@ class ProjectDetailScene extends SceneBase {
               screenConfig
             }); 
           }
+        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_QUOTE)) {
+          if (project.attributes.quote) {
+            projectPlane = await createPlaneForScreen({
+              data: {
+                id: `${idPrefix}-quote-${screenCamera.id}`,
+                type: PlaneType.PROJECT_QUOTE,
+                data: project,
+                layers: screenCamera.props.layers
+              },
+              screenConfig
+            }); 
+          }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.CURRICULUM_PICTURE)) {
           if (project.attributes.curriculum.data?.attributes.image.data?.attributes.url) {
             projectPlane = await createPlaneForScreen({

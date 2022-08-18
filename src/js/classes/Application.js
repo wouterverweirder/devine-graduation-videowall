@@ -144,7 +144,8 @@ class Application {
                   mime
                 }
               }
-            }
+            },
+            quote
           }
         }
       }

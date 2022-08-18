@@ -66,7 +66,9 @@ class ProjectsOverviewScene extends SceneBase {
     } else if (stateName === SceneState.INTRO) {
       const cameras = getScreenCamerasForRoles(this.cameras, [
         ScreenRole.PROFILE_PICTURE,
+        ScreenRole.CURRICULUM_PICTURE,
         ScreenRole.PROJECT_BIO,
+        ScreenRole.PROJECT_QUOTE,
         ScreenRole.PORTRAIT_SCREENSHOTS,
         ScreenRole.LANDSCAPE_SCREENSHOTS,
         ScreenRole.VIDEOS,
