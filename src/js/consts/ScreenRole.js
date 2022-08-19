@@ -5,6 +5,7 @@ const ScreenRole = {
   PROJECT_BIO: 'project-bio',
   PROJECT_DESCRIPTION: 'project-description',
   PROJECT_QUOTE: 'project-quote',
+  PROJECT_CONTACT: 'project-contact',
   PORTRAIT_SCREENSHOTS: 'portrait-screenshots',
   LANDSCAPE_SCREENSHOTS: 'landscape-screenshots',
   VIDEOS: 'videos',

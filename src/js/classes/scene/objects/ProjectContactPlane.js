@@ -1,8 +1,9 @@
 import { CanvasPlane } from "./CanvasPlane.js";
 import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
+import QRious from '../../../qrious/qrious.js';
 
-class ProjectBioPlane extends CanvasPlane {
+class ProjectContactPlane extends CanvasPlane {
 
   canvasObjects = [];
   title = {};
@@ -19,11 +20,15 @@ class ProjectBioPlane extends CanvasPlane {
   };
   delayBeforeScrolling = 10;
   scrollSpeedFactor = 30; // smaller is slower
+  bottomSectionHeight = 300;
+  qrSize = 200;
+  urlLines = [];
 
   async createInitalCanvasContent() {
     const marginLeft = 50;
     const marginRight = 50;
     const marginTop = 50;
+    const marginBottom = 50;
 
     const fontSizeTitle = 40 * 1.3333; // pt to px
     const fontSize = 36 * 1.3333; // pt to px
@@ -54,7 +59,7 @@ class ProjectBioPlane extends CanvasPlane {
       type: 'text',
       font: `700 ${fontSizeTitle}px "Embedded VAGRounded"`,
       fillStyle: 'rgb(68, 200, 245)',
-      content: 'BIO',
+      content: 'WERKERVARING',
       x: marginLeft,
       y: yPos,
       opacity: 0
@@ -62,7 +67,8 @@ class ProjectBioPlane extends CanvasPlane {
 
     yPos += 100;
 
-    const paragraphs = this.props.data.attributes.bio.split("\n");
+    let paragraphs = (this.props.data.attributes.bio) ? this.props.data.attributes.bio.split("\n") : [];
+    paragraphs = [...paragraphs, ...paragraphs, ...paragraphs];
 
     const textStartY = yPos;
 
@@ -94,15 +100,68 @@ class ProjectBioPlane extends CanvasPlane {
       image: gradientTop,
       opacity: 1,
       x: 0,
-      y: 100
+      y: 0
     };
     this.gradientBottom = {
       type: 'image',
       image: gradientBottom,
       opacity: 1,
       x: 0,
-      y: this.props.textureSize.y - this.gradientBottomHeight
+      y: this.props.textureSize.y - this.bottomSectionHeight - this.gradientBottomHeight
     };
+
+    if (this.props.data.attributes.website) {
+      // create a website variable and strip http(s)://(www.) with a regex
+      const website = this.props.data.attributes.website.replace(/(https?:\/\/)?(www\.)?/g, '');
+
+      // add the qr code
+      const qr = new QRious();
+      qr.set({
+        background: 'white',
+        backgroundAlpha: 1,
+        foreground: 'black',
+        foregroundAlpha: 1,
+        level: 'L',
+        padding: 0,
+        size: this.qrSize,
+        value: this.props.data.attributes.website
+      });
+      this.qr = {
+        type: 'image',
+        image: qr.image,
+        opacity: 1,
+        x: marginLeft,
+        y: this.props.textureSize.y - this.bottomSectionHeight + (this.bottomSectionHeight - this.qrSize) / 2
+      }
+
+      // add the url
+      this.ctx.font = `700 ${fontSize}px "Embedded OpenSans"`;
+      const urlLines = getLines(this.ctx, website, this.canvas.width - marginLeft - marginRight - this.qrSize - 50);
+      console.log(urlLines);
+      urlLines.forEach((line, index) => {
+        const textLine = {
+          type: 'text',
+          font: `700 ${fontSize}px "Embedded OpenSans"`,
+          fillStyle: 'black',
+          content: line,
+          x: marginLeft + this.qrSize + 50,
+          y: this.qr.y + lineHeight / 2 + index * lineHeight,
+          opacity: 1
+        };
+        this.urlLines.push(textLine);
+      });
+
+
+      // this.urlLine = {
+      //   type: 'text',
+      //   font: `700 ${fontSize}px "Embedded OpenSans"`,
+      //   fillStyle: 'black',
+      //   content: `≫ ${website}`,
+      //   x: marginLeft + this.qrSize + 50,
+      //   y: this.qr.y + lineHeight / 2 + (this.qrSize - lineHeight) / 2,
+      //   opacity: 1
+      // };
+    }
   }
 
   draw() {
@@ -128,15 +187,22 @@ class ProjectBioPlane extends CanvasPlane {
 
     this.ctx.save();
     this.ctx.translate(this.textLinesOffset.x, this.textLinesOffset.y);
+    drawCanvasObject(this.title);
     this.textLines.forEach(canvasObject => {
       drawCanvasObject(canvasObject);
     });
     this.ctx.restore();
     this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.props.textureSize.x, this.gradientTop.y);
+    this.ctx.fillRect(0, this.props.textureSize.y - this.bottomSectionHeight, this.props.textureSize.x, this.bottomSectionHeight);
     drawCanvasObject(this.gradientTop);
     drawCanvasObject(this.gradientBottom);
-    drawCanvasObject(this.title);
+    if (this.qr) {
+      drawCanvasObject(this.qr);
+      this.urlLines.forEach(canvasObject => {
+        drawCanvasObject(canvasObject);
+      });
+    }
     this.texture.needsUpdate = true;
   }
 
@@ -176,4 +242,4 @@ class ProjectBioPlane extends CanvasPlane {
   }
 }
 
-export { ProjectBioPlane }
+export { ProjectContactPlane }

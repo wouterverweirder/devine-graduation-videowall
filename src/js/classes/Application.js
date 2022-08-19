@@ -134,6 +134,7 @@ class Application {
               }
             },
             bio,
+            website,
             profilePicture {
               data {
                 id,
