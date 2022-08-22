@@ -52,7 +52,7 @@ const fetchProjects = async (argv) => {
       }
     }
   `;
-  return await (await fetch(`${getServerURL(argv)}/graphql`, {
+  let projects = await (await fetch(`${getServerURL(argv)}/graphql`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -63,6 +63,11 @@ const fetchProjects = async (argv) => {
       },
     }),
   })).json();
+  // sync assets locally
+  if (window.VideoWallAPI) {
+    projects = await window.VideoWallAPI.processProjects(projects, argv);
+  }
+  return projects;
 }
 
 const getServerURL = (argv) => {
