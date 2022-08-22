@@ -6,7 +6,6 @@ import QRious from '../../../qrious/qrious.js';
 class ProjectContactPlane extends CanvasPlane {
 
   canvasObjects = [];
-  title = {};
   gradientTop = {};
   gradientTopHeight = 50;
   gradientBottom = {};
@@ -28,7 +27,6 @@ class ProjectContactPlane extends CanvasPlane {
     const marginLeft = 50;
     const marginRight = 50;
     const marginTop = 50;
-    const marginBottom = 50;
 
     const fontSizeTitle = 40 * 1.3333; // pt to px
     const fontSize = 36 * 1.3333; // pt to px
@@ -55,43 +53,56 @@ class ProjectContactPlane extends CanvasPlane {
 
     let yPos = fontSizeTitle + marginTop;
 
-    this.title = {
-      type: 'text',
-      font: `700 ${fontSizeTitle}px "Embedded VAGRounded"`,
-      fillStyle: 'rgb(68, 200, 245)',
-      content: 'WERKERVARING',
-      x: marginLeft,
-      y: yPos,
-      opacity: 0
-    };
+    const addSectionIfNeeded = (title, content) => {
+      if (content) {
+        // title might be too long as well
+        this.ctx.font = `700 ${fontSizeTitle}px "Embedded VAGRounded"`
+        const lines = getLines(this.ctx, title.trim(), this.canvas.width - marginLeft - marginRight);
+        lines.forEach(line => {
+          const textLine = {
+            type: 'text',
+            font: `700 ${fontSizeTitle}px "Embedded VAGRounded"`,
+            fillStyle: 'rgb(68, 200, 245)',
+            content: line,
+            x: marginLeft,
+            y: yPos,
+            opacity: 0
+          };
+          this.textLines.push(textLine);
+          yPos += lineHeight;
+        });
+    
+        yPos += 50;
+    
+        let paragraphs = content.split("\n");
+    
+        paragraphs.forEach(paragraph => {
+          this.ctx.font = `400 ${fontSize}px "Embedded OpenSans"`;
+          const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
+          lines.forEach(line => {
+            const textLine = {
+              type: 'text',
+              font: this.ctx.font,
+              fillStyle: 'black',
+              content: line,
+              x: marginLeft,
+              y: yPos,
+              opacity: 0
+            };
+            this.textLines.push(textLine);
+            yPos += lineHeight;
+          });
+          yPos += lineHeight / 2;
+        });
 
-    yPos += 100;
+        yPos += 100;
+      }
+    }
 
-    let paragraphs = (this.props.data.attributes.bio) ? this.props.data.attributes.bio.split("\n") : [];
-    paragraphs = [...paragraphs, ...paragraphs, ...paragraphs];
+    addSectionIfNeeded('WERKERVARING', this.props.data.attributes.experience);
+    addSectionIfNeeded('LEVENSLES VOOR TOEKOMSTIGE STUDENTEN', this.props.data.attributes.lifeLesson);
 
-    const textStartY = yPos;
-
-    paragraphs.forEach(paragraph => {
-      this.ctx.font = `400 ${fontSize}px "Embedded OpenSans"`;
-      const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
-      lines.forEach(line => {
-        const textLine = {
-          type: 'text',
-          font: this.ctx.font,
-          fillStyle: 'black',
-          content: line,
-          x: marginLeft,
-          y: yPos,
-          opacity: 0
-        };
-        this.textLines.push(textLine);
-        yPos += lineHeight;
-      });
-      yPos += lineHeight / 2;
-    });
-
-    this.textHeight = (yPos - textStartY - lineHeight / 2);
+    this.textHeight = (yPos - lineHeight / 2);
     this.textScrollAmount = Math.max(0, yPos - this.props.textureSize.y);
 
     // add the gradients
@@ -137,7 +148,6 @@ class ProjectContactPlane extends CanvasPlane {
       // add the url
       this.ctx.font = `700 ${fontSize}px "Embedded OpenSans"`;
       const urlLines = getLines(this.ctx, website, this.canvas.width - marginLeft - marginRight - this.qrSize - 50);
-      console.log(urlLines);
       urlLines.forEach((line, index) => {
         const textLine = {
           type: 'text',
@@ -150,17 +160,6 @@ class ProjectContactPlane extends CanvasPlane {
         };
         this.urlLines.push(textLine);
       });
-
-
-      // this.urlLine = {
-      //   type: 'text',
-      //   font: `700 ${fontSize}px "Embedded OpenSans"`,
-      //   fillStyle: 'black',
-      //   content: `≫ ${website}`,
-      //   x: marginLeft + this.qrSize + 50,
-      //   y: this.qr.y + lineHeight / 2 + (this.qrSize - lineHeight) / 2,
-      //   opacity: 1
-      // };
     }
   }
 
@@ -187,7 +186,6 @@ class ProjectContactPlane extends CanvasPlane {
 
     this.ctx.save();
     this.ctx.translate(this.textLinesOffset.x, this.textLinesOffset.y);
-    drawCanvasObject(this.title);
     this.textLines.forEach(canvasObject => {
       drawCanvasObject(canvasObject);
     });
@@ -216,9 +214,6 @@ class ProjectContactPlane extends CanvasPlane {
     });
     const maxDelay = 0.5;
     const delayOffset = 0.1;
-    this.title.opacity = 1;
-    // this.tl.to(this.title, { y: this.title.y, opacity: 1, duration: 0.5, ease: Cubic.easeInOut }, 0);
-    // this.title.y += 100;
     this.textLines.forEach((canvasObject, index) => {
       const delay = delayOffset + Cubic.easeInOut(index / this.textLines.length) * maxDelay;
       this.tl.to(canvasObject, { y: canvasObject.y, opacity: 1, delay, duration: 0.5, ease: Cubic.easeInOut }, 0);

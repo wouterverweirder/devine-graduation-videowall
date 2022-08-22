@@ -34,7 +34,10 @@ const fetchProjects = async (argv) => {
               }
             },
             bio,
+            experience,
+            lifeLesson,
             website,
+            quote,
             profilePicture {
               data {
                 id,
@@ -46,7 +49,17 @@ const fetchProjects = async (argv) => {
                 }
               }
             },
-            quote
+            mainAsset {
+              data {
+                id,
+                attributes {
+                  url,
+                  width,
+                  height,
+                  mime
+                }
+              }
+            }
           }
         }
       }

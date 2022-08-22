@@ -17,6 +17,10 @@ contextBridge.exposeInMainWorld('VideoWallAPI', {
         const profilePicture = student.attributes.profilePicture.data.attributes;
         await updateUrlToLocalFileIfNeeded(profilePicture, uploadsPath);
       }
+      if (student.attributes.mainAsset.data) {
+        const mainAsset = student.attributes.mainAsset.data.attributes;
+        await updateUrlToLocalFileIfNeeded(mainAsset, uploadsPath);
+      }
       if (student.attributes.curriculum.data?.attributes.image.data) {
         const image = student.attributes.curriculum.data.attributes.image.data.attributes;
         await updateUrlToLocalFileIfNeeded(image, uploadsPath);

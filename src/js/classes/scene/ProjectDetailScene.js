@@ -223,7 +223,7 @@ class ProjectDetailScene extends SceneBase {
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-main-video-${screenCamera.id}`,
-                type: PlaneType.VIDEO,
+                type: PlaneType.IMAGE,
                 url: project.attributes.mainAsset.data.attributes.url,
                 layers: screenCamera.props.layers,
                 muted: false
