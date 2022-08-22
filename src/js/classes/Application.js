@@ -5,6 +5,7 @@ import { ScreenRole } from '../consts/ScreenRole.js';
 import { ProjectsOverviewScene } from './scene/ProjectsOverviewScene.js';
 import { ProjectDetailScene } from './scene/ProjectDetailScene.js';
 import { SceneState } from './scene/SceneBase.js';
+import { fetchProjects, getServerAddress, getServerURL } from '../functions/fetchProjects.js';
 
 class Application {
 
@@ -99,86 +100,15 @@ class Application {
   }
 
   async fetchProjects() {
-    const query = `# Write your query or mutation here
-    query{
-      students(pagination: { page: 1, pageSize: 100 }){
-        data {
-          id,
-          attributes {
-            firstName,
-            lastName,
-            curriculum {
-              data {
-                id,
-                attributes {
-                  name
-                  image {
-                    data {
-                      attributes {
-                        url,
-                        width,
-                        height,
-                        mime
-                      }
-                    }
-                  }
-                  pillar {
-                    data {
-                      attributes {
-                        name
-                        color
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            bio,
-            website,
-            profilePicture {
-              data {
-                id,
-                attributes {
-                  url,
-                  width,
-                  height,
-                  mime
-                }
-              }
-            },
-            quote
-          }
-        }
-      }
-    }`;
-    return await (await fetch(`${this.getServerURL()}/graphql`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query,
-        variables: {
-        },
-      }),
-    })).json();
+    return await fetchProjects(this.argv);
   }
 
   getServerURL() {
-    if (this.argv['server-url']) {
-      return this.argv['server-url'];
-    }
-    if (window.location.protocol === 'http:') {
-      return '';
-    }
-    return `http://${this.getServerAddress()}`;
+    return getServerURL(this.argv);
   }
 
   getServerAddress() {
-    if (window.location.protocol === 'http:') {
-      return window.location.hostname;
-    }
-    return '127.0.0.1';
+    return getServerAddress();
   }
 
   setupApplicationSpecificUI() {
