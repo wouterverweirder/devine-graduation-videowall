@@ -1,4 +1,5 @@
 import { ProjectorApplication } from './js/classes/ProjectorApplication.js';
+import './js/offscreencanvas.polyfill.js';
 
 let application;
 
