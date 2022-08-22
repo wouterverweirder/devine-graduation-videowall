@@ -79,19 +79,19 @@ class Application {
       }
     };
 
-    if (this.argv['websocket']) {
+    if (this.isControlledThroughWebsocket()) {
       this.connectToServer();
     } else {
+      this.currentProjectIndex = -1
       this.onRequestShowProjectsOverview();
       // keyboard interaction
-      let currentProjectIndex = -1
       document.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowRight') {
-          currentProjectIndex++;
-          if (currentProjectIndex >= this.students.length) {
-            currentProjectIndex = 0;
+          this.currentProjectIndex++;
+          if (this.currentProjectIndex >= this.students.length) {
+            this.currentProjectIndex = 0;
           }
-          this.onRequestShowProject(this.students[currentProjectIndex]);
+          this.onRequestShowProject(this.students[this.currentProjectIndex]);
         }
       });
     }
@@ -101,6 +101,10 @@ class Application {
 
   async fetchProjects() {
     return await fetchProjects(this.argv);
+  }
+  
+  isControlledThroughWebsocket() {
+    return !!this.argv['websocket'];
   }
 
   getServerURL() {
@@ -200,6 +204,13 @@ class Application {
   }
 
   async onRequestShowProjectsOverview () {
+    // disable overview, show first project
+    if (this.students.length > 0) {
+      this.currentProjectIndex = 0;
+      await this.onRequestShowProject(this.students[0]);
+      return;
+    }
+    // end disable overview
     const visibleSceneIsOverview = (this.visibleScenes.length === 1 && this.visibleScenes[0] instanceof ProjectsOverviewScene);
     if (visibleSceneIsOverview) {
       return;

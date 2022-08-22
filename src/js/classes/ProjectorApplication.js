@@ -26,6 +26,31 @@ class ProjectorApplication extends Application {
     outputCanvas.height = this.config.appDimensions.height;
     this.renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
 
+    if (this.isSingleProjection) {
+      document.body.style.width = '100vw';
+      document.body.style.height = '100vh';
+      document.body.style.overflow = 'hidden';
+    }
+
+    if (!this.isControlledThroughWebsocket() && this.isSingleProjection) {
+      // add next project button
+      const nextProjectButton = document.createElement('button');
+      nextProjectButton.innerHTML = 'Next project';
+      nextProjectButton.style.position = 'absolute';
+      nextProjectButton.style.top = '10px';
+      nextProjectButton.style.left = '10px';
+      nextProjectButton.style.zIndex = '100';
+      nextProjectButton.addEventListener('click', () => {
+        this.currentProjectIndex++;
+        if (this.currentProjectIndex >= this.students.length) {
+          this.currentProjectIndex = 0;
+        }
+        this.onRequestShowProject(this.students[this.currentProjectIndex]);
+      }
+      );
+      document.body.appendChild(nextProjectButton);
+    }
+
     this.resetScreensaver();
   }
 
@@ -43,9 +68,6 @@ class ProjectorApplication extends Application {
   applicationSpecificRender() {
     if (this.isSingleProjection) {
       this.renderer.setSize( this.fullBounds.width * 500, this.fullBounds.height * 500 );
-      document.body.style.width = '100vw';
-      document.body.style.height = '100vh';
-      document.body.style.overflow = 'hidden';
 
       this.cameras.forEach(camera => {
         const screenConfig = this.screenConfigsById[camera.id];
