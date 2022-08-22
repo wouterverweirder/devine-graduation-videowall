@@ -25,8 +25,8 @@ class ProjectBioPlane extends CanvasPlane {
     const marginRight = 50;
     const marginTop = 50;
 
-    const fontSizeTitle = 40 * 1.3333; // pt to px
-    const fontSize = 36 * 1.3333; // pt to px
+    const fontSizeTitle = Math.round(40 * 1.3333); // pt to px
+    const fontSize = Math.round(36 * 1.3333); // pt to px
     const lineHeight = 70;
 
     const gradientTop = new OffscreenCanvas(this.props.textureSize.x, this.gradientTopHeight);
@@ -72,7 +72,7 @@ class ProjectBioPlane extends CanvasPlane {
       lines.forEach(line => {
         const textLine = {
           type: 'text',
-          font: this.ctx.font,
+          font: `400 ${fontSize}px "Embedded OpenSans"`,
           fillStyle: 'black',
           content: line,
           x: marginLeft,
