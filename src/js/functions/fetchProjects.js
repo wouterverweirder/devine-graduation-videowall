@@ -87,14 +87,14 @@ const getServerURL = (argv) => {
   if (argv['server-url']) {
     return argv['server-url'];
   }
-  if (window.location.protocol === 'http:') {
+  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
     return '';
   }
   return `http://${getServerAddress()}`;
 }
 
 const getServerAddress = () => {
-  if (window.location.protocol === 'http:') {
+  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
     return window.location.hostname;
   }
   return '127.0.0.1';
