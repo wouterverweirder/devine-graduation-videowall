@@ -1,5 +1,6 @@
 {
   "interactionTimeout": 300000,
+  "crop": 1,
   "scenes": {
     "projectDetail": {
       "screenshotSlideInterval": 4000
