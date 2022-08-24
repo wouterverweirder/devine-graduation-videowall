@@ -127,9 +127,10 @@ class ProjectorApplication extends Application {
       const bottom = Math.floor( this.config.appDimensions.height * screenConfig.output.bottom );
       const width = Math.floor( this.config.appDimensions.width * screenConfig.output.width );
       const height = Math.floor( this.config.appDimensions.height * screenConfig.output.height );
+      const crop = Math.floor(isNaN(this.config.crop) ? 0 : this.config.crop);
 
       this.renderer.setViewport( left, bottom, width, height );
-      this.renderer.setScissor( left, bottom, width, height );
+      this.renderer.setScissor( left + crop, bottom + crop, width - crop*2, height - crop*2 );
       this.renderer.setScissorTest( true );
       this.renderer.setClearColor( BLACK );
 
