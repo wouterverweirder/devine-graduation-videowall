@@ -102,6 +102,5 @@ const getServerAddress = () => {
 
 export {
   fetchProjects,
-  getServerURL,
   getServerAddress
 }

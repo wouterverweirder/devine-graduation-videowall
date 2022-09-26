@@ -5,7 +5,7 @@ import { ScreenRole } from '../consts/ScreenRole.js';
 import { ProjectsOverviewScene } from './scene/ProjectsOverviewScene.js';
 import { ProjectDetailScene } from './scene/ProjectDetailScene.js';
 import { SceneState } from './scene/SceneBase.js';
-import { fetchProjects, getServerAddress, getServerURL } from '../functions/fetchProjects.js';
+import { fetchProjects } from '../functions/fetchProjects.js';
 
 class Application {
 
@@ -107,14 +107,6 @@ class Application {
     return !!this.argv['websocket'];
   }
 
-  getServerURL() {
-    return getServerURL(this.argv);
-  }
-
-  getServerAddress() {
-    return getServerAddress();
-  }
-
   setupApplicationSpecificUI() {
     // needs to be implemented by extending class if needed
   }
@@ -123,7 +115,7 @@ class Application {
   }
 
   connectToServer() {
-    this.serverConnection.connect(this.getServerAddress());
+    this.serverConnection.connect(this.argv['websocket']);
   }
 
   addObject(object) {
@@ -235,6 +227,8 @@ class Application {
   }
 
   async onRequestShowProject(project) {
+    // parse the project
+    console.log(project);
     while (this.visibleScenes.length > 0) {
       const visibleScene = this.visibleScenes.shift();
       visibleScene.animateToStateName(SceneState.OUTRO).then(() => {
