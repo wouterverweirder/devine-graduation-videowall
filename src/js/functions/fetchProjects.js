@@ -65,7 +65,8 @@ const fetchProjects = async (argv) => {
       }
     }
   `;
-  let projects = await (await fetch(`${getServerURL(argv)}/graphql`, {
+  // always fetch local
+  let projects = await (await fetch(argv['frontend-graphql-url'], {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -83,24 +84,6 @@ const fetchProjects = async (argv) => {
   return projects;
 }
 
-const getServerURL = (argv) => {
-  if (argv['server-url']) {
-    return argv['server-url'];
-  }
-  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-    return '';
-  }
-  return `http://${getServerAddress()}`;
-}
-
-const getServerAddress = () => {
-  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-    return window.location.hostname;
-  }
-  return '127.0.0.1';
-}
-
 export {
-  fetchProjects,
-  getServerAddress
+  fetchProjects
 }
