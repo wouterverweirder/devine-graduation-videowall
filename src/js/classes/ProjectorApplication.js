@@ -67,7 +67,8 @@ class ProjectorApplication extends Application {
 
   applicationSpecificRender() {
     if (this.isSingleProjection) {
-      this.renderer.setSize( this.fullBounds.width * 500, this.fullBounds.height * 500 );
+      const scaleFactor = 250;
+      this.renderer.setSize( this.fullBounds.width * scaleFactor, this.fullBounds.height * scaleFactor );
 
       this.cameras.forEach(camera => {
         const screenConfig = this.screenConfigsById[camera.id];
@@ -79,11 +80,11 @@ class ProjectorApplication extends Application {
         }
         const isLandscape = (rotation === 0);
 
-        const left = (Math.abs(this.fullBounds.left) + camera.props.position.x - cameraScale.x / 2) * 500;
-        const bottom = (Math.abs(this.fullBounds.bottom) + camera.props.position.y - cameraScale.y / 2) * 500;
+        const left = (Math.abs(this.fullBounds.left) + camera.props.position.x - cameraScale.x / 2) * scaleFactor;
+        const bottom = (Math.abs(this.fullBounds.bottom) + camera.props.position.y - cameraScale.y / 2) * scaleFactor;
 
-        const width = cameraScale.x * 500;
-        const height = cameraScale.y * 500;
+        const width = cameraScale.x * scaleFactor;
+        const height = cameraScale.y * scaleFactor;
   
         this.renderer.setViewport( left, bottom, width, height );
         this.renderer.setScissor( left, bottom, width, height );

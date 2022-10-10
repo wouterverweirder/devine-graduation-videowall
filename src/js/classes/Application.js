@@ -6,6 +6,7 @@ import { ProjectsOverviewScene } from './scene/ProjectsOverviewScene.js';
 import { ProjectDetailScene } from './scene/ProjectDetailScene.js';
 import { SceneState } from './scene/SceneBase.js';
 import { fetchProjects } from '../functions/fetchProjects.js';
+import { options } from '../../options.js';
 
 class Application {
 
@@ -28,7 +29,13 @@ class Application {
   async init() {
     // get the cli args
     // parse the querystring into this.argv using URLSearchParams
-    this.argv = Object.fromEntries(new URLSearchParams(window.location.search));
+    this.argv = {
+      ...options.reduce((acc, option) => {
+        acc[option.name] = option.value.default;
+        return acc;
+      }, {}),
+      ...Object.fromEntries(new URLSearchParams(window.location.search))
+    };
     //replace the argv properties with string values "true" and "false" with boolean values
     Object.keys(this.argv).forEach(key => {
       if (this.argv[key] === 'true') {
