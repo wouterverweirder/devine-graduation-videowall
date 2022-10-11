@@ -13,10 +13,17 @@ class ProjectorApplication extends Application {
 
   setupApplicationSpecificUI() {
 
-    this.ambientAudio = document.createElement('audio');
-    this.ambientAudio.src = 'assets/ambient-01.mp3';
-    this.ambientAudio.loop = true;
-    this.ambientAudio.volume = 0.1;
+    if (!this.hasProjectsOverview()) {
+      this.ambientAudio = document.createElement('audio');
+      this.ambientAudio.oncanplaythrough = () => {
+        if (!this.hasProjectsOverview() || this.activeScene.constructor.name !== 'ProjectsOverviewScene') {
+          this.ambientAudio.pause()
+        }
+      };
+      this.ambientAudio.src = 'assets/ambient-01.mp3';
+      this.ambientAudio.loop = true;
+      this.ambientAudio.volume = 0.1;
+    }
 
     this.isSingleProjection = (this.argv.projection !== 'multi');
     this.scene = new THREE.Scene();
@@ -55,10 +62,12 @@ class ProjectorApplication extends Application {
   }
 
   resetScreensaver() {
-    clearTimeout(this.interactionTimeoutId);
-    this.interactionTimeoutId = setTimeout(() => {
-      this.startScreensaver();
-    }, this.config.interactionTimeout);
+    if (!isNaN(this.config.screensaverTimeout) && this.config.screensaverTimeout > 0) {
+      clearTimeout(this.interactionTimeoutId);
+      this.interactionTimeoutId = setTimeout(() => {
+        this.startScreensaver();
+      }, this.config.screensaverTimeout);
+    }
   }
 
   startScreensaver() {
@@ -154,9 +163,10 @@ class ProjectorApplication extends Application {
 
   async onRequestShowProjectsOverview () {
     await super.onRequestShowProjectsOverview();
-
-    if (this.ambientAudio) {
-      this.ambientAudio.play();
+    if (!this.hasProjectsOverview()) {
+      if (this.ambientAudio) {
+        this.ambientAudio.play();
+      }
     }
   }
 

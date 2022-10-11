@@ -14,6 +14,7 @@ class Application {
   renderer;
   scene;
   visibleScenes = [];
+  activeScene;
   cameras;
   screenConfigsById = {};
   camerasById = {};
@@ -89,8 +90,6 @@ class Application {
     if (this.isControlledThroughWebsocket()) {
       this.connectToServer();
     } else {
-      this.currentProjectIndex = -1
-      this.onRequestShowProjectsOverview();
       // keyboard interaction
       document.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowRight') {
@@ -101,6 +100,15 @@ class Application {
           this.onRequestShowProject(this.students[this.currentProjectIndex]);
         }
       });
+      if (!this.hasProjectsOverview()) {
+        if (this.students.length > 0) {
+          this.currentProjectIndex = 0;
+          await this.onRequestShowProject(this.students[0]);
+        }
+      } else {
+        this.currentProjectIndex = -1
+        this.onRequestShowProjectsOverview();
+      }
     }
 
     requestAnimationFrame(() => this.render());
@@ -200,16 +208,14 @@ class Application {
       }
     });
     this.objects = [];
+    this.activeScene = null;
+  }
+
+  hasProjectsOverview() {
+    return !(this.config.scenes?.projectsOverview?.disabled);
   }
 
   async onRequestShowProjectsOverview () {
-    // disable overview, show first project
-    if (this.students.length > 0) {
-      this.currentProjectIndex = 0;
-      await this.onRequestShowProject(this.students[0]);
-      return;
-    }
-    // end disable overview
     const visibleSceneIsOverview = (this.visibleScenes.length === 1 && this.visibleScenes[0] instanceof ProjectsOverviewScene);
     if (visibleSceneIsOverview) {
       return;
@@ -231,6 +237,7 @@ class Application {
 
     scene.animateToStateName(SceneState.PLAYING);
     this.visibleScenes.push(scene);
+    this.activeScene = scene;
   }
 
   async onRequestShowProject(project) {
@@ -254,6 +261,7 @@ class Application {
 
     scene.animateToStateName(SceneState.PLAYING);
     this.visibleScenes.push(scene);
+    this.activeScene = scene;
   }
 
   async onRequestKeyPressed(event) {
