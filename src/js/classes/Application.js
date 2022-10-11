@@ -1,12 +1,12 @@
-import { ServerConnection } from './ServerConnection.js';
-import { createCamerasForConfig, calculateBoundsOfAllScreenCameras, getFirstScreenCameraForRole } from '../functions/screenUtils.js';
-import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
-import { ScreenRole } from '../consts/ScreenRole.js';
-import { ProjectsOverviewScene } from './scene/ProjectsOverviewScene.js';
-import { ProjectDetailScene } from './scene/ProjectDetailScene.js';
-import { SceneState } from './scene/SceneBase.js';
-import { fetchProjects } from '../functions/fetchProjects.js';
 import { options } from '../../options.js';
+import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
+import { fetchProjects } from '../functions/fetchProjects.js';
+import { calculateBoundsOfAllScreenCameras, createCamerasForConfig } from '../functions/screenUtils.js';
+import { BouncingDVDScene } from './scene/BouncingDVDScene.js';
+import { ProjectDetailScene } from './scene/ProjectDetailScene.js';
+import { ProjectsOverviewScene } from './scene/ProjectsOverviewScene.js';
+import { SceneState } from './scene/SceneBase.js';
+import { ServerConnection } from './ServerConnection.js';
 
 class Application {
 
@@ -241,8 +241,6 @@ class Application {
   }
 
   async onRequestShowProject(project) {
-    // parse the project
-    console.log(project);
     while (this.visibleScenes.length > 0) {
       const visibleScene = this.visibleScenes.shift();
       visibleScene.animateToStateName(SceneState.OUTRO).then(() => {
@@ -268,58 +266,15 @@ class Application {
   }
 
   async onRequestShowBouncingDVDLogo() {
-
-    const mainCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
-
-    const screenConfig = this.screenConfigsById[mainCamera.id];
-    const textureSize = {
-      x: 512,
-      y: 237
-    };
-    const scale = {
-      x: textureSize.x / 2000,
-      y: textureSize.y / 2000
-    }
-    const plane = await createPlaneForScreen({
-      data: {
-        type: 'image',
-        url: 'assets/dvd-logo.png',
-        scale,
-        textureSize,
-        velocity: {
-          x: 0.001,
-          y: 0.001,
-          z: 0
-        }
-      },
-      screenConfig
+    const scene = new BouncingDVDScene('bouncing-dvd', {
+      config: this.config,
+      cameras: this.cameras,
+      screenConfigsById: this.screenConfigsById,
+      addObject: this.addObject.bind(this),
+      removeObject: this.removeObject.bind(this)
     });
-    plane.render = () => {
-      const velocity = plane.props.velocity;
-      if (plane.props.position.x - scale.x / 2 < screenConfig.camera.position[0] - screenConfig.camera.size.width / 2) {
-        velocity.x = Math.abs(velocity.x);
-      }
-      if (plane.props.position.x + scale.x / 2 > screenConfig.camera.position[0] + screenConfig.camera.size.width / 2) {
-        velocity.x = -Math.abs(velocity.x);
-      }
-      if (plane.props.position.y - scale.y / 2 < screenConfig.camera.position[1] - screenConfig.camera.size.height / 2) {
-        velocity.y = Math.abs(velocity.y);
-      }
-      if (plane.props.position.y + scale.y / 2 > screenConfig.camera.position[1] + screenConfig.camera.size.height / 2) {
-        velocity.y = -Math.abs(velocity.y);
-      }
-      plane.applyProps({
-        position: {
-          x: plane.props.position.x + velocity.x,
-          y: plane.props.position.y + velocity.y,
-          z: 0
-        },
-        velocity
-      });
-      
-    };
-    this.objects.push(plane);
-    this.onSceneObjectAdded(plane);
+    this.visibleScenes.push(scene);
+    scene.animateToStateName(SceneState.PLAYING);
   }
 
   updateObjects() {
@@ -346,4 +301,4 @@ class Application {
   }
 }
 
-export { Application }
+export { Application };
