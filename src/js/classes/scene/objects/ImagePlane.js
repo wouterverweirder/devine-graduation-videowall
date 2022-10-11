@@ -5,6 +5,9 @@ import { loadImage } from "../../../functions/loadImage.js";
 import { setTextureRepeatAndOffset } from "../../../functions/setTextureRepeatAndOffset.js";
 
 class ImagePlane extends VisualBase {
+
+  transparent = false;
+  
   async createMaterial() {
 
     let image, texture, material;
@@ -15,8 +18,9 @@ class ImagePlane extends VisualBase {
         setTextureRepeatAndOffset(texture, image, this.props);
         const isJPEG = this.props.url.search( /\.jpe?g($|\?)/i ) > 0 || this.props.url.search( /^data\:image\/jpeg/ ) === 0;
         texture.format = isJPEG ? THREE.RGBFormat : THREE.RGBAFormat;
+        this.transparent = !isJPEG;
         texture.needsUpdate = true;
-        material = new THREE.MeshBasicMaterial( { map: texture } );
+        material = new THREE.MeshBasicMaterial( { map: texture, transparent: this.transparent } );
       } catch (error) {
         console.error(error);
         material = new THREE.MeshBasicMaterial( {} );

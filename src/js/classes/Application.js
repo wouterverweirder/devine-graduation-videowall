@@ -296,16 +296,16 @@ class Application {
     });
     plane.render = () => {
       const velocity = plane.props.velocity;
-      if (plane.props.position.x - scale.x / 2 < this.fullBounds.left) {
+      if (plane.props.position.x - scale.x / 2 < screenConfig.camera.position[0] - screenConfig.camera.size.width / 2) {
         velocity.x = Math.abs(velocity.x);
       }
-      if (plane.props.position.x + scale.x / 2 > this.fullBounds.right) {
+      if (plane.props.position.x + scale.x / 2 > screenConfig.camera.position[0] + screenConfig.camera.size.width / 2) {
         velocity.x = -Math.abs(velocity.x);
       }
-      if (plane.props.position.y - scale.y / 2 < this.fullBounds.bottom) {
+      if (plane.props.position.y - scale.y / 2 < screenConfig.camera.position[1] - screenConfig.camera.size.height / 2) {
         velocity.y = Math.abs(velocity.y);
       }
-      if (plane.props.position.y + scale.y / 2 > this.fullBounds.top) {
+      if (plane.props.position.y + scale.y / 2 > screenConfig.camera.position[1] + screenConfig.camera.size.height / 2) {
         velocity.y = -Math.abs(velocity.y);
       }
       plane.applyProps({
