@@ -1,6 +1,7 @@
 import { CanvasPlane } from "./CanvasPlane.js";
 import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
+import { loadImage } from "../../../functions/loadImage.js";
 
 class ProjectQuotePlane extends CanvasPlane {
 
@@ -18,6 +19,7 @@ class ProjectQuotePlane extends CanvasPlane {
     if (this.props.data.attributes.curriculum.data?.attributes.pillar.data?.attributes.color) {
       this.backgroundColor = `#${this.props.data.attributes.curriculum.data.attributes.pillar.data.attributes.color}`;
     }
+    this.quoteImage = await loadImage('assets/quote.svg');
     const marginLeft = 100;
     const marginRight = 100;
     const marginTop = 0;
@@ -30,6 +32,25 @@ class ProjectQuotePlane extends CanvasPlane {
     const paragraphs = this.props.data.attributes.quote.split("\n");
 
     const textStartY = yPos;
+
+    this.canvasObjects.push({
+      type: 'image',
+      image: this.quoteImage,
+      x: 112,
+      y: 90,
+      width: 267,
+      height: 420,
+      opacity: 0.67
+    });
+    this.canvasObjects.push({
+      type: 'image',
+      image: this.quoteImage,
+      x: 424,
+      y: 90,
+      width: 267,
+      height: 420,
+      opacity: 0.67
+    });
 
     paragraphs.forEach(paragraph => {
       this.ctx.font = `300 ${fontSize}px "Embedded VAGRounded"`;
@@ -72,11 +93,14 @@ class ProjectQuotePlane extends CanvasPlane {
       } else if (canvasObject.type === 'image') {
         this.ctx.save();
         this.ctx.globalAlpha = canvasObject.opacity;
-        this.ctx.drawImage(canvasObject.image, canvasObject.x, canvasObject.y);
+        this.ctx.drawImage(canvasObject.image, canvasObject.x, canvasObject.y, canvasObject.width, canvasObject.height);
         this.ctx.restore();
       }
     };
 
+    this.canvasObjects.forEach(canvasObject => {
+      drawCanvasObject(canvasObject);
+    });
     this.ctx.save();
     this.ctx.translate(this.textLinesOffset.x, this.textLinesOffset.y);
     this.textLines.forEach(canvasObject => {
