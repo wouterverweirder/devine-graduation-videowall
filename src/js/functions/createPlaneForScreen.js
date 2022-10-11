@@ -12,6 +12,7 @@ import { ProjectContactPlane } from '../classes/scene/objects/ProjectContactPlan
 import { CanvasPlane } from '../classes/scene/objects/CanvasPlane.js';
 import { DevineInfoPlane } from '../classes/scene/objects/DevineInfoPlane.js';
 import { VideoPlane } from '../classes/scene/objects/VideoPlane.js';
+import { BouncingDVD } from '../classes/scene/objects/BouncingDVD.js';
 
 const calculateTextureSizeForScreen = (screenConfig) => {
   let rotation = 0;
@@ -72,6 +73,8 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
     plane = new ProjectContactPlane(data.id, props);
   } else if (data.type === PlaneType.DEVINE_INFO) {
     plane = new DevineInfoPlane(data.id, props);
+  } else if (data.type === PlaneType.BOUNCING_DVD) {
+    plane = new BouncingDVD(data.id, props);
   } else {
     plane = new VisualBase(data.id, props);
   }

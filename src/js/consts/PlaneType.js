@@ -8,7 +8,8 @@ const PlaneType = {
   PROFILE_PICTURE: 'profile-picture',
   PROJECT_BIO: 'project-bio',
   PROJECT_CONTACT: 'project-contact',
-  DEVINE_INFO: 'devine-info'
+  DEVINE_INFO: 'devine-info',
+  BOUNCING_DVD: 'bouncing-dvd'
 }
 
 export { PlaneType };
