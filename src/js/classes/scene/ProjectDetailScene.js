@@ -3,10 +3,10 @@ import { PlaneType } from '../../consts/PlaneType.js';
 import { ScreenRole } from "../../consts/ScreenRole.js";
 import { createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { delay } from '../../functions/delay.js';
-import { calculateScaleForScreenConfig, doesScreenCameraHaveRole, getFirstScreenCameraForRole, getScreenCamerasForRole } from "../../functions/screenUtils.js";
+import { calculateScaleForScreenConfig, doesScreenCameraHaveRole, getFirstScreenCameraForRole } from "../../functions/screenUtils.js";
 import { gsap, Power4 } from '../../gsap/src/index.js';
 import { ImagePlane } from './objects/ImagePlane.js';
-import { StudentNamePlane } from './objects/StudentNamePlane.js';
+import { StudentNameData, StudentNamePlane } from './objects/StudentNamePlane.js';
 import { PlaneSlider } from './PlaneSlider.js';
 import { SceneBase, SceneState } from "./SceneBase.js";
 
@@ -29,10 +29,6 @@ class ProjectDetailScene extends SceneBase {
   nonVisibleStudentNamePlanes = [];
   visibleStudentNamePlanes = [];
   studentNamePlaneSlider = false;
-
-  portraitScreenshots = [];
-  landscapeScreenshots = [];
-  videos = [];
 
   allPortraitScreenshotPlanes = [];
   nonVisiblePortraitScreenshotPlanes = [];
@@ -70,57 +66,40 @@ class ProjectDetailScene extends SceneBase {
       if (!assets) {
         assets = { data: [] };
       }
-      this.portraitScreenshots = assets.data.filter(asset => {
+      const portraitScreenshots = assets.data.filter(asset => {
         if (asset.attributes.mime.indexOf('image') === -1) {
           return false;
         }
         return asset.attributes.width < asset.attributes.height;
       }).map(asset => asset.attributes);
-      this.landscapeScreenshots = assets.data.filter(asset => {
+      const landscapeScreenshots = assets.data.filter(asset => {
         if (asset.attributes.mime.indexOf('image') === -1) {
           return false;
         }
         return asset.attributes.width > asset.attributes.height;
       }).map(asset => asset.attributes);
-      this.videos = assets.data.filter(asset => {
+      const videos = assets.data.filter(asset => {
         return (asset.attributes.mime.indexOf('video') === 0);
       }).map(asset => asset.attributes);
 
-      const profilePictureCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE);
-      const portraitScreenshotScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.PORTRAIT_SCREENSHOTS);
-      const landscapeScreenshotScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.LANDSCAPE_SCREENSHOTS);
-      const videoScreenCameras = getScreenCamerasForRole(this.cameras, ScreenRole.VIDEOS);
-
-      const assetsperCameraId = {};
-      for (const screenCamera of this.cameras) {
-        assetsperCameraId[screenCamera.id] = [];
-      }
-      portraitScreenshotScreenCameras.forEach((screenCamera, cameraIndex) => {
-        this.portraitScreenshots.forEach((asset, assetIndex) => {
-          if (assetIndex % portraitScreenshotScreenCameras.length === cameraIndex) {
-            assetsperCameraId[screenCamera.id].push(asset);
-          }
-        });
-      });
-      landscapeScreenshotScreenCameras.forEach((screenCamera, cameraIndex) => {
-        this.landscapeScreenshots.forEach((asset, assetIndex) => {
-          if (assetIndex % landscapeScreenshotScreenCameras.length === cameraIndex) {
-            assetsperCameraId[screenCamera.id].push(asset);
-          }
-        });
-      });
-      videoScreenCameras.forEach((screenCamera, cameraIndex) => {
-        this.videos.forEach((asset, assetIndex) => {
-          if (assetIndex % videoScreenCameras.length === cameraIndex) {
-            assetsperCameraId[screenCamera.id].push(asset);
-          }
-        });
-      });
-
+      const createScreenshotPlanes = async ({ screenshots, textureSize, allScreenshotsArray, nonVisibleScreenshotsArray }) => {
+        for (let index = 0; index < screenshots.length; index++) {
+          const portraitScreenshot = screenshots[index];
+          const props = {
+            name: `project-asset-${project.id}-${index}`,
+            textureSize,
+            url: portraitScreenshot.url
+          };
+          const plane = new ImagePlane(props.name, props);
+          await plane.init();
+          allScreenshotsArray.push(plane);
+          nonVisibleScreenshotsArray.push(plane);
+        }
+      };
 
       // create a plane for portrait screenshots
-      for (let index = 0; index < this.portraitScreenshots.length; index++) {
-        const portraitScreenshot = this.portraitScreenshots[index];
+      for (let index = 0; index < portraitScreenshots.length; index++) {
+        const portraitScreenshot = portraitScreenshots[index];
         const props = {
           name: `project-asset-${project.id}-${index}`,
           textureSize: {
@@ -135,8 +114,8 @@ class ProjectDetailScene extends SceneBase {
         this.nonVisiblePortraitScreenshotPlanes.push(plane);
       }
       // create a plane for landscape screenshots
-      for (let index = 0; index < this.landscapeScreenshots.length; index++) {
-        const landscapeScreenshot = this.landscapeScreenshots[index];
+      for (let index = 0; index < landscapeScreenshots.length; index++) {
+        const landscapeScreenshot = landscapeScreenshots[index];
         const props = {
           name: `project-asset-${project.id}-${index}`,
           textureSize: {
@@ -152,6 +131,7 @@ class ProjectDetailScene extends SceneBase {
       }
 
       {
+        const profilePictureCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE);
         // create a plane for student names
         const screenConfig = this.screenConfigsById[profilePictureCamera.id];
         const screenScale = calculateScaleForScreenConfig(screenConfig);
@@ -170,7 +150,7 @@ class ProjectDetailScene extends SceneBase {
             x: 1080,
             y: (studentNameHeight+studentNameTriangleMaxHeight),
           },
-          data: student
+          data: StudentNameData.fromProjectData(project),
         });
         plane.customData.camera = profilePictureCamera;
         await plane.init();
@@ -218,7 +198,6 @@ class ProjectDetailScene extends SceneBase {
         // what roles does this screen have?
         let projectPlane;
         if (doesScreenCameraHaveRole(screenCamera, ScreenRole.MAIN_VIDEO)) {
-          console.log(project);
           if (project.attributes.mainAsset?.data) {
             projectPlane = await createPlaneForScreen({
               data: {
@@ -253,12 +232,12 @@ class ProjectDetailScene extends SceneBase {
             this.visibleLandscapeScreenshotPlanes.push(projectPlane);
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.VIDEOS)) {
-          if (assetsperCameraId[screenCamera.id].length > 0) {
+          if (videos.length > 0) {
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-assets-${screenCamera.id}`,
                 type: PlaneType.VIDEO,
-                url: assetsperCameraId[screenCamera.id][0].url,
+                url: videos[0].url,
                 layers: screenCamera.props.layers
               },
               screenConfig

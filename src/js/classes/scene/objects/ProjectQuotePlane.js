@@ -3,7 +3,20 @@ import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
 import { loadImage } from "../../../functions/loadImage.js";
 
-class ProjectQuotePlane extends CanvasPlane {
+export class ProjectQuoteData {
+  constructor({quote, backgroundColor}) {
+    this.quote = quote;
+    this.backgroundColor = backgroundColor;
+  }
+  static fromProjectData(projectData) {
+    return new ProjectQuoteData({
+      quote: projectData.attributes.quote,
+      backgroundColor: projectData.attributes.curriculum.data?.attributes.pillar.data?.attributes.color
+    });
+  }
+}
+
+export class ProjectQuotePlane extends CanvasPlane {
 
   canvasObjects = [];
   textLines = [];
@@ -16,8 +29,8 @@ class ProjectQuotePlane extends CanvasPlane {
   backgroundColor = 'black';
 
   async createInitalCanvasContent() {
-    if (this.props.data.attributes.curriculum.data?.attributes.pillar.data?.attributes.color) {
-      this.backgroundColor = `#${this.props.data.attributes.curriculum.data.attributes.pillar.data.attributes.color}`;
+    if (this.props.data.backgroundColor) {
+      this.backgroundColor = `#${this.props.data.backgroundColor}`;
     }
     this.quoteImage = await loadImage('assets/quote.svg');
     const marginLeft = 100;
@@ -29,7 +42,7 @@ class ProjectQuotePlane extends CanvasPlane {
 
     let yPos = fontSize + marginTop;
 
-    const paragraphs = this.props.data.attributes.quote.split("\n");
+    const paragraphs = this.props.data.quote.split("\n");
 
     const textStartY = yPos;
 
@@ -134,5 +147,3 @@ class ProjectQuotePlane extends CanvasPlane {
     super.dispose();
   }
 }
-
-export { ProjectQuotePlane }

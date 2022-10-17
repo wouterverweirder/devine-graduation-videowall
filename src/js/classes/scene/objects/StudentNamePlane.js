@@ -1,7 +1,22 @@
+import { gsap } from '../../../gsap/src/index.js';
 import { CanvasPlane } from "./CanvasPlane.js";
-import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 
-class StudentNamePlane extends CanvasPlane {
+export class StudentNameData {
+  constructor({firstName, lastName, curriculumName}) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.curriculumName = curriculumName;
+  }
+  static fromProjectData(projectData) {
+    return new StudentNameData({
+      firstName: projectData.attributes.firstName,
+      lastName: projectData.attributes.lastName,
+      curriculumName: projectData.attributes.curriculum.data.attributes.name
+    });
+  }
+}
+
+export class StudentNamePlane extends CanvasPlane {
 
   tl = false;
   introProgress = 0;
@@ -23,8 +38,8 @@ class StudentNamePlane extends CanvasPlane {
     let yPos = fontSize + marginTop + this.maxTriangleHeight;
 
     let curriculum = 'Design';
-    if (this.props.data.attributes.curriculum.data) {
-      curriculum = this.props.data.attributes.curriculum.data.attributes.name;
+    if (this.props.data.curriculumName) {
+      curriculum = this.props.data.curriculumName;
     }
     const tagLine = `Alumnus ${curriculum}`;
 
@@ -32,7 +47,7 @@ class StudentNamePlane extends CanvasPlane {
       type: 'text',
       font: `700 ${fontSize}px "Embedded VAGRounded"`,
       fillStyle: 'rgb(68,200,245)',
-      content: `${this.props.data.attributes.firstName} ${this.props.data.attributes.lastName}`,
+      content: `${this.props.data.firstName} ${this.props.data.lastName}`,
       x: marginLeft,
       y: yPos,
       opacity: 1
@@ -85,7 +100,6 @@ class StudentNamePlane extends CanvasPlane {
         this.draw();
       }
     });
-    console.log('intro');
     this.tl.to(this, { introProgress: 1, duration: 0.5, delay: 0.1, ease: 'power1.out' });
   }
 
@@ -96,5 +110,3 @@ class StudentNamePlane extends CanvasPlane {
     super.dispose();
   }
 }
-
-export { StudentNamePlane }

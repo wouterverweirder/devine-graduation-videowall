@@ -2,7 +2,18 @@ import { CanvasPlane } from "./CanvasPlane.js";
 import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
 
-class ProjectBioPlane extends CanvasPlane {
+export class ProjectBioData {
+  constructor({bio}) {
+    this.bio = bio;
+  }
+  static fromProjectData(projectData) {
+    return new ProjectBioData({
+      bio: projectData.attributes.bio
+    });
+  }
+}
+
+export class ProjectBioPlane extends CanvasPlane {
 
   canvasObjects = [];
   title = {};
@@ -62,7 +73,7 @@ class ProjectBioPlane extends CanvasPlane {
 
     yPos += 100;
 
-    const paragraphs = this.props.data.attributes.bio.split("\n");
+    const paragraphs = this.props.data.bio.split("\n");
 
     const textStartY = yPos;
 
@@ -175,5 +186,3 @@ class ProjectBioPlane extends CanvasPlane {
     super.dispose();
   }
 }
-
-export { ProjectBioPlane }

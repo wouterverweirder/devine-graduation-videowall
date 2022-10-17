@@ -3,7 +3,22 @@ import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
 import QRious from '../../../qrious/qrious.js';
 
-class ProjectContactPlane extends CanvasPlane {
+export class ProjectContactData {
+  constructor({experience, lifeLesson, website}) {
+    this.experience = experience;
+    this.lifeLesson = lifeLesson;
+    this.website = website;
+  }
+  static fromProjectData(projectData) {
+    return new ProjectContactData({
+      experience: projectData.attributes.experience,
+      lifeLesson: projectData.attributes.lifeLesson,
+      website: projectData.attributes.website
+    });
+  }
+}
+
+export class ProjectContactPlane extends CanvasPlane {
 
   canvasObjects = [];
   gradientTop = {};
@@ -99,8 +114,8 @@ class ProjectContactPlane extends CanvasPlane {
       }
     }
 
-    addSectionIfNeeded('WERKERVARING', this.props.data.attributes.experience);
-    addSectionIfNeeded('LEVENSLES VOOR TOEKOMSTIGE STUDENTEN', this.props.data.attributes.lifeLesson);
+    addSectionIfNeeded('WERKERVARING', this.props.data.experience);
+    addSectionIfNeeded('LEVENSLES VOOR TOEKOMSTIGE STUDENTEN', this.props.data.lifeLesson);
 
     this.textHeight = (yPos - lineHeight / 2);
     this.textScrollAmount = Math.max(0, yPos - this.props.textureSize.y);
@@ -121,9 +136,9 @@ class ProjectContactPlane extends CanvasPlane {
       y: this.props.textureSize.y - this.bottomSectionHeight - this.gradientBottomHeight
     };
 
-    if (this.props.data.attributes.website) {
+    if (this.props.data.website) {
       // create a website variable and strip http(s)://(www.) with a regex
-      const website = this.props.data.attributes.website.replace(/(https?:\/\/)?(www\.)?/g, '');
+      const website = this.props.data.website.replace(/(https?:\/\/)?(www\.)?/g, '');
 
       // add the qr code
       const qr = new QRious();
@@ -135,7 +150,7 @@ class ProjectContactPlane extends CanvasPlane {
         level: 'L',
         padding: 0,
         size: this.qrSize,
-        value: this.props.data.attributes.website
+        value: this.props.data.website
       });
       this.qr = {
         type: 'image',
@@ -236,5 +251,3 @@ class ProjectContactPlane extends CanvasPlane {
     super.dispose();
   }
 }
-
-export { ProjectContactPlane }
