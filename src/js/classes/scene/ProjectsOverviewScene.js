@@ -49,7 +49,8 @@ class ProjectsOverviewScene extends SceneBase {
       }
       {
         // create the instructions plane
-        const descriptionCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROJECT_DESCRIPTION);
+        const cameras = getScreenCamerasForRoles(this.cameras, [ScreenRole.PROJECT_DESCRIPTION, ScreenRole.PROJECT_CONTACT]);
+        const descriptionCamera = cameras[0];
         const screenConfig = this.screenConfigsById[descriptionCamera.id];
         this.devineInfoPlane = await createPlaneForScreen({
           data: {
@@ -66,7 +67,9 @@ class ProjectsOverviewScene extends SceneBase {
     } else if (stateName === SceneState.INTRO) {
       const cameras = getScreenCamerasForRoles(this.cameras, [
         ScreenRole.PROFILE_PICTURE,
+        ScreenRole.CURRICULUM_PICTURE,
         ScreenRole.PROJECT_BIO,
+        ScreenRole.PROJECT_QUOTE,
         ScreenRole.PORTRAIT_SCREENSHOTS,
         ScreenRole.LANDSCAPE_SCREENSHOTS,
         ScreenRole.VIDEOS,

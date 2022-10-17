@@ -13,10 +13,17 @@ class ProjectorApplication extends Application {
 
   setupApplicationSpecificUI() {
 
-    this.ambientAudio = document.createElement('audio');
-    this.ambientAudio.src = 'assets/ambient-01.mp3';
-    this.ambientAudio.loop = true;
-    this.ambientAudio.volume = 0.1;
+    if (!this.hasProjectsOverview()) {
+      this.ambientAudio = document.createElement('audio');
+      this.ambientAudio.oncanplaythrough = () => {
+        if (!this.hasProjectsOverview() || this.activeScene.constructor.name !== 'ProjectsOverviewScene') {
+          this.ambientAudio.pause()
+        }
+      };
+      this.ambientAudio.src = 'assets/ambient-01.mp3';
+      this.ambientAudio.loop = true;
+      this.ambientAudio.volume = 0.1;
+    }
 
     this.isSingleProjection = (this.argv.projection !== 'multi');
     this.scene = new THREE.Scene();
@@ -26,14 +33,41 @@ class ProjectorApplication extends Application {
     outputCanvas.height = this.config.appDimensions.height;
     this.renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
 
+    if (this.isSingleProjection) {
+      document.body.style.width = '100vw';
+      document.body.style.height = '100vh';
+      document.body.style.overflow = 'hidden';
+    }
+
+    if (!this.isControlledThroughWebsocket() && this.isSingleProjection) {
+      // add next project button
+      const nextProjectButton = document.createElement('button');
+      nextProjectButton.innerHTML = 'Next project';
+      nextProjectButton.style.position = 'absolute';
+      nextProjectButton.style.top = '10px';
+      nextProjectButton.style.left = '10px';
+      nextProjectButton.style.zIndex = '100';
+      nextProjectButton.addEventListener('click', () => {
+        this.currentProjectIndex++;
+        if (this.currentProjectIndex >= this.students.length) {
+          this.currentProjectIndex = 0;
+        }
+        this.onRequestShowProject(this.students[this.currentProjectIndex]);
+      }
+      );
+      document.body.appendChild(nextProjectButton);
+    }
+
     this.resetScreensaver();
   }
 
   resetScreensaver() {
-    clearTimeout(this.interactionTimeoutId);
-    this.interactionTimeoutId = setTimeout(() => {
-      this.startScreensaver();
-    }, this.config.interactionTimeout);
+    if (!isNaN(this.config.screensaverTimeout) && this.config.screensaverTimeout > 0) {
+      clearTimeout(this.interactionTimeoutId);
+      this.interactionTimeoutId = setTimeout(() => {
+        this.startScreensaver();
+      }, this.config.screensaverTimeout);
+    }
   }
 
   startScreensaver() {
@@ -42,10 +76,8 @@ class ProjectorApplication extends Application {
 
   applicationSpecificRender() {
     if (this.isSingleProjection) {
-      this.renderer.setSize( this.fullBounds.width * 500, this.fullBounds.height * 500 );
-      document.body.style.width = '100vw';
-      document.body.style.height = '100vh';
-      document.body.style.overflow = 'hidden';
+      const scaleFactor = 250;
+      this.renderer.setSize( this.fullBounds.width * scaleFactor, this.fullBounds.height * scaleFactor );
 
       this.cameras.forEach(camera => {
         const screenConfig = this.screenConfigsById[camera.id];
@@ -57,11 +89,11 @@ class ProjectorApplication extends Application {
         }
         const isLandscape = (rotation === 0);
 
-        const left = (Math.abs(this.fullBounds.left) + camera.props.position.x - cameraScale.x / 2) * 500;
-        const bottom = (Math.abs(this.fullBounds.bottom) + camera.props.position.y - cameraScale.y / 2) * 500;
+        const left = (Math.abs(this.fullBounds.left) + camera.props.position.x - cameraScale.x / 2) * scaleFactor;
+        const bottom = (Math.abs(this.fullBounds.bottom) + camera.props.position.y - cameraScale.y / 2) * scaleFactor;
 
-        const width = cameraScale.x * 500;
-        const height = cameraScale.y * 500;
+        const width = cameraScale.x * scaleFactor;
+        const height = cameraScale.y * scaleFactor;
   
         this.renderer.setViewport( left, bottom, width, height );
         this.renderer.setScissor( left, bottom, width, height );
@@ -131,9 +163,10 @@ class ProjectorApplication extends Application {
 
   async onRequestShowProjectsOverview () {
     await super.onRequestShowProjectsOverview();
-
-    if (this.ambientAudio) {
-      this.ambientAudio.play();
+    if (!this.hasProjectsOverview()) {
+      if (this.ambientAudio) {
+        this.ambientAudio.play();
+      }
     }
   }
 

@@ -1,6 +1,5 @@
-import * as THREE from '../../three.js/build/three.module.js';
-import { gsap } from '../../gsap/src/index.js';
 import { DevineEasing } from '../../consts/DevineEasing.js';
+import { gsap } from '../../gsap/src/index.js';
 
 class PlaneSlider {
 
@@ -151,4 +150,4 @@ class PlaneSlider {
 
 }
 
-export { PlaneSlider }
+export { PlaneSlider };

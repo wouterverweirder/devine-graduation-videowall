@@ -2,7 +2,18 @@ import { CanvasPlane } from "./CanvasPlane.js";
 import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
 
-class ProjectDescriptionPlane extends CanvasPlane {
+export class ProjectDescriptionData {
+  constructor({description}) {
+    this.description = description;
+  }
+  static fromProjectData(projectData) {
+    return new ProjectDescriptionData({
+      description: projectData.attributes.description
+    });
+  }
+}
+
+export class ProjectDescriptionPlane extends CanvasPlane {
 
   canvasObjects = [];
   title = {};
@@ -51,7 +62,7 @@ class ProjectDescriptionPlane extends CanvasPlane {
 
     this.title = {
       type: 'text',
-      font: `700 ${fontSize}px "Embedded Space Grotesk"`,
+      font: `700 ${fontSize}px "Embedded VAGRounded"`,
       fillStyle: 'white',
       content: 'Project Info',
       x: marginLeft,
@@ -61,12 +72,12 @@ class ProjectDescriptionPlane extends CanvasPlane {
 
     yPos += 200;
 
-    const paragraphs = this.props.data.attributes.description.split("\n");
+    const paragraphs = this.props.data.description.split("\n");
 
     const textStartY = yPos;
 
     paragraphs.forEach(paragraph => {
-      this.ctx.font = `${fontSize}px "Embedded Space Grotesk"`;
+      this.ctx.font = `${fontSize}px "Embedded VAGRounded"`;
       const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
       lines.forEach(line => {
         const textLine = {
@@ -174,5 +185,3 @@ class ProjectDescriptionPlane extends CanvasPlane {
     super.dispose();
   }
 }
-
-export { ProjectDescriptionPlane }

@@ -1,22 +1,26 @@
 import { CanvasPlane } from "./CanvasPlane.js";
 import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
+import QRious from '../../../qrious/qrious.js';
 
-export class ProjectBioData {
-  constructor({bio}) {
-    this.bio = bio;
+export class ProjectContactData {
+  constructor({experience, lifeLesson, website}) {
+    this.experience = experience;
+    this.lifeLesson = lifeLesson;
+    this.website = website;
   }
   static fromProjectData(projectData) {
-    return new ProjectBioData({
-      bio: projectData.attributes.bio
+    return new ProjectContactData({
+      experience: projectData.attributes.experience,
+      lifeLesson: projectData.attributes.lifeLesson,
+      website: projectData.attributes.website
     });
   }
 }
 
-export class ProjectBioPlane extends CanvasPlane {
+export class ProjectContactPlane extends CanvasPlane {
 
   canvasObjects = [];
-  title = {};
   gradientTop = {};
   gradientTopHeight = 50;
   gradientBottom = {};
@@ -30,14 +34,17 @@ export class ProjectBioPlane extends CanvasPlane {
   };
   delayBeforeScrolling = 10;
   scrollSpeedFactor = 30; // smaller is slower
+  bottomSectionHeight = 300;
+  qrSize = 200;
+  urlLines = [];
 
   async createInitalCanvasContent() {
     const marginLeft = 50;
     const marginRight = 50;
     const marginTop = 50;
 
-    const fontSizeTitle = Math.round(40 * 1.3333); // pt to px
-    const fontSize = Math.round(36 * 1.3333); // pt to px
+    const fontSizeTitle = 40 * 1.3333; // pt to px
+    const fontSize = 36 * 1.3333; // pt to px
     const lineHeight = 70;
 
     const gradientTop = new OffscreenCanvas(this.props.textureSize.x, this.gradientTopHeight);
@@ -61,42 +68,56 @@ export class ProjectBioPlane extends CanvasPlane {
 
     let yPos = fontSizeTitle + marginTop;
 
-    this.title = {
-      type: 'text',
-      font: `700 ${fontSizeTitle}px "Embedded VAGRounded"`,
-      fillStyle: 'rgb(68, 200, 245)',
-      content: 'BIO',
-      x: marginLeft,
-      y: yPos,
-      opacity: 0
-    };
+    const addSectionIfNeeded = (title, content) => {
+      if (content) {
+        // title might be too long as well
+        this.ctx.font = `700 ${fontSizeTitle}px "Embedded VAGRounded"`
+        const lines = getLines(this.ctx, title.trim(), this.canvas.width - marginLeft - marginRight);
+        lines.forEach(line => {
+          const textLine = {
+            type: 'text',
+            font: `700 ${fontSizeTitle}px "Embedded VAGRounded"`,
+            fillStyle: 'rgb(68, 200, 245)',
+            content: line,
+            x: marginLeft,
+            y: yPos,
+            opacity: 0
+          };
+          this.textLines.push(textLine);
+          yPos += lineHeight;
+        });
+    
+        yPos += 50;
+    
+        let paragraphs = content.split("\n");
+    
+        paragraphs.forEach(paragraph => {
+          this.ctx.font = `400 ${fontSize}px "Embedded OpenSans"`;
+          const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
+          lines.forEach(line => {
+            const textLine = {
+              type: 'text',
+              font: this.ctx.font,
+              fillStyle: 'black',
+              content: line,
+              x: marginLeft,
+              y: yPos,
+              opacity: 0
+            };
+            this.textLines.push(textLine);
+            yPos += lineHeight;
+          });
+          yPos += lineHeight / 2;
+        });
 
-    yPos += 100;
+        yPos += 100;
+      }
+    }
 
-    const paragraphs = this.props.data.bio.split("\n");
+    addSectionIfNeeded('WERKERVARING', this.props.data.experience);
+    addSectionIfNeeded('LEVENSLES VOOR TOEKOMSTIGE STUDENTEN', this.props.data.lifeLesson);
 
-    const textStartY = yPos;
-
-    paragraphs.forEach(paragraph => {
-      this.ctx.font = `400 ${fontSize}px "Embedded OpenSans"`;
-      const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
-      lines.forEach(line => {
-        const textLine = {
-          type: 'text',
-          font: `400 ${fontSize}px "Embedded OpenSans"`,
-          fillStyle: 'black',
-          content: line,
-          x: marginLeft,
-          y: yPos,
-          opacity: 0
-        };
-        this.textLines.push(textLine);
-        yPos += lineHeight;
-      });
-      yPos += lineHeight / 2;
-    });
-
-    this.textHeight = (yPos - textStartY - lineHeight / 2);
+    this.textHeight = (yPos - lineHeight / 2);
     this.textScrollAmount = Math.max(0, yPos - this.props.textureSize.y);
 
     // add the gradients
@@ -105,15 +126,56 @@ export class ProjectBioPlane extends CanvasPlane {
       image: gradientTop,
       opacity: 1,
       x: 0,
-      y: 100
+      y: 0
     };
     this.gradientBottom = {
       type: 'image',
       image: gradientBottom,
       opacity: 1,
       x: 0,
-      y: this.props.textureSize.y - this.gradientBottomHeight
+      y: this.props.textureSize.y - this.bottomSectionHeight - this.gradientBottomHeight
     };
+
+    if (this.props.data.website) {
+      // create a website variable and strip http(s)://(www.) with a regex
+      const website = this.props.data.website.replace(/(https?:\/\/)?(www\.)?/g, '');
+
+      // add the qr code
+      const qr = new QRious();
+      qr.set({
+        background: 'white',
+        backgroundAlpha: 1,
+        foreground: 'black',
+        foregroundAlpha: 1,
+        level: 'L',
+        padding: 0,
+        size: this.qrSize,
+        value: this.props.data.website
+      });
+      this.qr = {
+        type: 'image',
+        image: qr.image,
+        opacity: 1,
+        x: marginLeft,
+        y: this.props.textureSize.y - this.bottomSectionHeight + (this.bottomSectionHeight - this.qrSize) / 2
+      }
+
+      // add the url
+      this.ctx.font = `700 ${fontSize}px "Embedded OpenSans"`;
+      const urlLines = getLines(this.ctx, website, this.canvas.width - marginLeft - marginRight - this.qrSize - 50);
+      urlLines.forEach((line, index) => {
+        const textLine = {
+          type: 'text',
+          font: `700 ${fontSize}px "Embedded OpenSans"`,
+          fillStyle: 'black',
+          content: line,
+          x: marginLeft + this.qrSize + 50,
+          y: this.qr.y + lineHeight / 2 + index * lineHeight,
+          opacity: 1
+        };
+        this.urlLines.push(textLine);
+      });
+    }
   }
 
   draw() {
@@ -145,9 +207,15 @@ export class ProjectBioPlane extends CanvasPlane {
     this.ctx.restore();
     this.ctx.fillStyle = 'white';
     this.ctx.fillRect(0, 0, this.props.textureSize.x, this.gradientTop.y);
+    this.ctx.fillRect(0, this.props.textureSize.y - this.bottomSectionHeight, this.props.textureSize.x, this.bottomSectionHeight);
     drawCanvasObject(this.gradientTop);
     drawCanvasObject(this.gradientBottom);
-    drawCanvasObject(this.title);
+    if (this.qr) {
+      drawCanvasObject(this.qr);
+      this.urlLines.forEach(canvasObject => {
+        drawCanvasObject(canvasObject);
+      });
+    }
     this.texture.needsUpdate = true;
   }
 
@@ -161,9 +229,6 @@ export class ProjectBioPlane extends CanvasPlane {
     });
     const maxDelay = 0.5;
     const delayOffset = 0.1;
-    this.title.opacity = 1;
-    // this.tl.to(this.title, { y: this.title.y, opacity: 1, duration: 0.5, ease: Cubic.easeInOut }, 0);
-    // this.title.y += 100;
     this.textLines.forEach((canvasObject, index) => {
       const delay = delayOffset + Cubic.easeInOut(index / this.textLines.length) * maxDelay;
       this.tl.to(canvasObject, { y: canvasObject.y, opacity: 1, delay, duration: 0.5, ease: Cubic.easeInOut }, 0);

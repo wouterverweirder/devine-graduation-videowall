@@ -5,6 +5,8 @@ import { setTextureRepeatAndOffset } from "../../../functions/setTextureRepeatAn
 
 class CanvasPlane extends VisualBase {
 
+  transparent = false;
+
   async createMaterial() {
 
     const canvas = new OffscreenCanvas(this.props.textureSize.x, this.props.textureSize.y);
@@ -19,7 +21,7 @@ class CanvasPlane extends VisualBase {
 
     await this.createInitalCanvasContent();
 
-    return new THREE.MeshBasicMaterial( { map: texture } );
+    return new THREE.MeshBasicMaterial( { map: texture, transparent: this.transparent } );
   }
 
   async createInitalCanvasContent() {

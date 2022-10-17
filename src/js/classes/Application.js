@@ -1,10 +1,12 @@
-import { ServerConnection } from './ServerConnection.js';
-import { createCamerasForConfig, calculateBoundsOfAllScreenCameras, getFirstScreenCameraForRole } from '../functions/screenUtils.js';
+import { options } from '../../options.js';
 import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
-import { ScreenRole } from '../consts/ScreenRole.js';
-import { ProjectsOverviewScene } from './scene/ProjectsOverviewScene.js';
+import { fetchProjects } from '../functions/fetchProjects.js';
+import { calculateBoundsOfAllScreenCameras, createCamerasForConfig } from '../functions/screenUtils.js';
+import { BouncingDVDScene } from './scene/BouncingDVDScene.js';
 import { ProjectDetailScene } from './scene/ProjectDetailScene.js';
+import { ProjectsOverviewScene } from './scene/ProjectsOverviewScene.js';
 import { SceneState } from './scene/SceneBase.js';
+import { ServerConnection } from './ServerConnection.js';
 
 class Application {
 
@@ -12,6 +14,7 @@ class Application {
   renderer;
   scene;
   visibleScenes = [];
+  activeScene;
   cameras;
   screenConfigsById = {};
   camerasById = {};
@@ -27,7 +30,13 @@ class Application {
   async init() {
     // get the cli args
     // parse the querystring into this.argv using URLSearchParams
-    this.argv = Object.fromEntries(new URLSearchParams(window.location.search));
+    this.argv = {
+      ...options.reduce((acc, option) => {
+        acc[option.name] = option.value.default;
+        return acc;
+      }, {}),
+      ...Object.fromEntries(new URLSearchParams(window.location.search))
+    };
     //replace the argv properties with string values "true" and "false" with boolean values
     Object.keys(this.argv).forEach(key => {
       if (this.argv[key] === 'true') {
@@ -38,14 +47,7 @@ class Application {
     });
 
     const apiProjects = await this.fetchProjects();
-    this.projects = apiProjects.data.projects.data;
-    console.log(this.projects);
-    this.students = [];
-    this.projects.forEach(project => {
-      project.attributes.students.data.forEach(student => {
-        this.students.push(student);
-      });
-    });
+    this.students = apiProjects.data.students.data;
     
     this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
     
@@ -85,117 +87,39 @@ class Application {
       }
     };
 
-    if (this.argv['websocket']) {
+    if (this.isControlledThroughWebsocket()) {
       this.connectToServer();
     } else {
-      this.onRequestShowProjectsOverview();
       // keyboard interaction
-      let currentProjectIndex = -1
       document.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowRight') {
-          currentProjectIndex++;
-          if (currentProjectIndex >= this.projects.length) {
-            currentProjectIndex = 0;
+          this.currentProjectIndex++;
+          if (this.currentProjectIndex >= this.students.length) {
+            this.currentProjectIndex = 0;
           }
-          this.onRequestShowProject(this.projects[currentProjectIndex]);
+          this.onRequestShowProject(this.students[this.currentProjectIndex]);
         }
       });
+      if (!this.hasProjectsOverview()) {
+        if (this.students.length > 0) {
+          this.currentProjectIndex = 0;
+          await this.onRequestShowProject(this.students[0]);
+        }
+      } else {
+        this.currentProjectIndex = -1
+        this.onRequestShowProjectsOverview();
+      }
     }
 
     requestAnimationFrame(() => this.render());
   }
 
   async fetchProjects() {
-    const query = `query{
-      projects(pagination: { page: 1, pageSize: 100 }){
-        data {
-          id,
-          attributes {
-            Name,
-            description,
-            mainAsset {
-              data {
-                id,
-                attributes {
-                  url,
-                  width,
-                  height,
-                  mime
-                }
-              }
-            },
-            assets {
-              data {
-                id,
-                attributes {
-                  url,
-                  width,
-                  height,
-                  mime
-                }
-              }
-            },
-            students {
-              data {
-                id,
-                attributes {
-                  firstName,
-                  lastName,
-                  expert {
-                    data {
-                      id,
-                      attributes {
-                        name
-                      }
-                    }
-                  },
-                  bio,
-                  profilePicture {
-                    data {
-                      id,
-                      attributes {
-                        url,
-                        width,
-                        height,
-                        mime
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }`;
-    return await (await fetch(`${this.getServerURL()}/graphql`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query,
-        variables: {
-        },
-      }),
-    })).json();
+    return await fetchProjects(this.argv);
   }
-
-  getServerURL() {
-    if (this.argv['server-url']) {
-      return this.argv['server-url'];
-    }
-    if (window.location.protocol === 'http:') {
-      return '';
-    }
-    return `http://${this.getServerAddress()}`;
-  }
-
-  getServerAddress() {
-    if (window.location.protocol === 'http:') {
-      return window.location.hostname;
-    }
-    return '127.0.0.1';
+  
+  isControlledThroughWebsocket() {
+    return !!this.argv['websocket'];
   }
 
   setupApplicationSpecificUI() {
@@ -206,7 +130,7 @@ class Application {
   }
 
   connectToServer() {
-    this.serverConnection.connect(this.getServerAddress());
+    this.serverConnection.connect(this.argv['websocket']);
   }
 
   addObject(object) {
@@ -284,6 +208,11 @@ class Application {
       }
     });
     this.objects = [];
+    this.activeScene = null;
+  }
+
+  hasProjectsOverview() {
+    return !(this.config.scenes?.projectsOverview?.disabled);
   }
 
   async onRequestShowProjectsOverview () {
@@ -301,7 +230,6 @@ class Application {
       config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
-      projects: this.projects,
       students: this.students,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this)
@@ -309,6 +237,7 @@ class Application {
 
     scene.animateToStateName(SceneState.PLAYING);
     this.visibleScenes.push(scene);
+    this.activeScene = scene;
   }
 
   async onRequestShowProject(project) {
@@ -322,7 +251,6 @@ class Application {
       config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
-      projects: this.projects,
       students: this.students,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this),
@@ -331,64 +259,22 @@ class Application {
 
     scene.animateToStateName(SceneState.PLAYING);
     this.visibleScenes.push(scene);
+    this.activeScene = scene;
   }
 
   async onRequestKeyPressed(event) {
   }
 
   async onRequestShowBouncingDVDLogo() {
-
-    const mainCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.MAIN_VIDEO);
-
-    const screenConfig = this.screenConfigsById[mainCamera.id];
-    const textureSize = {
-      x: 512,
-      y: 237
-    };
-    const scale = {
-      x: textureSize.x / 2000,
-      y: textureSize.y / 2000
-    }
-    const plane = await createPlaneForScreen({
-      data: {
-        type: 'image',
-        url: 'assets/dvd-logo.png',
-        scale,
-        textureSize,
-        velocity: {
-          x: 0.001,
-          y: 0.001,
-          z: 0
-        }
-      },
-      screenConfig
+    const scene = new BouncingDVDScene('bouncing-dvd', {
+      config: this.config,
+      cameras: this.cameras,
+      screenConfigsById: this.screenConfigsById,
+      addObject: this.addObject.bind(this),
+      removeObject: this.removeObject.bind(this)
     });
-    plane.render = () => {
-      const velocity = plane.props.velocity;
-      if (plane.props.position.x - scale.x / 2 < this.fullBounds.left) {
-        velocity.x = Math.abs(velocity.x);
-      }
-      if (plane.props.position.x + scale.x / 2 > this.fullBounds.right) {
-        velocity.x = -Math.abs(velocity.x);
-      }
-      if (plane.props.position.y - scale.y / 2 < this.fullBounds.bottom) {
-        velocity.y = Math.abs(velocity.y);
-      }
-      if (plane.props.position.y + scale.y / 2 > this.fullBounds.top) {
-        velocity.y = -Math.abs(velocity.y);
-      }
-      plane.applyProps({
-        position: {
-          x: plane.props.position.x + velocity.x,
-          y: plane.props.position.y + velocity.y,
-          z: 0
-        },
-        velocity
-      });
-      
-    };
-    this.objects.push(plane);
-    this.onSceneObjectAdded(plane);
+    this.visibleScenes.push(scene);
+    scene.animateToStateName(SceneState.PLAYING);
   }
 
   updateObjects() {
@@ -415,4 +301,4 @@ class Application {
   }
 }
 
-export { Application }
+export { Application };

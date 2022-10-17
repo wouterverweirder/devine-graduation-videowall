@@ -245,7 +245,7 @@ function SidebarScene( editor ) {
 
 		const projectOptions = {};
     projects.forEach((project) => {
-      projectOptions[project.id] = `${project.firstName} ${project.lastName}`;
+      projectOptions[project.id] = `${project.attributes.firstName} ${project.attributes.lastName}`;
     })
     projectSelect.setOptions(projectOptions);
 		if (!firstProject && projects.length > 0) {
@@ -257,7 +257,7 @@ function SidebarScene( editor ) {
 
 	const getSelectedProject = () => {
     const projectId = parseInt(projectSelect.getValue());
-    return projects.find(project => project.id === projectId);
+    return projects.find(project => parseInt(project.id) === projectId);
   };
 
 	refreshUI();
@@ -325,7 +325,7 @@ function SidebarScene( editor ) {
 
 	const fetchProjectsList = async () => {
     const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
-    projects = data.data.projects.data;
+    projects = data.data.students.data;
   };
 
 	fetchProjectsList()

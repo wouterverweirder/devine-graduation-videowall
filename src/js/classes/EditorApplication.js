@@ -65,16 +65,6 @@ class EditorApplication extends Application {
     // this.serverConnection.requestCreatePlaneOnScreen({ id: THREE.MathUtils.generateUUID(), screenId: 'screen-7', type: 'project-description', data: project });
   }
 
-  getServerAddress() {
-
-    let serverAddress = this.editorConfig.getKey('serverAddress');
-    if (!serverAddress) {
-      serverAddress = '127.0.0.1';
-      this.editorConfig.setKey('serverAddress', serverAddress);
-    }
-    return serverAddress;
-  }
-
   onWindowResize() {
     this.editor.signals.windowResize.dispatch();
   }
