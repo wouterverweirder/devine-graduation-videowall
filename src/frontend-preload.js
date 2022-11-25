@@ -2,30 +2,51 @@ const { contextBridge } = require('electron');
 const util = require('util');
 const path = require('path');
 const fs = require('fs');
+const readFilePromised = util.promisify(fs.readFile);
+const configJSONPath = path.resolve(__dirname, '..', 'public', 'config.json');
+
+const getValueByPath = (object, path) => {
+  const pathParts = path.split('.');
+  let value = object;
+  for (let i = 0; i < pathParts.length; i++) {
+    const pathPart = pathParts[i];
+    if (pathPart === '[]') {
+      // return an array of all values
+      return value.map((item) => {
+        return getValueByPath(item, pathParts.slice(i + 1).join('.'));
+      });
+    } else {
+      value = value[pathPart];
+    }
+    if (!value) {
+      break;
+    }
+  }
+  return value;
+};
 
 contextBridge.exposeInMainWorld('VideoWallAPI', {
   processProjects: async (projects, argv) => {
     console.log('process projects called');
     console.log(projects);
     console.log(argv);
+
     const uploadsPath = path.resolve(__dirname, '..', 'public', 'uploads');
     // create the uploadsPath folder async if it doesn't exist
     await util.promisify(fs.mkdir)(uploadsPath, { recursive: true });
 
-    for (const student of projects.data.students.data) {
-      if (student.attributes.profilePicture.data) {
-        const profilePicture = student.attributes.profilePicture.data.attributes;
-        await updateUrlToLocalFileIfNeeded(profilePicture, uploadsPath);
-      }
-      if (student.attributes.mainAsset.data) {
-        const mainAsset = student.attributes.mainAsset.data.attributes;
-        await updateUrlToLocalFileIfNeeded(mainAsset, uploadsPath);
-      }
-      if (student.attributes.curriculum.data?.attributes.image.data) {
-        const image = student.attributes.curriculum.data.attributes.image.data.attributes;
-        await updateUrlToLocalFileIfNeeded(image, uploadsPath);
+    const config = JSON.parse(await readFilePromised(configJSONPath, 'utf8'));
+    const assetKeyNames = Object.keys(config.data.assetKeys);
+    for (const assetKeyName of assetKeyNames) {
+      const assets = getValueByPath(projects, config.data.assetKeys[assetKeyName]);
+      console.log(assetKeyName, assets);
+      const flattenedAssets = assets.reduce((acc, val) => acc.concat(val), []);
+      for (const asset of flattenedAssets) {
+        await updateUrlToLocalFileIfNeeded(asset, uploadsPath);
       }
     }
+    console.log('processed');
+    console.log(projects);
     return projects;
   }
 })

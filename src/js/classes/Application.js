@@ -20,8 +20,7 @@ class Application {
   camerasById = {};
   objects = [];
   serverConnection = new ServerConnection();
-  projects;
-  students;
+  fetchProjectsResult;
 
   constructor(config) {
     this.config = config;
@@ -46,8 +45,7 @@ class Application {
       }
     });
 
-    const apiProjects = await this.fetchProjects();
-    this.students = apiProjects.data.students.data;
+    this.fetchProjectsResult = await this.fetchProjects();
     
     this.config.screens.forEach(screenConfig => this.screenConfigsById[screenConfig.id] = screenConfig);
     
@@ -94,16 +92,16 @@ class Application {
       document.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowRight') {
           this.currentProjectIndex++;
-          if (this.currentProjectIndex >= this.students.length) {
+          if (this.currentProjectIndex >= this.projects.length) {
             this.currentProjectIndex = 0;
           }
-          this.onRequestShowProject(this.students[this.currentProjectIndex]);
+          this.onRequestShowProject(this.projects[this.currentProjectIndex]);
         }
       });
       if (!this.hasProjectsOverview()) {
-        if (this.students.length > 0) {
+        if (this.projects.length > 0) {
           this.currentProjectIndex = 0;
-          await this.onRequestShowProject(this.students[0]);
+          await this.onRequestShowProject(this.projects[0]);
         }
       } else {
         this.currentProjectIndex = -1
@@ -230,7 +228,7 @@ class Application {
       config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
-      students: this.students,
+      fetchProjectsResult: this.fetchProjectsResult,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this)
     });
@@ -251,6 +249,7 @@ class Application {
       config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
+      projects: this.projects,
       students: this.students,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this),

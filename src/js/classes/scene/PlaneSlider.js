@@ -3,70 +3,119 @@ import { gsap } from '../../gsap/src/index.js';
 
 class PlaneSlider {
 
+  scene = null;
   animationTimeoutId = false;
+  nonVisiblePlanes = [];
+  visiblePlanes = [];
+  pickingMethod = 'next'; // or 'random'
 
-  constructor() {
+  setupNewPlane = ({ oldPlane, newPlane }) => {};
+  getAxis = ({ oldPlane, newPlane }) => 'horizontal';
+  getDirection = ({ oldPlane, newPlane }) => -1;
+  getSlideDuration = () => 1;
+  getSlideDelay = () => 0;
+  getDelayForNextAnimation = () => 1;
+
+  constructor(scene, {
+    nonVisiblePlanes = [],
+    visiblePlanes = [],
+    setupNewPlane = ({ oldPlane, newPlane }) => {},
+    getAxis = ({ oldPlane, newPlane }) => 'horizontal',
+    getDirection = ({ oldPlane, newPlane }) => -1,
+    getSlideDuration = () => 1,
+    getSlideDelay = () => 0,
+    getDelayForNextAnimation = () => 1,
+    pickingMethod = 'next'
+  } = {}) {
+    this.scene = scene;
+    this.nonVisiblePlanes = nonVisiblePlanes;
+    this.visiblePlanes = visiblePlanes;
+    this.setupNewPlane = setupNewPlane;
+    this.getAxis = getAxis;
+    this.getDirection = getDirection;
+    this.getSlideDuration = getSlideDuration;
+    this.getSlideDelay = getSlideDelay;
+    this.getDelayForNextAnimation = getDelayForNextAnimation;
+    this.pickingMethod = pickingMethod;
+
   }
 
   stop(){
     this.killAnimationTimeout();
   }
 
-  /**
-    {
-    addObject = () => {},
-    removeObject = () => {},
-    getNewPlane = ({ oldPlane }) => {},
-    getOldPlane = () => {},
-    getAxis = ({ oldPlane, newPlane }) => 'horizontal',
-    getDirection = ({ oldPlane, newPlane }) => -1,
-    getSlideDuration = () => 1,
-    getSlideDelay = () => 0,
-    }
-   */
-  start(params) {
-    this.scheduleAnimationTimeout(params);
+  start() {
+    this.scheduleAnimationTimeout();
   }
 
   killAnimationTimeout() {
     clearTimeout(this.animationTimeoutId);
   }
 
-  scheduleAnimationTimeout(params) {
-    const { getDelayForNextAnimation } = params;
+  scheduleAnimationTimeout() {
     this.killAnimationTimeout();
-    const delayForNextAnimation = getDelayForNextAnimation();
+    const delayForNextAnimation = this.getDelayForNextAnimation();
     this.animationTimeoutId = setTimeout(() => {
-      this.animationTimeoutCb(params);
-      this.scheduleAnimationTimeout(params);
+      this.animationTimeoutCb();
+      this.scheduleAnimationTimeout();
     }, delayForNextAnimation);
+  }
+
+  getNewPlane({ oldPlane } = {}) {
+    const newPlane = this.nonVisiblePlanes.shift();
+    if (!newPlane) {
+      return null;
+    }
+    if (oldPlane) {
+      newPlane.customData.camera = oldPlane.customData.camera;
+    }
+    return newPlane;
+  }
+
+  addObject(o) {
+    this.scene.addObject(o);
+    this.visiblePlanes.push(o);
+  }
+
+  removeObject(o) {
+    const indexToRemove = this.visiblePlanes.indexOf(o);
+    if (indexToRemove >= this.visiblePlanes.length) {
+      return;
+    }
+    this.visiblePlanes.splice(indexToRemove, 1);
+    this.scene.removeObject(o);
+    this.nonVisiblePlanes.push(o);
   };
 
-  animationTimeoutCb({
-    addObject = () => {},
-    removeObject = () => {},
-    getNewPlane = ({ oldPlane }) => {},
-    getOldPlane = () => {},
-    getAxis = ({ oldPlane, newPlane }) => 'horizontal',
-    getDirection = ({ oldPlane, newPlane }) => -1,
-    getSlideDuration = () => 1,
-    getSlideDelay = () => 0,
-  } = params) {
+  getOldPlane() {
+    if (this.pickingMethod === 'next') {
+      return this.visiblePlanes[0];
+    }
+    // random
+    const index = Math.floor(Math.random() * this.visiblePlanes.length);
+    if (index >= this.visiblePlanes.length) {
+      return;
+    }
+    return this.visiblePlanes[index];
+  }
 
-    const oldPlane = getOldPlane();
+  animationTimeoutCb() {
+
+    const oldPlane = this.getOldPlane();
     if (!oldPlane) {
       console.warn('no oldPlane to animate from');
       return;
     }
-    const newPlane = getNewPlane({ oldPlane });
+    const newPlane = this.getNewPlane({ oldPlane });
     if (!newPlane) {
       console.warn('no newPlane to animate to');
       return;
     }
+    this.setupNewPlane({ oldPlane, newPlane });
 
-    const axis = getAxis({ oldPlane, newPlane });
-    const direction = getDirection({ oldPlane, newPlane });
-    const slideDuration = getSlideDuration();
+    const axis = this.getAxis({ oldPlane, newPlane });
+    const direction = this.getDirection({ oldPlane, newPlane });
+    const slideDuration = this.getSlideDuration();
 
     const distanceXOldPlane = (oldPlane) ? oldPlane.props.scale.x : 0;
     const distanceYOldPlane = (oldPlane) ? oldPlane.props.scale.y : 0;
@@ -134,18 +183,18 @@ class PlaneSlider {
         });
       },
       onComplete: () => {
-        removeObject(oldPlane);
+        this.removeObject(oldPlane);
       }
     });
 
-    const delay = getSlideDelay();
+    const delay = this.getSlideDelay();
 
     if (oldPlane) {
       tl.to(oldPlane.props.position, {...targetPropsOldPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE, delay}, 0);
     }
     tl.to(newPlane.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE, delay}, 0);
 
-    addObject(newPlane);
+    this.addObject(newPlane);
   }
 
 }

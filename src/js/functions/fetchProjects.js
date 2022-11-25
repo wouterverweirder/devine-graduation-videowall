@@ -77,7 +77,6 @@ const fetchProjects = async (argv) => {
       },
     }),
   })).json();
-  console.log(projects);
   // sync assets locally
   if (window.VideoWallAPI) {
     projects = await window.VideoWallAPI.processProjects(projects, argv);

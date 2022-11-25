@@ -1,9 +1,9 @@
-import { gsap } from '../../../gsap/src/index.js';
+import { gsap } from '../../../../gsap/src/index.js';
 
-import { DevineEasing } from '../../../consts/DevineEasing.js';
+import { DevineEasing } from '../../../../consts/DevineEasing.js';
 
-import { CanvasPlane } from "./CanvasPlane.js";
-import { loadImage } from '../../../functions/loadImage.js';
+import { CanvasPlane } from "../CanvasPlane.js";
+import { loadImage } from '../../../../functions/loadImage.js';
 
 class DevineInfoPlane extends CanvasPlane {
 

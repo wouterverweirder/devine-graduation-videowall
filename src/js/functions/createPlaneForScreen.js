@@ -2,7 +2,6 @@ import { calculateScaleForScreenConfig } from './screenUtils.js';
 
 import { VisualBase } from '../classes/scene/objects/VisualBase.js';
 import { ImagePlane } from '../classes/scene/objects/ImagePlane.js';
-import { ProjectStudentData, ProjectStudentPlane } from '../classes/scene/objects/ProjectStudentPlane.js';
 import { ProjectAssetsPlane } from '../classes/scene/objects/ProjectAssetsPlane.js';
 import { ProjectDescriptionData, ProjectDescriptionPlane } from '../classes/scene/objects/ProjectDescriptionPlane.js';
 import { PlaneType } from '../consts/PlaneType.js';
@@ -10,7 +9,7 @@ import { ProjectBioData, ProjectBioPlane } from '../classes/scene/objects/Projec
 import { ProjectQuoteData, ProjectQuotePlane } from '../classes/scene/objects/ProjectQuotePlane.js';
 import { ProjectContactData, ProjectContactPlane } from '../classes/scene/objects/ProjectContactPlane.js';
 import { CanvasPlane } from '../classes/scene/objects/CanvasPlane.js';
-import { DevineInfoPlane } from '../classes/scene/objects/DevineInfoPlane.js';
+import { DevineInfoPlane } from '../classes/scene/objects/devine/DevineInfoPlane.js';
 import { VideoPlane } from '../classes/scene/objects/VideoPlane.js';
 import { BouncingDVD } from '../classes/scene/objects/BouncingDVD.js';
 
@@ -63,8 +62,6 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
     plane = new ProjectAssetsPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_DESCRIPTION) {
     plane = new ProjectDescriptionPlane(data.id, { ...props, data: ProjectDescriptionData.fromProjectData(props.data) });
-  } else if (data.type === PlaneType.PROFILE_PICTURE) {
-    plane = new ProjectStudentPlane(data.id, { ...props, data: ProjectStudentData.fromProjectData(props.data) });
   } else if (data.type === PlaneType.PROJECT_BIO) {
     plane = new ProjectBioPlane(data.id, { ...props, data: ProjectBioData.fromProjectData(props.data) });
   } else if (data.type === PlaneType.PROJECT_QUOTE) {

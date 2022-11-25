@@ -2,15 +2,14 @@
   "interactionTimeout": 300000,
   "crop": 1,
   "data": {
-    "projectsKey": "data.projects.data",
+    "projectsKey": "data.students.data",
     "assetKeys": {
-      "mainAsset": "data.projects.data.[].attributes.mainAsset.data.attributes",
-      "assets": "data.projects.data.[].attributes.assets.data.[].attributes",
-      "people": "data.projects.data.[].attributes.students.data.[].attributes.profilePicture.data.attributes"
+      "mainAsset": "data.students.data.[].attributes.mainAsset.data.attributes",
+      "people": "data.students.data.[].attributes.profilePicture.data.attributes"
     },
     "project": {
       "people": {
-        "key": "attributes.students.data.[].attributes"
+        "key": "attributes"
       }
     }
   },
@@ -19,16 +18,17 @@
       "screenshotSlideInterval": 4000,
       "namePlane": {
         "height": 280,
-        "maxHeight": 280, 
+        "maxHeight": 360, 
         "name": {
           "template": "${firstName} ${lastName}"
         },
         "tagLine": {
-          "template": "Expert ${expert.data.attributes.name}"
+          "template": "Alumnus ${curriculum.data.attributes.name}"
         }
       }
     },
     "projectsOverview": {
+      "disabled": true,
       "updateInterval": 4000
     }
   },
@@ -50,12 +50,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.698,
-          "height": 0.392
+          "width": 1.217,
+          "height": 0.686
         },
         "position": [
-          -1.66,
-          0.77,
+          -0.5385909880116457,
+          0.9599794608671588,
           1
         ],
         "rotation": -1.5707963267948966
@@ -64,7 +64,7 @@
     {
       "id": "screen-1",
       "roles": [
-        "portrait-screenshots"
+        "project-bio"
       ],
       "output": {
         "left": 0.25,
@@ -74,12 +74,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 1.217,
+          "height": 0.686
         },
         "position": [
-          -1.1,
-          1.15,
+          -2.152445288877636,
+          -0.4445715873586684,
           1
         ],
         "rotation": -1.5707963267948966
@@ -88,7 +88,7 @@
     {
       "id": "screen-2",
       "roles": [
-        "videos"
+        "curriculum-picture"
       ],
       "output": {
         "left": 0,
@@ -98,12 +98,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.698,
-          "height": 0.392
+          "width": 0.553,
+          "height": 0.333
         },
         "position": [
-          -0.81,
-          0.16,
+          -1.3219593529324618,
+          1.6371481828410144,
           1
         ],
         "rotation": 0
@@ -122,12 +122,12 @@
       },
       "camera": {
         "size": {
-          "width": 1.206,
-          "height": 0.678
+          "width": 1.661,
+          "height": 0.935
         },
         "position": [
-          -0.14,
-          1.14,
+          -1.8717998585459175,
+          0.8106173341683776,
           1
         ],
         "rotation": 0
@@ -136,7 +136,7 @@
     {
       "id": "screen-4",
       "roles": [
-        "landscape-screenshots"
+        "project-quote"
       ],
       "output": {
         "left": 0.5,
@@ -146,12 +146,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 1.217,
+          "height": 0.686
         },
         "position": [
-          0.89,
-          1.04,
+          -0.9692552553069111,
+          -0.39811635086139147,
           1
         ],
         "rotation": 0
@@ -160,31 +160,7 @@
     {
       "id": "screen-5",
       "roles": [
-        "portrait-screenshots"
-      ],
-      "output": {
-        "left": 0.75,
-        "bottom": 0.5,
-        "width": 0.25,
-        "height": 0.5
-      },
-      "camera": {
-        "size": {
-          "width": 0.698,
-          "height": 0.392
-        },
-        "position": [
-          1.46,
-          1.07,
-          1
-        ],
-        "rotation": -1.5707963267948966
-      }
-    },
-    {
-      "id": "screen-6",
-      "roles": [
-        "project-description"
+        "project-contact"
       ],
       "output": {
         "left": 0.5,
@@ -194,39 +170,15 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 1.217,
+          "height": 0.686
         },
         "position": [
-          0.16,
-          0.14,
+          0.35005035388405303,
+          0.6052216351391068,
           1
         ],
         "rotation": -1.5707963267948966
-      }
-    },
-    {
-      "id": "screen-7",
-      "roles": [
-        "videos"
-      ],
-      "output": {
-        "left": 0.75,
-        "bottom": 0,
-        "width": 0.25,
-        "height": 0.5
-      },
-      "camera": {
-        "size": {
-          "width": 0.698,
-          "height": 0.392
-        },
-        "position": [
-          1.05,
-          0.17,
-          1
-        ],
-        "rotation": 0
       }
     }
   ]

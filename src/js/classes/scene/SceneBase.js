@@ -35,8 +35,7 @@ class SceneBase {
       config: {},
       cameras: [],
       screenConfigsById: {},
-      projects: [],
-      students: [],
+      fetchProjectsResult: {},
       addObject: () => {},
       removeObject: () => {},
     };
@@ -47,8 +46,7 @@ class SceneBase {
     this.config = this.props.config;
     this.cameras = props.cameras;
     this.screenConfigsById = props.screenConfigsById;
-    this.projects = props.projects;
-    this.students = props.students;
+    this.fetchProjectsResult = props.fetchProjectsResult;
 
     this.addObject = props.addObject;
     this.removeObject = props.removeObject;

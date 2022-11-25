@@ -4,13 +4,13 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron . --projection=multi --websocket=127.0.0.1 --cms-graphql-url=https://howest-videowall.herokuapp.com/graphql",
-    "debug": "electron . --projection=multi --websocket=127.0.0.1 --devtools=true --editor=true --cms-graphql-url=https://howest-videowall.herokuapp.com/graphql",
-    "debug-local": "electron . --websocket=127.0.0.1 --devtools=true --editor=true --cms-graphql-url=https://howest-videowall.herokuapp.com/graphql",
-    "server": "electron . --only-server --cms-graphql-url=https://howest-videowall.herokuapp.com/graphql",
+    "start": "electron . --projection=multi --websocket=127.0.0.1",
+    "debug": "electron . --projection=multi --websocket=127.0.0.1 --devtools=true --editor=true",
+    "debug-local": "electron . --websocket=127.0.0.1 --devtools=true --editor=true",
+    "server": "electron . --only-server",
     "build": "vite build",
     "dev:web": "vite",
-    "dev:server": "nodemon main.js --only-server --cms-graphql-url=https://howest-videowall.herokuapp.com/graphql"
+    "dev:server": "nodemon main.js --only-server"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [

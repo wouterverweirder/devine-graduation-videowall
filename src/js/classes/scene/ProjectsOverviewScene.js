@@ -6,6 +6,7 @@ import { ImagePlane } from './objects/ImagePlane.js';
 import { delay } from '../../functions/delay.js';
 import { PlaneType } from '../../consts/PlaneType.js';
 import { PlaneSlider } from './PlaneSlider.js';
+import { getValueByPath } from "../../functions/getValueByPath.js";
 
 class ProjectsOverviewScene extends SceneBase {
 
@@ -19,16 +20,38 @@ class ProjectsOverviewScene extends SceneBase {
   async _executeStateName(stateName) {
     if (stateName === SceneState.LOAD) {
 
-      // create a plane for each student
-      for (let index = 0; index < this.students.length; index++) {
-        const student = this.students[index];
+      // prepare the plane slider
+      this.planeSlider = new PlaneSlider(this, {
+        visiblePlanes: this.visiblePlanes,
+        nonVisiblePlanes: this.nonVisiblePlanes,
+        setupNewPlane: ({ oldPlane, newPlane }) => {
+          const setPropsNewPlane = this.generatePropsForScreen(oldPlane.customData.camera, oldPlane.customData.isFirstItemOnScreen);
+          newPlane.customData.isFirstItemOnScreen = oldPlane.customData.isFirstItemOnScreen;
+          newPlane.applyProps(setPropsNewPlane);
+          return newPlane;
+        },
+        getAxis: ({ newPlane }) => {
+          const camera = newPlane.customData.camera;
+          const isLandscape = !(camera.props.rotation.z !== 0);
+          return (isLandscape) ? 'vertical' : 'horizontal';
+        },
+        getDirection: ({ oldPlane, newPlane }) => (Math.random() < .5) ? 1 : -1,
+        getDelayForNextAnimation: () => this.config.scenes.projectsOverview.updateInterval,
+        getSlideDuration: () => 1,
+        pickingMethod: 'random'
+      });
+
+      const peopleImages = getValueByPath(this.fetchProjectsResult, this.config.data.assetKeys.people).reduce((acc, val) => acc.concat(val), []);
+
+      for (let index = 0; index < peopleImages.length; index++) {
+        const personImage = peopleImages[index];
         const props = {
-          name: `project-overview-${student.id}-${index}`,
+          name: `project-overview-personImage-${index}`,
           textureSize: {
             x: 1920,
             y: 1920
           },
-          url: student.attributes.profilePicture.data?.attributes.url
+          url: personImage.url
         };
         const plane = new ImagePlane(props.name, props);
         await plane.init();
@@ -99,47 +122,7 @@ class ProjectsOverviewScene extends SceneBase {
       this.addObject(this.instructionsPlane);
       this.instructionsPlane.intro();
 
-      this.planeSlider = new PlaneSlider();
-      this.planeSlider.start({
-        addObject: (o) => {
-          this.addObject(o);
-          this.visiblePlanes.push(o);
-        },
-        removeObject: (o) => {
-          const indexToRemove = this.visiblePlanes.indexOf(o);
-          if (indexToRemove >= this.visiblePlanes.length) {
-            return;
-          }
-          this.visiblePlanes.splice(indexToRemove, 1);
-          this.removeObject(o);
-          this.nonVisiblePlanes.push(o);
-        },
-        getNewPlane: ({ oldPlane }) => {
-          const newPlane = this.nonVisiblePlanes.shift();
-          if (!newPlane) return;
-          const setPropsNewPlane = this.generatePropsForScreen(oldPlane.customData.camera, oldPlane.customData.isFirstItemOnScreen);
-          newPlane.customData.camera = oldPlane.customData.camera;
-          newPlane.customData.isFirstItemOnScreen = oldPlane.customData.isFirstItemOnScreen;
-          newPlane.applyProps(setPropsNewPlane);
-          return newPlane;
-        },
-        getOldPlane: () => {
-          // choose a random item to replace
-          const index = Math.floor(Math.random() * this.visiblePlanes.length);
-          if (index >= this.visiblePlanes.length) {
-            return;
-          }
-          return this.visiblePlanes[index];
-        },
-        getAxis: ({ oldPlane, newPlane }) => {
-          const camera = oldPlane.customData.camera;
-          const isLandscape = !(camera.props.rotation.z !== 0);
-          return (isLandscape) ? 'vertical' : 'horizontal';
-        },
-        getDirection: ({ oldPlane, newPlane }) => (Math.random() < .5) ? 1 : -1,
-        getDelayForNextAnimation: () => this.config.scenes.projectsOverview.updateInterval,
-        getSlideDuration: () => 1
-      });
+      this.planeSlider.start();
 
     } else if (stateName === SceneState.OUTRO) {
       

@@ -32,7 +32,8 @@ class VisualBase extends SceneObject {
       textureSize:{
         x: 1920,
         y: 1080
-      }
+      },
+      planeConfig: {},
     };
     Object.assign(mergedProps, props);
     props = mergedProps;
