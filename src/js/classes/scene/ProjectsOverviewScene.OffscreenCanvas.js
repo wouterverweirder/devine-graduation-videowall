@@ -71,7 +71,8 @@ class ProjectsOverviewScene extends SceneBase {
             type: PlaneType.CANVAS,
             color: 0x000000,
           },
-          screenConfig
+          screenConfig,
+          appConfig: this.config
         });
         await screenPlane.init();
         this.screenPlanes.push(screenPlane);

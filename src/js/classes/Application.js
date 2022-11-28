@@ -164,7 +164,7 @@ class Application {
     if (!screenConfig) {
       return;
     }
-    const plane = await createPlaneForScreen({data, screenConfig});
+    const plane = await createPlaneForScreen({data, screenConfig, appConfig: this.config});
     this.addObject(plane);
   }
 

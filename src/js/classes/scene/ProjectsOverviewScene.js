@@ -67,7 +67,8 @@ class ProjectsOverviewScene extends SceneBase {
             id: 'devine-info',
             type: PlaneType.DEVINE_INFO
           },
-          screenConfig
+          screenConfig,
+          appConfig: this.config
         });
       }
       {
@@ -82,7 +83,8 @@ class ProjectsOverviewScene extends SceneBase {
             url: 'assets/footswitch.mp4',
             layers: descriptionCamera.props.layers
           },
-          screenConfig
+          screenConfig,
+          appConfig: this.config
         });
       }
 

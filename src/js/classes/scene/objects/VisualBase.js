@@ -33,7 +33,7 @@ class VisualBase extends SceneObject {
         x: 1920,
         y: 1080
       },
-      planeConfig: {},
+      appConfig: {},
     };
     Object.assign(mergedProps, props);
     props = mergedProps;

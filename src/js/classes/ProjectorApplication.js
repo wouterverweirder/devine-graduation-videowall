@@ -76,7 +76,7 @@ class ProjectorApplication extends Application {
 
   applicationSpecificRender() {
     if (this.isSingleProjection) {
-      const scaleFactor = 250;
+      const scaleFactor = 450;
       this.renderer.setSize( this.fullBounds.width * scaleFactor, this.fullBounds.height * scaleFactor );
 
       this.cameras.forEach(camera => {

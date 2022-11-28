@@ -15,45 +15,50 @@ export class StudentNamePlane extends CanvasPlane {
   }
 
   async createInitalCanvasContent() {
+    const planeConfig = this.props.appConfig.planes.namePlane || {};
     const marginLeft = 100;
-    const marginTop = 50;
+    const marginTop = planeConfig.marginTop || 0;
 
-    const fontSize = 60 * 1.333;
-    const lineHeight = 70;
-
-    const maxTriangleHeightConfig = this.props.planeConfig.maxHeight - this.props.planeConfig.height;
+    const maxTriangleHeightConfig = planeConfig.maxHeight - planeConfig.height;
     this.maxTriangleHeight = (!isNaN(maxTriangleHeightConfig)) ? maxTriangleHeightConfig : this.maxTriangleHeight;
 
-    let yPos = fontSize + marginTop + this.maxTriangleHeight;
+    let yPos = marginTop + this.maxTriangleHeight;
 
-    let name = this.props.planeConfig.name?.template || '';
+    let name = planeConfig.name?.template || '';
     name = name.replace(/\$\{([^\}]+)\}/g, (match, p1) => {
       const value = getValueByPath(this.props.data, p1);
       return value || '';
     });
 
-    let tagLine = this.props.planeConfig.tagLine?.template || '';
+    let tagLine = planeConfig.tagLine?.template || '';
     // replace the ${} items in the tagLine with the data from this.props.data
     tagLine = tagLine.replace(/\$\{([^\}]+)\}/g, (match, p1) => {
       const value = getValueByPath(this.props.data, p1);
       return value || '';
     });
 
+    const nameFont = planeConfig.name?.font || `700 80px "Embedded VAGRounded"`;
+    const nameFillStyle = planeConfig.name?.fillStyle || 'rgb(68,200,245)';
+    const nameMarginBottom = planeConfig.name?.marginBottom || 70;
+    console.log(nameFont);
+   
     this.canvasObjects.push({
       type: 'text',
-      font: `700 ${fontSize}px "Embedded VAGRounded"`,
-      fillStyle: 'rgb(68,200,245)',
+      font: nameFont,
+      fillStyle: nameFillStyle,
       content: name,
       x: marginLeft,
       y: yPos,
       opacity: 1
     });
-    yPos += lineHeight;
+    yPos += nameMarginBottom;
 
+    const tagLineFont = planeConfig.tagLine?.font || `400 48 "Embedded VAGRounded"`;
+    const tagLineFillStyle = planeConfig.tagLine?.fillStyle || '#000000';
     this.canvasObjects.push({
       type: 'text',
-      font: `400 ${36*1.333}px "Embedded VAGRounded"`,
-      fillStyle: 'black',
+      font: tagLineFont,
+      fillStyle: tagLineFillStyle,
       content: `${tagLine}`,
       x: marginLeft,
       y: yPos,

@@ -3,11 +3,11 @@ import { calculateScaleForScreenConfig } from './screenUtils.js';
 import { VisualBase } from '../classes/scene/objects/VisualBase.js';
 import { ImagePlane } from '../classes/scene/objects/ImagePlane.js';
 import { ProjectAssetsPlane } from '../classes/scene/objects/ProjectAssetsPlane.js';
-import { ProjectDescriptionData, ProjectDescriptionPlane } from '../classes/scene/objects/ProjectDescriptionPlane.js';
+import { ProjectDescriptionPlane } from '../classes/scene/objects/ProjectDescriptionPlane.js';
 import { PlaneType } from '../consts/PlaneType.js';
-import { ProjectBioData, ProjectBioPlane } from '../classes/scene/objects/ProjectBioPlane.js';
-import { ProjectQuoteData, ProjectQuotePlane } from '../classes/scene/objects/ProjectQuotePlane.js';
-import { ProjectContactData, ProjectContactPlane } from '../classes/scene/objects/ProjectContactPlane.js';
+import { ProjectBioPlane } from '../classes/scene/objects/ProjectBioPlane.js';
+import { ProjectQuotePlane } from '../classes/scene/objects/ProjectQuotePlane.js';
+import { ProjectContactPlane } from '../classes/scene/objects/ProjectContactPlane.js';
 import { CanvasPlane } from '../classes/scene/objects/CanvasPlane.js';
 import { DevineInfoPlane } from '../classes/scene/objects/devine/DevineInfoPlane.js';
 import { VideoPlane } from '../classes/scene/objects/VideoPlane.js';
@@ -32,7 +32,7 @@ const calculateTextureSizeForScreen = (screenConfig) => {
   return textureSize;
 };
 
-const createPlaneForScreen = async ({data, screenConfig}) => {
+const createPlaneForScreen = async ({data, screenConfig, appConfig}) => {
 
   const scale = (data.scale) ? data.scale : calculateScaleForScreenConfig(screenConfig);
   const textureSize = (data.textureSize) ? data.textureSize : calculateTextureSizeForScreen(screenConfig);
@@ -48,7 +48,8 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
       z: zPosition
     },
     scale,
-    textureSize
+    textureSize,
+    appConfig
   });
 
   let plane;
@@ -61,13 +62,13 @@ const createPlaneForScreen = async ({data, screenConfig}) => {
   } else if (data.type === PlaneType.PROJECT_ASSETS) {
     plane = new ProjectAssetsPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_DESCRIPTION) {
-    plane = new ProjectDescriptionPlane(data.id, { ...props, data: ProjectDescriptionData.fromProjectData(props.data) });
+    plane = new ProjectDescriptionPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_BIO) {
-    plane = new ProjectBioPlane(data.id, { ...props, data: ProjectBioData.fromProjectData(props.data) });
+    plane = new ProjectBioPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_QUOTE) {
-    plane = new ProjectQuotePlane(data.id, { ...props, data: ProjectQuoteData.fromProjectData(props.data) });
+    plane = new ProjectQuotePlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_CONTACT) {
-    plane = new ProjectContactPlane(data.id, { ...props, data: ProjectContactData.fromProjectData(props.data) });
+    plane = new ProjectContactPlane(data.id, props);
   } else if (data.type === PlaneType.DEVINE_INFO) {
     plane = new DevineInfoPlane(data.id, props);
   } else if (data.type === PlaneType.BOUNCING_DVD) {

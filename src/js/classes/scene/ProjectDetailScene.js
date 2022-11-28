@@ -42,8 +42,8 @@ class ProjectDetailScene extends SceneBase {
     super(id, props);
     this.project = props.project;
 
-    this.studentNameHeight = this.config.scenes.projectDetail.namePlane?.height || this.studentNameHeight;
-    this.studentNameMaxHeight = this.config.scenes.projectDetail.namePlane?.maxHeight || this.studentNameMaxHeight;
+    this.studentNameHeight = this.config.planes.namePlane?.height || this.studentNameHeight;
+    this.studentNameMaxHeight = this.config.planes.namePlane?.maxHeight || this.studentNameMaxHeight;
 
     // sort cameras from bottom to top
     this.camerasFromBottomToTop = this.cameras.sort((a, b) => {
@@ -217,7 +217,7 @@ class ProjectDetailScene extends SceneBase {
                 y: (this.studentNameMaxHeight),
               },
               data: person,
-              planeConfig: this.config.scenes.projectDetail.namePlane || {}
+              appConfig: this.config
             });
             plane.customData.camera = profilePictureCamera;
             await plane.init();
@@ -254,7 +254,8 @@ class ProjectDetailScene extends SceneBase {
             },
             layers: screenCamera.props.layers
           },
-          screenConfig
+          screenConfig,
+          appConfig: this.config
         });
         // offset position
         colorPlane.applyProps({
@@ -279,7 +280,8 @@ class ProjectDetailScene extends SceneBase {
                 layers: screenCamera.props.layers,
                 muted: false
               },
-              screenConfig
+              screenConfig,
+              appConfig: this.config
             });
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROFILE_PICTURE)) {
@@ -313,7 +315,8 @@ class ProjectDetailScene extends SceneBase {
                 url: video.url,
                 layers: screenCamera.props.layers
               },
-              screenConfig
+              screenConfig,
+              appConfig: this.config
             }); 
           } else {
             // no videos - take landscape screenshots
@@ -333,7 +336,8 @@ class ProjectDetailScene extends SceneBase {
                 data: project,
                 layers: screenCamera.props.layers
               },
-              screenConfig
+              screenConfig,
+              appConfig: this.config
             });
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_CONTACT)) {
@@ -344,7 +348,8 @@ class ProjectDetailScene extends SceneBase {
               data: project,
               layers: screenCamera.props.layers
             },
-            screenConfig
+            screenConfig,
+            appConfig: this.config
           });
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_DESCRIPTION)) {
           if (project.attributes.description) {
@@ -355,7 +360,8 @@ class ProjectDetailScene extends SceneBase {
                 data: project,
                 layers: screenCamera.props.layers
               },
-              screenConfig
+              screenConfig,
+              appConfig: this.config
             }); 
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_QUOTE)) {
@@ -367,7 +373,8 @@ class ProjectDetailScene extends SceneBase {
                 data: project,
                 layers: screenCamera.props.layers
               },
-              screenConfig
+              screenConfig,
+              appConfig: this.config
             }); 
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.CURRICULUM_PICTURE)) {
@@ -379,7 +386,8 @@ class ProjectDetailScene extends SceneBase {
                 url: project.attributes.curriculum.data.attributes.image.data.attributes.url,
                 layers: screenCamera.props.layers
               },
-              screenConfig
+              screenConfig,
+              appConfig: this.config
             }); 
           }
         }
@@ -391,7 +399,8 @@ class ProjectDetailScene extends SceneBase {
               color: 0x000000,
               layers: screenCamera.props.layers
             },
-            screenConfig
+            screenConfig,
+            appConfig: this.config
           });
         }
 

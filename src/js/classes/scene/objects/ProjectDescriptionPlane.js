@@ -1,26 +1,14 @@
 import { CanvasPlane } from "./CanvasPlane.js";
 import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
+import { getValueByPath } from '../../../functions/getValueByPath.js';
 import { getLines } from '../../../functions/getLines.js';
-
-export class ProjectDescriptionData {
-  constructor({description}) {
-    this.description = description;
-  }
-  static fromProjectData(projectData) {
-    return new ProjectDescriptionData({
-      description: projectData.attributes.description
-    });
-  }
-}
 
 export class ProjectDescriptionPlane extends CanvasPlane {
 
   canvasObjects = [];
   title = {};
   gradientTop = {};
-  gradientTopHeight = 100;
   gradientBottom = {};
-  gradientBottomHeight = 100;
   textLines = [];
   tl = false;
   textHeight = 0;
@@ -32,58 +20,83 @@ export class ProjectDescriptionPlane extends CanvasPlane {
   scrollSpeedFactor = 30; // smaller is slower
 
   async createInitalCanvasContent() {
+
+    const planeConfig = this.props.appConfig.planes.descriptionPlane || {};
+
     const marginLeft = 50;
     const marginRight = 50;
-    const marginTop = 50;
+    const marginTop = planeConfig.marginTop || 50;
 
-    const fontSize = 55;
-    const lineHeight = 70;
-
-    const gradientTop = new OffscreenCanvas(this.props.textureSize.x, this.gradientTopHeight);
+    const gradientTop = new OffscreenCanvas(this.props.textureSize.x, (planeConfig.gradientTop?.height || 50));
     {
       const ctx = gradientTop.getContext('2d');
       const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      if (planeConfig.gradientTop?.stops) {
+        for (const stopKey in planeConfig.gradientTop.stops) {
+          if (Object.hasOwnProperty.call(planeConfig.gradientTop, stopKey)) {
+            const stop = planeConfig.gradientTop[stopKey];
+            gradient.addColorStop(parseInt(stopKey), stop);
+          }
+        }
+      }
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
-    const gradientBottom = new OffscreenCanvas(this.props.textureSize.x, this.gradientBottomHeight);
+    const gradientBottom = new OffscreenCanvas(this.props.textureSize.x, (planeConfig.gradientBottom?.height || 50));
     {
       const ctx = gradientBottom.getContext('2d');
       const gradient = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 1)');
+      if (planeConfig.gradientBottom?.stops) {
+        for (const stopKey in planeConfig.gradientBottom.stops) {
+          if (Object.hasOwnProperty.call(planeConfig.gradientBottom.stops, stopKey)) {
+            const stop = planeConfig.gradientBottom.stops[stopKey];
+            gradient.addColorStop(parseInt(stopKey), stop);
+          }
+        }
+      }
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     }
 
-    let yPos = fontSize + marginTop;
+    let yPos = marginTop;
+
+    let title = planeConfig.title?.template || 'Project Description';
+    title = title.replace(/\$\{([^\}]+)\}/g, (match, p1) => {
+      const value = getValueByPath(this.props.data, p1);
+      return value || '';
+    });
 
     this.title = {
       type: 'text',
-      font: `700 ${fontSize}px "Embedded VAGRounded"`,
-      fillStyle: 'white',
-      content: 'Project Info',
+      font: planeConfig.title?.font || `700 53px "Embedded VAGRounded"`,
+      fillStyle: planeConfig.title?.fillStyle || 'rgb(68, 200, 245)',
+      content: title,
       x: marginLeft,
       y: yPos,
       opacity: 0
     };
 
-    yPos += 200;
+    yPos += planeConfig.title?.marginBottom || 100;
 
-    const paragraphs = this.props.data.description.split("\n");
+    let content = planeConfig.paragraphs?.template || '';
+    content = content.replace(/\$\{([^\}]+)\}/g, (match, p1) => {
+      const value = getValueByPath(this.props.data, p1);
+      return value || '';
+    });
+
+    const paragraphs = content.split("\n");
 
     const textStartY = yPos;
 
+    const lineHeight = planeConfig.paragraphs?.lineHeight || 70;
     paragraphs.forEach(paragraph => {
-      this.ctx.font = `${fontSize}px "Embedded VAGRounded"`;
+      this.ctx.font = planeConfig.paragraphs?.font || `400 53px "Embedded OpenSans"`;
       const lines = getLines(this.ctx, paragraph.trim(), this.canvas.width - marginLeft - marginRight);
       lines.forEach(line => {
         const textLine = {
           type: 'text',
-          font: this.ctx.font,
-          fillStyle: 'white',
+          font: planeConfig.paragraphs?.font || `400 53px "Embedded OpenSans"`,
+          fillStyle: planeConfig.paragraphs?.fillStyle || `#000000`,
           content: line,
           x: marginLeft,
           y: yPos,
@@ -104,20 +117,22 @@ export class ProjectDescriptionPlane extends CanvasPlane {
       image: gradientTop,
       opacity: 1,
       x: 0,
-      y: 150
+      y: planeConfig.gradientTop?.y || 100
     };
     this.gradientBottom = {
       type: 'image',
       image: gradientBottom,
       opacity: 1,
       x: 0,
-      y: this.props.textureSize.y - this.gradientBottomHeight
+      y: this.props.textureSize.y - (planeConfig.gradientBottom.height || 50)
     };
+    console.log(this.gradientBottom);
   }
 
   draw() {
     // draw my basic displaylist to the screen
-    this.ctx.fillStyle = 'black';
+    const planeConfig = this.props.appConfig.planes.descriptionPlane || {};
+    this.ctx.fillStyle = planeConfig.backgroundColor || 'white';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     const drawCanvasObject = canvasObject => {
@@ -142,7 +157,7 @@ export class ProjectDescriptionPlane extends CanvasPlane {
       drawCanvasObject(canvasObject);
     });
     this.ctx.restore();
-    this.ctx.fillStyle = 'black';
+    this.ctx.fillStyle = planeConfig.backgroundColor || 'white';
     this.ctx.fillRect(0, 0, this.props.textureSize.x, this.gradientTop.y);
     drawCanvasObject(this.gradientTop);
     drawCanvasObject(this.gradientBottom);
