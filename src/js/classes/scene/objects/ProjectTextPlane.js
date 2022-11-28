@@ -3,7 +3,7 @@ import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getValueByPath } from '../../../functions/getValueByPath.js';
 import { getLines } from '../../../functions/getLines.js';
 
-export class ProjectBioPlane extends CanvasPlane {
+export class ProjectTextPlane extends CanvasPlane {
 
   canvasObjects = [];
   title = {};
@@ -21,7 +21,7 @@ export class ProjectBioPlane extends CanvasPlane {
 
   async createInitalCanvasContent() {
 
-    const planeConfig = this.props.appConfig.planes.bioPlane || {};
+    const planeConfig = this.props.planeConfig || {};
 
     const marginLeft = 50;
     const marginRight = 50;
@@ -60,7 +60,7 @@ export class ProjectBioPlane extends CanvasPlane {
 
     let yPos = marginTop;
 
-    let title = planeConfig.title?.template || 'BIO';
+    let title = planeConfig.title?.template || 'Project Description';
     title = title.replace(/\$\{([^\}]+)\}/g, (match, p1) => {
       const value = getValueByPath(this.props.data, p1);
       return value || '';
@@ -126,11 +126,12 @@ export class ProjectBioPlane extends CanvasPlane {
       x: 0,
       y: this.props.textureSize.y - (planeConfig.gradientBottom.height || 50)
     };
+    console.log(this.gradientBottom);
   }
 
   draw() {
     // draw my basic displaylist to the screen
-    const planeConfig = this.props.appConfig.planes.bioPlane || {};
+    const planeConfig = this.props.planeConfig || {};
     this.ctx.fillStyle = planeConfig.backgroundColor || 'white';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 

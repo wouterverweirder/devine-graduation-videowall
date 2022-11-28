@@ -55,7 +55,7 @@
         "marginBottom": 100
       },
       "paragraphs": {
-        "template": "${bio}",
+        "template": "${attributes.bio}",
         "font": "400 53px 'Embedded OpenSans'",
         "fillStyle": "#000000",
         "lineHeight": 70

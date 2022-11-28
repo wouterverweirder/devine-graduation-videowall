@@ -3,19 +3,6 @@ import { gsap, Cubic, Linear } from '../../../gsap/src/index.js';
 import { getLines } from '../../../functions/getLines.js';
 import { loadImage } from "../../../functions/loadImage.js";
 
-export class ProjectQuoteData {
-  constructor({quote, backgroundColor}) {
-    this.quote = quote;
-    this.backgroundColor = backgroundColor;
-  }
-  static fromProjectData(projectData) {
-    return new ProjectQuoteData({
-      quote: projectData.attributes.quote,
-      backgroundColor: projectData.attributes.curriculum.data?.attributes.pillar.data?.attributes.color
-    });
-  }
-}
-
 export class ProjectQuotePlane extends CanvasPlane {
 
   canvasObjects = [];
@@ -29,8 +16,9 @@ export class ProjectQuotePlane extends CanvasPlane {
   backgroundColor = 'black';
 
   async createInitalCanvasContent() {
-    if (this.props.data.backgroundColor) {
-      this.backgroundColor = `#${this.props.data.backgroundColor}`;
+    const backgroundColor = this.props.data.attributes.curriculum.data?.attributes.pillar.data?.attributes.color;
+    if (backgroundColor) {
+      this.backgroundColor = `#${backgroundColor}`;
     }
     this.quoteImage = await loadImage('assets/quote.svg');
     const marginLeft = 100;
@@ -42,7 +30,9 @@ export class ProjectQuotePlane extends CanvasPlane {
 
     let yPos = fontSize + marginTop;
 
-    const paragraphs = this.props.data.quote.split("\n");
+    const quote = this.props.data.attributes.quote;
+    
+    const paragraphs = quote.split("\n");
 
     const textStartY = yPos;
 

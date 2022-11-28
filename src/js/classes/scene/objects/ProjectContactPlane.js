@@ -47,6 +47,10 @@ export class ProjectContactPlane extends CanvasPlane {
     const fontSize = 36 * 1.3333; // pt to px
     const lineHeight = 70;
 
+    const experience = this.props.data.attributes.experience;
+    const lifeLesson = this.props.data.attributes.lifeLesson;
+    const website = this.props.data.attributes.website;
+
     const gradientTop = new OffscreenCanvas(this.props.textureSize.x, this.gradientTopHeight);
     {
       const ctx = gradientTop.getContext('2d');
@@ -114,8 +118,8 @@ export class ProjectContactPlane extends CanvasPlane {
       }
     }
 
-    addSectionIfNeeded('WERKERVARING', this.props.data.experience);
-    addSectionIfNeeded('LEVENSLES VOOR TOEKOMSTIGE STUDENTEN', this.props.data.lifeLesson);
+    addSectionIfNeeded('WERKERVARING', experience);
+    addSectionIfNeeded('LEVENSLES VOOR TOEKOMSTIGE STUDENTEN', lifeLesson);
 
     this.textHeight = (yPos - lineHeight / 2);
     this.textScrollAmount = Math.max(0, yPos - this.props.textureSize.y);
@@ -136,9 +140,9 @@ export class ProjectContactPlane extends CanvasPlane {
       y: this.props.textureSize.y - this.bottomSectionHeight - this.gradientBottomHeight
     };
 
-    if (this.props.data.website) {
+    if (website) {
       // create a website variable and strip http(s)://(www.) with a regex
-      const website = this.props.data.website.replace(/(https?:\/\/)?(www\.)?/g, '');
+      const websiteLabel = website.replace(/(https?:\/\/)?(www\.)?/g, '');
 
       // add the qr code
       const qr = new QRious();
@@ -150,7 +154,7 @@ export class ProjectContactPlane extends CanvasPlane {
         level: 'L',
         padding: 0,
         size: this.qrSize,
-        value: this.props.data.website
+        value: website
       });
       this.qr = {
         type: 'image',
@@ -162,7 +166,7 @@ export class ProjectContactPlane extends CanvasPlane {
 
       // add the url
       this.ctx.font = `700 ${fontSize}px "Embedded OpenSans"`;
-      const urlLines = getLines(this.ctx, website, this.canvas.width - marginLeft - marginRight - this.qrSize - 50);
+      const urlLines = getLines(this.ctx, websiteLabel, this.canvas.width - marginLeft - marginRight - this.qrSize - 50);
       urlLines.forEach((line, index) => {
         const textLine = {
           type: 'text',

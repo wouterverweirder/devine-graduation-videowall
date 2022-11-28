@@ -3,9 +3,8 @@ import { calculateScaleForScreenConfig } from './screenUtils.js';
 import { VisualBase } from '../classes/scene/objects/VisualBase.js';
 import { ImagePlane } from '../classes/scene/objects/ImagePlane.js';
 import { ProjectAssetsPlane } from '../classes/scene/objects/ProjectAssetsPlane.js';
-import { ProjectDescriptionPlane } from '../classes/scene/objects/ProjectDescriptionPlane.js';
 import { PlaneType } from '../consts/PlaneType.js';
-import { ProjectBioPlane } from '../classes/scene/objects/ProjectBioPlane.js';
+import { ProjectTextPlane } from '../classes/scene/objects/ProjectTextPlane.js';
 import { ProjectQuotePlane } from '../classes/scene/objects/ProjectQuotePlane.js';
 import { ProjectContactPlane } from '../classes/scene/objects/ProjectContactPlane.js';
 import { CanvasPlane } from '../classes/scene/objects/CanvasPlane.js';
@@ -62,9 +61,9 @@ const createPlaneForScreen = async ({data, screenConfig, appConfig}) => {
   } else if (data.type === PlaneType.PROJECT_ASSETS) {
     plane = new ProjectAssetsPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_DESCRIPTION) {
-    plane = new ProjectDescriptionPlane(data.id, props);
+    plane = new ProjectTextPlane(data.id, { ...props, planeConfig: props.appConfig.planes.descriptionPlane });
   } else if (data.type === PlaneType.PROJECT_BIO) {
-    plane = new ProjectBioPlane(data.id, props);
+    plane = new ProjectTextPlane(data.id, { ...props, planeConfig: props.appConfig.planes.bioPlane });
   } else if (data.type === PlaneType.PROJECT_QUOTE) {
     plane = new ProjectQuotePlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_CONTACT) {
