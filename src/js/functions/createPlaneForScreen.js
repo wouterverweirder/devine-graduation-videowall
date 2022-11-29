@@ -2,7 +2,6 @@ import { calculateScaleForScreenConfig } from './screenUtils.js';
 
 import { VisualBase } from '../classes/scene/objects/VisualBase.js';
 import { ImagePlane } from '../classes/scene/objects/ImagePlane.js';
-import { ProjectAssetsPlane } from '../classes/scene/objects/ProjectAssetsPlane.js';
 import { PlaneType } from '../consts/PlaneType.js';
 import { ProjectTextPlane } from '../classes/scene/objects/ProjectTextPlane.js';
 import { ProjectQuotePlane } from '../classes/scene/objects/ProjectQuotePlane.js';
@@ -58,8 +57,6 @@ const createPlaneForScreen = async ({data, screenConfig, appConfig}) => {
     plane = new VideoPlane(data.id, props);
   } else if (data.type === PlaneType.CANVAS) {
     plane = new CanvasPlane(data.id, props);
-  } else if (data.type === PlaneType.PROJECT_ASSETS) {
-    plane = new ProjectAssetsPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_DESCRIPTION) {
     plane = new ProjectTextPlane(data.id, { ...props, planeConfig: props.appConfig.planes.descriptionPlane });
   } else if (data.type === PlaneType.PROJECT_BIO) {

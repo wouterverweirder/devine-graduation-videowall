@@ -25,7 +25,6 @@ function SidebarNew( editor ) {
     'project-description': 'Project Description',
     'project-bio': 'Project Bio',
     'profile-picture': 'Project Student',
-    'project-assets': 'Project Assets'
   }).onChange(() => refreshUI());
   typeSelect.setValue( 'image' );
   typeRow.add(typeSelect);
@@ -39,15 +38,9 @@ function SidebarNew( editor ) {
 
   const projectRow = new UIRow();
   projectRow.add( new UIText( 'Project' ).setWidth( '90px' ) );
-  const projectSelect = new UISelect().onChange(() => updateProjectAssetsList());
+  const projectSelect = new UISelect();
   projectRow.add(projectSelect);
   container.add(projectRow);
-
-  const projectAssetsRow = new UIRow();
-  projectAssetsRow.add( new UIText( 'Assets' ).setWidth( '90px' ) );
-  const projectAssetsList = new UICheckboxList();
-  projectAssetsRow.add(projectAssetsList);
-  container.add(projectAssetsRow);
 
   const newPlaneRow = new UIRow();
   newPlaneRow.add( new UIText( '' ).setWidth( '90px' ) );
@@ -94,34 +87,13 @@ function SidebarNew( editor ) {
     if (!firstProject && projects.length > 0) {
       firstProject = projects[0];
       projectSelect.setValue(firstProject.id);
-      updateProjectAssetsList();
     }
 
     const imageSelectVisible = (typeSelect.getValue() === 'image');
 
     imageRow.setDisplay((imageSelectVisible) ? '' : 'none' );
     projectRow.setDisplay(shouldProjectSelectBeVisible() ? '' : 'none' );
-    projectAssetsRow.setDisplay(shouldProjectAssetsListBeVisible() ? '' : 'none' );
 
-  };
-
-  const updateProjectAssetsList = () => {
-    const project = getSelectedProject();
-    const items = [];
-    console.warn('TODO: get assets from project in Editor Sidebar');
-    // if (project.attributes.mainAsset.data) {
-    //   items.push({
-    //     id: project.attributes.mainAsset.data.id,
-    //     name: new URL(project.attributes.mainAsset.data.attributes.url).pathname
-    //   });
-    // }
-    // project.attributes.assets.data.forEach(asset => {
-    //   items.push({
-    //     id: asset.id,
-    //     name: new URL(asset.attributes.url).pathname
-    //   });
-    // });
-    projectAssetsList.setItems(items);
   };
 
   const getSelectedProject = () => {
@@ -129,24 +101,9 @@ function SidebarNew( editor ) {
     return projects.find(project => project.id === projectId);
   };
 
-  const getSelectedProjectAssets = () => {
-    const projectAssetsListValue = projectAssetsList.getValue().map(id => parseInt(id));
-    const project = getSelectedProject();
-    const selectedProjectAssets = project.assets.filter(asset => projectAssetsListValue.includes(asset.id));
-    if (projectAssetsListValue.includes(project.mainAsset.id)) {
-      selectedProjectAssets.unshift(project.mainAsset);
-    }
-    return selectedProjectAssets;
-  };
-
   const shouldProjectSelectBeVisible = () => {
-    const projectTypes = ['project-description', 'project-bio', 'profile-picture', 'project-assets'];
+    const projectTypes = ['project-description', 'project-bio', 'profile-picture'];
     return projectTypes.includes(typeSelect.getValue());
-  };
-
-  const shouldProjectAssetsListBeVisible = () => {
-    const projectAssetsTypes = ['project-assets'];
-    return projectAssetsTypes.includes(typeSelect.getValue());
   };
 
   const fetchImageList = async () => {
@@ -178,9 +135,6 @@ function SidebarNew( editor ) {
       createOptions.url = imageSelect.getValue();
     } else if (shouldProjectSelectBeVisible()) {
       createOptions.data = getSelectedProject();
-      if (typeSelect.getValue() === 'project-assets') {
-        createOptions.data = getSelectedProjectAssets();
-      }
     }
     serverConnection.requestCreatePlaneOnScreen(createOptions);
   });
