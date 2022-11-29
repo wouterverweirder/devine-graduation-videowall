@@ -4,7 +4,7 @@ import { ScreenRole } from "../../consts/ScreenRole.js";
 import { createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { delay } from '../../functions/delay.js';
 import { getValueByPath } from '../../functions/getValueByPath.js';
-import { calculateScaleForScreenConfig, doesScreenCameraHaveRole, getFirstScreenCameraForRole } from "../../functions/screenUtils.js";
+import { calculateScaleForScreenConfig, doesScreenCameraHaveRole } from "../../functions/screenUtils.js";
 import { gsap, Power4 } from '../../gsap/src/index.js';
 import { ImagePlane } from './objects/ImagePlane.js';
 import { ProfilePicturePlane } from './objects/ProfilePicturePlane.js';
@@ -16,10 +16,6 @@ class ProjectDetailScene extends SceneBase {
   projectPlanes = [];
   colorPlanes = [];
   tl = false;
-
-  nonVisibleProfilePicturePlanes = [];
-  visibleProfilePicturePlanes = [];
-  profilePicturePlaneSlider = false;
 
   objectsFromConfig = []; // objects created from the scene config, !== objects (visible in the scene)
 
@@ -56,7 +52,7 @@ class ProjectDetailScene extends SceneBase {
           if (objectConfig.type === 'slider') {
             // load the planes for this slider
             const planes = [];
-            let { data: dataForSlider } = getValueByPath(project, objectConfig.dataSource.key);
+            let dataForSlider = getValueByPath(project, objectConfig.dataSource.key);
             objectConfig.dataSource.filters?.forEach(filter => {
               if (filter.type === 'landscape-images') {
                 dataForSlider = dataForSlider.filter(asset => {
@@ -76,9 +72,26 @@ class ProjectDetailScene extends SceneBase {
                     x: objectConfig.item.width,
                     y: objectConfig.item.height,
                   },
-                  url: asset.attributes.url
+                  url: asset.attributes.url,
+                  appConfig: this.config,
                 };
                 const plane = new ImagePlane(props.name, props);
+                await plane.init();
+                planes.push(plane);
+              }
+            } else if (objectConfig.item?.type === 'profile-picture') {
+              for (let assetIndex = 0; assetIndex < dataForSlider.length; assetIndex++) {
+                const asset = dataForSlider[assetIndex];
+                const props = {
+                  name: `project-asset-${project.id}-${objectConfigIndex}-${assetIndex}`,
+                  textureSize: {
+                    x: objectConfig.item.width,
+                    y: objectConfig.item.height,
+                  },
+                  data: asset,
+                  appConfig: this.config,
+                };
+                const plane = new ProfilePicturePlane(props.name, props);
                 await plane.init();
                 planes.push(plane);
               }
@@ -110,46 +123,6 @@ class ProjectDetailScene extends SceneBase {
       const getAssetsWithMimeStartingWith = (mimeTypeStartsWith) => assets.data.filter(asset => asset.attributes.mime.startsWith(mimeTypeStartsWith));
 
       const videos = getAssetsWithMimeStartingWith('video').map(asset => asset.attributes);
-
-      this.profilePicturePlaneSlider = new PlaneSlider(this, {
-        nonVisiblePlanes: this.nonVisibleProfilePicturePlanes,
-        visiblePlanes: this.visibleProfilePicturePlanes,
-        setupNewPlane: ({ newPlane }) => {
-          const setPropsNewPlane = this.generatePropsForScreen(newPlane.customData.camera);
-          newPlane.applyProps(setPropsNewPlane);
-          return newPlane;
-        },
-        getAxis: () => 'horizontal',
-        getDelayForNextAnimation: () => this.config.scenes.projectDetail.screenshotSlideInterval,
-        getSlideDelay: () => 2,
-        pickingMethod: 'first'
-      });
-
-      {
-        let peopleValue = getValueByPath(project, this.config.data.project.people.key);
-        if (!Array.isArray(peopleValue)) {
-          peopleValue = [peopleValue];
-        }
-        for (let index = 0; index < peopleValue.length; index++) {
-          const person = peopleValue[index];
-          // create a plane for profile pictures
-          {
-            const props = {
-              name: `profile-picture-${index}`,
-              textureSize: {
-                x: 1080,
-                y: 1920
-              },
-              appConfig: this.config,
-              data: person
-            };
-            const plane = new ProfilePicturePlane(props.name, props);
-            await plane.init();
-            this.nonVisibleProfilePicturePlanes.push(plane);
-          }
-          
-        }
-      }
 
       for (const screenCamera of this.camerasFromBottomToTop) {
         const screenConfig = this.screenConfigsById[screenCamera.id];
@@ -191,13 +164,6 @@ class ProjectDetailScene extends SceneBase {
               screenConfig,
               appConfig: this.config
             });
-          }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROFILE_PICTURE)) {
-          if (this.nonVisibleProfilePicturePlanes.length > 0) {
-            projectPlane = this.nonVisibleProfilePicturePlanes.shift();
-            projectPlane.customData.camera = screenCamera;
-            this.profilePicturePlaneSlider.setupNewPlane({ newPlane: projectPlane });
-            this.visibleProfilePicturePlanes.push(projectPlane);
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.VIDEOS)) {
           if (videos.length > 0) {
@@ -407,8 +373,6 @@ class ProjectDetailScene extends SceneBase {
         }
       });
 
-      this.profilePicturePlaneSlider.start();
-
     } else if (stateName === SceneState.OUTRO) {
 
       if (this.tl) {
@@ -421,10 +385,6 @@ class ProjectDetailScene extends SceneBase {
           object.stop();
         }
       });
-
-      if (this.profilePicturePlaneSlider) {
-        this.profilePicturePlaneSlider.stop();
-      }
 
       await delay(1000);
 
@@ -446,10 +406,6 @@ class ProjectDetailScene extends SceneBase {
             this.removeObject(plane);
           });
         }
-      });
-
-      this.visibleProfilePicturePlanes.forEach(plane => {
-        this.removeObject(plane);
       });
     }
   }

@@ -107,7 +107,7 @@
             "height": 1080
           },
           "dataSource": {
-            "key": "attributes.assets",
+            "key": "attributes.assets.data",
             "filters": [
               {
                 "type": "landscape-images"
@@ -131,7 +131,7 @@
             "height": 1920
           },
           "dataSource": {
-            "key": "attributes.assets",
+            "key": "attributes.assets.data",
             "filters": [
               {
                 "type": "portrait-images"
@@ -147,6 +147,25 @@
             },
             {
               "id": "screen-5"
+            }
+          ]
+        },
+        {
+          "type": "slider",
+          "item": {
+            "type" : "profile-picture",
+            "width": 1080,
+            "height": 1920
+          },
+          "dataSource": {
+            "key": "attributes.students.data.[].attributes"
+          },
+          "pickingMethod": "first",
+          "slideInterval": 4000,
+          "slideDelay": 2,
+          "screens": [
+            {
+              "id": "screen-0"
             }
           ]
         }
