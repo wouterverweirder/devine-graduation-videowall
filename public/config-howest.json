@@ -64,7 +64,28 @@
   },
   "scenes": {
     "projectDetail": {
-      "screenshotSlideInterval": 4000
+      "screenshotSlideInterval": 4000,
+      "objects": [
+        {
+          "type": "slider",
+          "item": {
+            "type" : "profile-picture",
+            "width": 1080,
+            "height": 1920
+          },
+          "dataSource": {
+            "key": "attributes"
+          },
+          "pickingMethod": "first",
+          "slideInterval": 4000,
+          "slideDelay": 2,
+          "screens": [
+            {
+              "id": "screen-0"
+            }
+          ]
+        }
+      ]
     },
     "projectsOverview": {
       "disabled": true,

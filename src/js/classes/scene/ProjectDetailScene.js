@@ -53,6 +53,10 @@ class ProjectDetailScene extends SceneBase {
             // load the planes for this slider
             const planes = [];
             let dataForSlider = getValueByPath(project, objectConfig.dataSource.key);
+            // is dataForSlider an array?
+            if (!Array.isArray(dataForSlider)) {
+              dataForSlider = [dataForSlider];
+            }
             objectConfig.dataSource.filters?.forEach(filter => {
               if (filter.type === 'landscape-images') {
                 dataForSlider = dataForSlider.filter(asset => {

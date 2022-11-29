@@ -92,7 +92,7 @@ export class ProfilePicturePlane extends CanvasPlane {
     this.canvasObjects.forEach(canvasObject => {
       if (canvasObject.type === 'text') {
         this.ctx.save();
-        this.ctx.translate(0, this.canvas.height - this.planeConfig.height + this.nameOffsetY);
+        this.ctx.translate(0, this.canvas.height - this.planeConfig.maxHeight + this.nameOffsetY);
         this.ctx.globalAlpha = canvasObject.opacity;
         this.ctx.fillStyle = canvasObject.fillStyle;
         this.ctx.font = canvasObject.font;
@@ -105,9 +105,9 @@ export class ProfilePicturePlane extends CanvasPlane {
         this.ctx.restore();
       } else if (canvasObject.type === 'name-background') {
         this.ctx.save();
-        this.ctx.translate(0, this.canvas.height - this.planeConfig.height + this.nameOffsetY);
+        this.ctx.translate(0, this.canvas.height - this.planeConfig.maxHeight + this.nameOffsetY);
         this.ctx.fillStyle = 'white';
-        this.ctx.fillRect(0, this.maxTriangleHeight, this.canvas.width, this.planeConfig.height - this.maxTriangleHeight);
+        this.ctx.fillRect(0, this.maxTriangleHeight, this.canvas.width, this.planeConfig.height);
         // draw triangle
         const triangleHeight = this.maxTriangleHeight * this.triangleProgress;
         this.ctx.beginPath();
