@@ -17,6 +17,7 @@ class PlaneSlider {
   getDelayForNextAnimation = () => 1;
 
   constructor(scene, {
+    objectConfig = {},
     nonVisiblePlanes = [],
     visiblePlanes = [],
     setupNewPlane = ({ oldPlane, newPlane }) => {},
@@ -28,6 +29,7 @@ class PlaneSlider {
     pickingMethod = 'next'
   } = {}) {
     this.scene = scene;
+    this.objectConfig = objectConfig;
     this.nonVisiblePlanes = nonVisiblePlanes;
     this.visiblePlanes = visiblePlanes;
     this.setupNewPlane = setupNewPlane;
@@ -72,6 +74,18 @@ class PlaneSlider {
     return newPlane;
   }
 
+  getOldPlane() {
+    if (this.pickingMethod === 'next') {
+      return this.visiblePlanes[0];
+    }
+    // random
+    const index = Math.floor(Math.random() * this.visiblePlanes.length);
+    if (index >= this.visiblePlanes.length) {
+      return;
+    }
+    return this.visiblePlanes[index];
+  }
+
   addObject(o) {
     this.scene.addObject(o);
     this.visiblePlanes.push(o);
@@ -85,18 +99,6 @@ class PlaneSlider {
     this.visiblePlanes.splice(indexToRemove, 1);
     this.scene.removeObject(o);
     this.nonVisiblePlanes.push(o);
-  };
-
-  getOldPlane() {
-    if (this.pickingMethod === 'next') {
-      return this.visiblePlanes[0];
-    }
-    // random
-    const index = Math.floor(Math.random() * this.visiblePlanes.length);
-    if (index >= this.visiblePlanes.length) {
-      return;
-    }
-    return this.visiblePlanes[index];
   }
 
   animationTimeoutCb() {

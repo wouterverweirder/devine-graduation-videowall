@@ -96,7 +96,15 @@
   },
   "scenes": {
     "projectDetail": {
-      "screenshotSlideInterval": 4000
+      "screenshotSlideInterval": 4000,
+      "objects": [
+        {
+          "type": "slider",
+          "dataSource": {
+            "key": "attributes.assets"
+          }
+        }
+      ]
     },
     "projectsOverview": {
       "updateInterval": 4000

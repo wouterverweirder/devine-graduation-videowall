@@ -13,7 +13,6 @@ import { SceneBase, SceneState } from "./SceneBase.js";
 
 class ProjectDetailScene extends SceneBase {
 
-  planeSliders = [];
   projectPlanes = [];
   colorPlanes = [];
   tl = false;
@@ -27,13 +26,7 @@ class ProjectDetailScene extends SceneBase {
   visibleStudentNamePlanes = [];
   studentNamePlaneSlider = false;
 
-  nonVisiblePortraitScreenshotPlanes = [];
-  visiblePortraitScreenshotPlanes = [];
-  portraitPlaneSlider = false;
-
-  nonVisibleLandscapeScreenshotPlanes = [];
-  visibleLandscapeScreenshotPlanes = [];
-  landscapePlaneSlider = false;
+  objectsFromConfig = []; // objects created from the scene config, !== objects (visible in the scene)
 
   studentNameHeight = 280;
   studentNameMaxHeight = 280; // when the name is non-straight, this might be a differnt value
@@ -67,38 +60,68 @@ class ProjectDetailScene extends SceneBase {
         assets = { data: [] };
       }
 
+      // objects for this scene
+      if (this.config.scenes.projectDetail?.objects?.length > 0) {
+        for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectDetail.objects.length; objectConfigIndex++) {
+          const objectConfig = this.config.scenes.projectDetail.objects[objectConfigIndex];
+          if (objectConfig.type === 'slider') {
+            // load the planes for this slider
+            const planes = [];
+            let { data: dataForSlider } = getValueByPath(project, objectConfig.dataSource.key);
+            objectConfig.dataSource.filters?.forEach(filter => {
+              if (filter.type === 'landscape-images') {
+                dataForSlider = dataForSlider.filter(asset => {
+                  return asset.attributes.mime.startsWith('image') && asset.attributes.width > asset.attributes.height;
+                });
+              } else if (filter.type === 'portrait-images') {
+                dataForSlider = dataForSlider.filter(asset => {
+                  return asset.attributes.mime.startsWith('image') && asset.attributes.width < asset.attributes.height;
+                });
+              }
+            });
+            if (objectConfig.item?.type === 'image') {
+              for (const asset of dataForSlider) {
+                const props = {
+                  name: `project-asset-${project.id}-${objectConfigIndex}-${asset.attributes.url}`,
+                  textureSize: {
+                    x: objectConfig.item.width,
+                    y: objectConfig.item.height,
+                  },
+                  url: asset.attributes.url
+                };
+                const plane = new ImagePlane(props.name, props);
+                await plane.init();
+                planes.push(plane);
+              }
+            }
+            // planes are loaded, create the slider
+            const slider = new PlaneSlider(this, {
+              objectConfig,
+              nonVisiblePlanes: planes,
+              visiblePlanes: [],
+              setupNewPlane: ({ newPlane }) => {
+                const setPropsNewPlane = this.generatePropsForScreen(newPlane.customData.camera);
+                newPlane.applyProps(setPropsNewPlane);
+                return newPlane;
+              },
+              getAxis: ({ newPlane }) => {
+                const camera = newPlane.customData.camera;
+                const isLandscape = !(camera.props.rotation.z !== 0);
+                return (isLandscape) ? 'vertical' : 'horizontal';
+              },
+              getDelayForNextAnimation: () => objectConfig.slideInterval,
+              getSlideDelay: () => objectConfig.slideDelay, //TODO: make this ms instead of seconds for consistency
+              pickingMethod: objectConfig.pickingMethod,
+            })
+            this.objectsFromConfig.push(slider);
+          }
+        }
+      }
+
       const getAssetsWithMimeStartingWith = (mimeTypeStartsWith) => assets.data.filter(asset => asset.attributes.mime.startsWith(mimeTypeStartsWith));
 
-      const portraitScreenshots = getAssetsWithMimeStartingWith('image').filter(asset => asset.attributes.width < asset.attributes.height).map(asset => asset.attributes);
-      const landscapeScreenshots = getAssetsWithMimeStartingWith('image').filter(asset => asset.attributes.width > asset.attributes.height).map(asset => asset.attributes);
       const videos = getAssetsWithMimeStartingWith('video').map(asset => asset.attributes);
 
-      const sharedScreenshotSliderProps = {
-        setupNewPlane: ({ newPlane }) => {
-          const setPropsNewPlane = this.generatePropsForScreen(newPlane.customData.camera);
-          newPlane.applyProps(setPropsNewPlane);
-          return newPlane;
-        },
-        getAxis: ({ newPlane }) => {
-          const camera = newPlane.customData.camera;
-          const isLandscape = !(camera.props.rotation.z !== 0);
-          return (isLandscape) ? 'vertical' : 'horizontal';
-        },
-        getDelayForNextAnimation: () => this.config.scenes.projectDetail.screenshotSlideInterval,
-        pickingMethod: 'random'
-      };
-
-      this.landscapePlaneSlider = new PlaneSlider(this, {
-        nonVisiblePlanes: this.nonVisibleLandscapeScreenshotPlanes,
-        visiblePlanes: this.visibleLandscapeScreenshotPlanes,
-        ...sharedScreenshotSliderProps
-      });
-      this.portraitPlaneSlider = new PlaneSlider(this, {
-        nonVisiblePlanes: this.nonVisiblePortraitScreenshotPlanes,
-        visiblePlanes: this.visiblePortraitScreenshotPlanes,
-        getSlideDelay: () => 1,
-        ...sharedScreenshotSliderProps
-      });
       this.profilePicturePlaneSlider = new PlaneSlider(this, {
         nonVisiblePlanes: this.nonVisibleProfilePicturePlanes,
         visiblePlanes: this.visibleProfilePicturePlanes,
@@ -158,37 +181,6 @@ class ProjectDetailScene extends SceneBase {
         getSlideDelay: () => 2,
         pickingMethod: 'first'
       });
-
-      // create a plane for portrait screenshots
-      for (let index = 0; index < portraitScreenshots.length; index++) {
-        const portraitScreenshot = portraitScreenshots[index];
-        const props = {
-          name: `project-asset-${project.id}-${index}`,
-          textureSize: {
-            x: 1080,
-            y: 1920
-          },
-          url: portraitScreenshot.url
-        };
-        const plane = new ImagePlane(props.name, props);
-        await plane.init();
-        this.nonVisiblePortraitScreenshotPlanes.push(plane);
-      }
-      // create a plane for landscape screenshots
-      for (let index = 0; index < landscapeScreenshots.length; index++) {
-        const landscapeScreenshot = landscapeScreenshots[index];
-        const props = {
-          name: `project-asset-${project.id}-${index}`,
-          textureSize: {
-            x: 1920,
-            y: 1080
-          },
-          url: landscapeScreenshot.url
-        };
-        const plane = new ImagePlane(props.name, props);
-        await plane.init();
-        this.nonVisibleLandscapeScreenshotPlanes.push(plane);
-      }
 
       {
         const profilePictureCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE);
@@ -278,7 +270,7 @@ class ProjectDetailScene extends SceneBase {
                 type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
                 url: project.attributes.mainAsset.data.attributes.url,
                 layers: screenCamera.props.layers,
-                muted: false
+                muted: this.config.muted === undefined ? false : this.config.muted
               },
               screenConfig,
               appConfig: this.config
@@ -290,20 +282,6 @@ class ProjectDetailScene extends SceneBase {
             projectPlane.customData.camera = screenCamera;
             this.profilePicturePlaneSlider.setupNewPlane({ newPlane: projectPlane });
             this.visibleProfilePicturePlanes.push(projectPlane);
-          }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PORTRAIT_SCREENSHOTS)) {
-          if (this.nonVisiblePortraitScreenshotPlanes.length > 0) {
-            projectPlane = this.nonVisiblePortraitScreenshotPlanes.shift();
-            projectPlane.applyProps(this.generatePropsForScreen(screenCamera));
-            projectPlane.customData.camera = screenCamera;
-            this.visiblePortraitScreenshotPlanes.push(projectPlane);
-          }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.LANDSCAPE_SCREENSHOTS)) {
-          if (this.nonVisibleLandscapeScreenshotPlanes.length > 0) {
-            projectPlane = this.nonVisibleLandscapeScreenshotPlanes.shift();
-            projectPlane.applyProps(this.generatePropsForScreen(screenCamera));
-            projectPlane.customData.camera = screenCamera;
-            this.visibleLandscapeScreenshotPlanes.push(projectPlane);
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.VIDEOS)) {
           if (videos.length > 0) {
@@ -392,6 +370,24 @@ class ProjectDetailScene extends SceneBase {
           }
         }
         if (!projectPlane) {
+          // does a slider need to show something on this screen?
+          this.objectsFromConfig.forEach((object) => {
+            if (object instanceof PlaneSlider) {
+              // does this planeslider need to show something on this screen?
+              const indexOfScreenInObjectConfig = object.objectConfig.screens.findIndex(screen => screen.id === screenCamera.id);
+              if (indexOfScreenInObjectConfig > -1) {
+                // yes, it does
+                if (object.nonVisiblePlanes.length > 0) {
+                  projectPlane = object.nonVisiblePlanes.shift();
+                  projectPlane.applyProps(this.generatePropsForScreen(screenCamera));
+                  projectPlane.customData.camera = screenCamera;
+                  object.visiblePlanes.push(projectPlane);
+                }
+              }
+            }
+          });
+        }
+        if (!projectPlane) {
           // add an empty plane on the screen when we have no plane on that screen
           projectPlane = await createPlaneForScreen({
             data: {
@@ -403,6 +399,8 @@ class ProjectDetailScene extends SceneBase {
             appConfig: this.config
           });
         }
+
+        
 
         this.projectPlanes.push(projectPlane);
       };
@@ -518,9 +516,12 @@ class ProjectDetailScene extends SceneBase {
         this.addObject(colorPlane);
       });
 
-      this.landscapePlaneSlider.start();
-
-      this.portraitPlaneSlider.start();
+      this.objectsFromConfig.forEach(object => {
+        // is the object a plane slider?
+        if (object instanceof PlaneSlider) {
+          object.start();
+        }
+      });
 
       this.profilePicturePlaneSlider.start();
 
@@ -532,12 +533,13 @@ class ProjectDetailScene extends SceneBase {
         this.tl.kill();
       }
 
-      if (this.portraitPlaneSlider) {
-        this.portraitPlaneSlider.stop();
-      }
-      if (this.landscapePlaneSlider) {
-        this.landscapePlaneSlider.stop();
-      }
+      this.objectsFromConfig.forEach(object => {
+        // is the object a plane slider?
+        if (object instanceof PlaneSlider) {
+          object.stop();
+        }
+      });
+
       if (this.profilePicturePlaneSlider) {
         this.profilePicturePlaneSlider.stop();
       }
@@ -555,18 +557,16 @@ class ProjectDetailScene extends SceneBase {
         this.removeObject(plane);
       });
 
-      this.visiblePortraitScreenshotPlanes.forEach(plane => {
-        if (this.projectPlanes.includes(plane)) {
-          return;
+      this.objectsFromConfig.forEach(object => {
+        // is the object a plane slider?
+        if (object instanceof PlaneSlider) {
+          object.visiblePlanes.forEach(plane => {
+            if (this.projectPlanes.includes(plane)) {
+              return;
+            }
+            this.removeObject(plane);
+          });
         }
-        this.removeObject(plane);
-      });
-
-      this.visibleLandscapeScreenshotPlanes.forEach(plane => {
-        if (this.projectPlanes.includes(plane)) {
-          return;
-        }
-        this.removeObject(plane);
       });
 
       this.visibleProfilePicturePlanes.forEach(plane => {
