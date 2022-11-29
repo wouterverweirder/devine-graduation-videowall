@@ -7,7 +7,8 @@ import { loadImage } from "../../../functions/loadImage.js";
 export class ProfilePicturePlane extends CanvasPlane {
 
   tl = false;
-  introProgress = 0;
+  nameOffsetY = 0;
+  triangleProgress = 0;
   canvasObjects = [];
   maxTriangleHeight = 80;
 
@@ -23,6 +24,8 @@ export class ProfilePicturePlane extends CanvasPlane {
 
     const maxTriangleHeightConfig = this.planeConfig.maxHeight - this.planeConfig.height;
     this.maxTriangleHeight = (!isNaN(maxTriangleHeightConfig)) ? maxTriangleHeightConfig : this.maxTriangleHeight;
+
+    this.nameOffsetY = this.planeConfig.height;
 
     let yPos = marginTop + this.maxTriangleHeight;
 
@@ -89,7 +92,7 @@ export class ProfilePicturePlane extends CanvasPlane {
     this.canvasObjects.forEach(canvasObject => {
       if (canvasObject.type === 'text') {
         this.ctx.save();
-        this.ctx.translate(0, this.canvas.height - this.planeConfig.height);
+        this.ctx.translate(0, this.canvas.height - this.planeConfig.height + this.nameOffsetY);
         this.ctx.globalAlpha = canvasObject.opacity;
         this.ctx.fillStyle = canvasObject.fillStyle;
         this.ctx.font = canvasObject.font;
@@ -102,11 +105,11 @@ export class ProfilePicturePlane extends CanvasPlane {
         this.ctx.restore();
       } else if (canvasObject.type === 'name-background') {
         this.ctx.save();
-        this.ctx.translate(0, this.canvas.height - this.planeConfig.height);
+        this.ctx.translate(0, this.canvas.height - this.planeConfig.height + this.nameOffsetY);
         this.ctx.fillStyle = 'white';
         this.ctx.fillRect(0, this.maxTriangleHeight, this.canvas.width, this.planeConfig.height - this.maxTriangleHeight);
         // draw triangle
-        const triangleHeight = this.maxTriangleHeight * this.introProgress;
+        const triangleHeight = this.maxTriangleHeight * this.triangleProgress;
         this.ctx.beginPath();
         this.ctx.moveTo(0, this.maxTriangleHeight);
         this.ctx.lineTo(this.canvas.width, this.maxTriangleHeight);
@@ -126,7 +129,8 @@ export class ProfilePicturePlane extends CanvasPlane {
         this.draw();
       }
     });
-    this.tl.to(this, { introProgress: 1, duration: 0.5, delay: 0.1, ease: 'power1.out' });
+    this.tl.to(this, { nameOffsetY: 0, duration: 0.5, ease: 'power2.out' });
+    this.tl.to(this, { triangleProgress: 1, duration: 0.5, ease: 'power1.out' }, "<= 0.2");
   }
 
   dispose() {

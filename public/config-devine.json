@@ -1,6 +1,7 @@
 {
   "interactionTimeout": 300000,
   "crop": 1,
+  "muted": true,
   "data": {
     "projectsKey": "data.projects.data",
     "assetKeys": {
@@ -100,9 +101,73 @@
       "objects": [
         {
           "type": "slider",
+          "item": {
+            "type" : "image",
+            "width": 1920,
+            "height": 1080
+          },
           "dataSource": {
-            "key": "attributes.assets"
-          }
+            "key": "attributes.assets.data",
+            "filters": [
+              {
+                "type": "landscape-images"
+              }
+            ]
+          },
+          "pickingMethod": "random",
+          "slideInterval": 4000,
+          "slideDelay": 0,
+          "screens": [
+            {
+              "id": "screen-4"
+            }
+          ]
+        },
+        {
+          "type": "slider",
+          "item": {
+            "type" : "image",
+            "width": 1080,
+            "height": 1920
+          },
+          "dataSource": {
+            "key": "attributes.assets.data",
+            "filters": [
+              {
+                "type": "portrait-images"
+              }
+            ]
+          },
+          "pickingMethod": "random",
+          "slideInterval": 4000,
+          "slideDelay": 1,
+          "screens": [
+            {
+              "id": "screen-1"
+            },
+            {
+              "id": "screen-5"
+            }
+          ]
+        },
+        {
+          "type": "slider",
+          "item": {
+            "type" : "profile-picture",
+            "width": 1080,
+            "height": 1920
+          },
+          "dataSource": {
+            "key": "attributes.students.data.[].attributes"
+          },
+          "pickingMethod": "first",
+          "slideInterval": 4000,
+          "slideDelay": 2,
+          "screens": [
+            {
+              "id": "screen-0"
+            }
+          ]
         }
       ]
     },

@@ -195,6 +195,9 @@ class PlaneSlider {
       tl.to(oldPlane.props.position, {...targetPropsOldPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE, delay}, 0);
     }
     tl.to(newPlane.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE, delay}, 0);
+    if (newPlane.intro) {
+      newPlane.intro();
+    }
 
     this.addObject(newPlane);
   }
