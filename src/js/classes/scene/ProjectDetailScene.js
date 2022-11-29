@@ -7,7 +7,7 @@ import { getValueByPath } from '../../functions/getValueByPath.js';
 import { calculateScaleForScreenConfig, doesScreenCameraHaveRole, getFirstScreenCameraForRole } from "../../functions/screenUtils.js";
 import { gsap, Power4 } from '../../gsap/src/index.js';
 import { ImagePlane } from './objects/ImagePlane.js';
-import { StudentNamePlane } from './objects/StudentNamePlane.js';
+import { ProfilePicturePlane } from './objects/ProfilePicturePlane.js';
 import { PlaneSlider } from './PlaneSlider.js';
 import { SceneBase, SceneState } from "./SceneBase.js";
 
@@ -21,22 +21,11 @@ class ProjectDetailScene extends SceneBase {
   visibleProfilePicturePlanes = [];
   profilePicturePlaneSlider = false;
 
-  allStudentNamePlanes = [];
-  nonVisibleStudentNamePlanes = [];
-  visibleStudentNamePlanes = [];
-  studentNamePlaneSlider = false;
-
   objectsFromConfig = []; // objects created from the scene config, !== objects (visible in the scene)
-
-  studentNameHeight = 280;
-  studentNameMaxHeight = 280; // when the name is non-straight, this might be a differnt value
 
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
     super(id, props);
     this.project = props.project;
-
-    this.studentNameHeight = this.config.planes.namePlane?.height || this.studentNameHeight;
-    this.studentNameMaxHeight = this.config.planes.namePlane?.maxHeight || this.studentNameMaxHeight;
 
     // sort cameras from bottom to top
     this.camerasFromBottomToTop = this.cameras.sort((a, b) => {
@@ -128,52 +117,6 @@ class ProjectDetailScene extends SceneBase {
         setupNewPlane: ({ newPlane }) => {
           const setPropsNewPlane = this.generatePropsForScreen(newPlane.customData.camera);
           newPlane.applyProps(setPropsNewPlane);
-
-          // profile picture is less high
-          const screenConfig = this.screenConfigsById[newPlane.customData.camera.id];
-          const screenScale = calculateScaleForScreenConfig(screenConfig);
-          const scale = {...screenScale};
-          scale.y *= (this.studentNameHeight / 1920);
-          newPlane.applyProps({
-            position: {
-              x: newPlane.props.position.x,
-              y: newPlane.props.position.y + (scale.y / 2),
-              z: -0.2
-            },
-            scale: {
-              x: newPlane.props.scale.x,
-              y: newPlane.props.scale.y - scale.y
-            }
-          });
-          return newPlane;
-        },
-        getAxis: () => 'horizontal',
-        getDelayForNextAnimation: () => this.config.scenes.projectDetail.screenshotSlideInterval,
-        getSlideDelay: () => 2,
-        pickingMethod: 'first'
-      });
-      this.studentNamePlaneSlider = new PlaneSlider(this, {
-        nonVisiblePlanes: this.nonVisibleStudentNamePlanes,
-        visiblePlanes: this.visibleStudentNamePlanes,
-        setupNewPlane: ({ newPlane }) => {
-          const screenConfig = this.screenConfigsById[newPlane.customData.camera.id];
-          const screenScale = calculateScaleForScreenConfig(screenConfig);
-          const scale = {...screenScale};
-          scale.y *= ((this.studentNameMaxHeight) / 1920);
-
-          const setPropsNewPlane = {
-            position: {
-              x: screenConfig.camera.position[0],
-              y: screenConfig.camera.position[1] - (screenScale.y / 2 - scale.y / 2),
-              z: -0.1
-            },
-            scale,
-            textureSize: {
-              x: 1080,
-              y: (this.studentNameMaxHeight),
-            }
-          }
-          newPlane.applyProps(setPropsNewPlane);
           return newPlane;
         },
         getAxis: () => 'horizontal',
@@ -183,40 +126,12 @@ class ProjectDetailScene extends SceneBase {
       });
 
       {
-        const profilePictureCamera = getFirstScreenCameraForRole(this.cameras, ScreenRole.PROFILE_PICTURE);
-        // create a plane for student names
-        const screenConfig = this.screenConfigsById[profilePictureCamera.id];
-        const screenScale = calculateScaleForScreenConfig(screenConfig);
-        const scale = {...screenScale};
-        scale.y *= ((this.studentNameMaxHeight) / 1920);
-
         let peopleValue = getValueByPath(project, this.config.data.project.people.key);
         if (!Array.isArray(peopleValue)) {
           peopleValue = [peopleValue];
         }
         for (let index = 0; index < peopleValue.length; index++) {
           const person = peopleValue[index];
-          {
-            const plane = new StudentNamePlane(`student-name-${project.id}-${index}`, {
-              position: {
-                x: screenConfig.camera.position[0],
-                y: screenConfig.camera.position[1] - (screenScale.y / 2 - scale.y / 2),
-                z: -0.1
-              },
-              scale,
-              textureSize: {
-                x: 1080,
-                y: (this.studentNameMaxHeight),
-              },
-              data: person,
-              appConfig: this.config
-            });
-            plane.customData.camera = profilePictureCamera;
-            await plane.init();
-            this.allStudentNamePlanes.push(plane);
-            this.nonVisibleStudentNamePlanes.push(plane);
-          }
-
           // create a plane for profile pictures
           {
             const props = {
@@ -225,9 +140,10 @@ class ProjectDetailScene extends SceneBase {
                 x: 1080,
                 y: 1920
               },
-              url: person.profilePicture.data?.attributes.url
+              appConfig: this.config,
+              data: person
             };
-            const plane = new ImagePlane(props.name, props);
+            const plane = new ProfilePicturePlane(props.name, props);
             await plane.init();
             this.nonVisibleProfilePicturePlanes.push(plane);
           }
@@ -400,8 +316,6 @@ class ProjectDetailScene extends SceneBase {
           });
         }
 
-        
-
         this.projectPlanes.push(projectPlane);
       };
 
@@ -409,7 +323,6 @@ class ProjectDetailScene extends SceneBase {
 
       const projectPlanes = this.projectPlanes;
       const colorPlanes = this.colorPlanes;
-      const studentNamePlanes = this.allStudentNamePlanes;
 
       this.tl = gsap.timeline({
         onUpdate: () => {
@@ -421,12 +334,6 @@ class ProjectDetailScene extends SceneBase {
             plane.applyProps(props)
           });
           projectPlanes.forEach(plane => {
-            const props = {
-              position: plane.props.position,
-            };
-            plane.applyProps(props)
-          });
-          studentNamePlanes.forEach(plane => {
             const props = {
               position: plane.props.position,
             };
@@ -446,13 +353,6 @@ class ProjectDetailScene extends SceneBase {
           console.log(`no project plane for index ${index}`);
           return;
         }
-        const isProfilePicturePlane = (this.visibleProfilePicturePlanes.includes(projectPlane));
-        let studentNamePlane;
-        if (isProfilePicturePlane) {
-          studentNamePlane = this.nonVisibleStudentNamePlanes.shift();
-          this.visibleStudentNamePlanes.push(studentNamePlane);
-        }
-
         const colorPlaneIntroDelay = Power4.easeOut(index / projectPlanes.length) * maxDelay;
         const projectPlaneIntroDelay = colorPlaneIntroDelay + introColorPlaneDuration;
 
@@ -477,13 +377,7 @@ class ProjectDetailScene extends SceneBase {
           // add the project plane once the color plane has full scale
           this.tl.add(() => {
             this.addObject(projectPlane);
-            if (isProfilePicturePlane) {
-             this.addObject(studentNamePlane);
-            }
             projectPlane.intro();
-            if(studentNamePlane) {
-              studentNamePlane.intro();
-            }
           }, projectPlaneIntroDelay);
   
           // outro color plane
@@ -502,16 +396,6 @@ class ProjectDetailScene extends SceneBase {
 
           this.tl.to(projectPlane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: Power4.easeOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
         }
-        if (isProfilePicturePlane) {
-          // schedule the name animation as well
-          const endPropValues = JSON.parse(JSON.stringify(studentNamePlane.props));
-          const startPropValues = JSON.parse(JSON.stringify(studentNamePlane.props));
-
-          startPropValues.position.y -= .1;
-          studentNamePlane.applyProps(startPropValues);
-
-          this.tl.to(studentNamePlane.props.position, {y: endPropValues.position.y, ease: Power4.easeOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
-        }
 
         this.addObject(colorPlane);
       });
@@ -524,8 +408,6 @@ class ProjectDetailScene extends SceneBase {
       });
 
       this.profilePicturePlaneSlider.start();
-
-      this.studentNamePlaneSlider.start();
 
     } else if (stateName === SceneState.OUTRO) {
 
@@ -542,9 +424,6 @@ class ProjectDetailScene extends SceneBase {
 
       if (this.profilePicturePlaneSlider) {
         this.profilePicturePlaneSlider.stop();
-      }
-      if (this.studentNamePlaneSlider) {
-        this.studentNamePlaneSlider.stop();
       }
 
       await delay(1000);
@@ -570,10 +449,6 @@ class ProjectDetailScene extends SceneBase {
       });
 
       this.visibleProfilePicturePlanes.forEach(plane => {
-        this.removeObject(plane);
-      });
-      
-      this.visibleStudentNamePlanes.forEach(plane => {
         this.removeObject(plane);
       });
     }
