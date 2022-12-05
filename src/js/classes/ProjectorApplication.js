@@ -2,6 +2,7 @@ import * as THREE from '../three.js/build/three.module.js';
 
 import { Application } from './Application.js';
 import { calculateScaleForScreenConfig, getBoundsForSize } from '../functions/screenUtils.js';
+import { getValueByPath } from '../functions/getValueByPath.js';
 
 const BLACK = new THREE.Color(0, 0, 0);
 
@@ -49,10 +50,11 @@ class ProjectorApplication extends Application {
       nextProjectButton.style.zIndex = '100';
       nextProjectButton.addEventListener('click', () => {
         this.currentProjectIndex++;
-        if (this.currentProjectIndex >= this.students.length) {
+        const projects = getValueByPath(this.fetchProjectsResult, this.config.data.projectsKey);
+        if (this.currentProjectIndex >= projects.length) {
           this.currentProjectIndex = 0;
         }
-        this.onRequestShowProject(this.students[this.currentProjectIndex]);
+        this.onRequestShowProject(projects[this.currentProjectIndex]);
       }
       );
       document.body.appendChild(nextProjectButton);

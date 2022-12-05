@@ -1,6 +1,7 @@
 import { options } from '../../options.js';
 import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
 import { fetchProjects } from '../functions/fetchProjects.js';
+import { getValueByPath } from '../functions/getValueByPath.js';
 import { calculateBoundsOfAllScreenCameras, createCamerasForConfig } from '../functions/screenUtils.js';
 import { BouncingDVDScene } from './scene/BouncingDVDScene.js';
 import { ProjectDetailScene } from './scene/ProjectDetailScene.js';
@@ -89,19 +90,20 @@ class Application {
       this.connectToServer();
     } else {
       // keyboard interaction
+      const projects = getValueByPath(this.fetchProjectsResult, this.config.data.projectsKey);
       document.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowRight') {
           this.currentProjectIndex++;
-          if (this.currentProjectIndex >= this.projects.length) {
+          if (this.currentProjectIndex >= projects.length) {
             this.currentProjectIndex = 0;
           }
-          this.onRequestShowProject(this.projects[this.currentProjectIndex]);
+          this.onRequestShowProject(projects[this.currentProjectIndex]);
         }
       });
       if (!this.hasProjectsOverview()) {
-        if (this.projects.length > 0) {
+        if (projects.length > 0) {
           this.currentProjectIndex = 0;
-          await this.onRequestShowProject(this.projects[0]);
+          await this.onRequestShowProject(projects[0]);
         }
       } else {
         this.currentProjectIndex = -1
@@ -249,8 +251,6 @@ class Application {
       config: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
-      projects: this.projects,
-      students: this.students,
       addObject: this.addObject.bind(this),
       removeObject: this.removeObject.bind(this),
       project
