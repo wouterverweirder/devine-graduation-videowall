@@ -44,11 +44,39 @@ export class ProfilePicturePlane extends CanvasPlane {
 
     // image
     const image = await loadImage(this.props.data.profilePicture.data?.attributes.url);
+    // Define the target area dimensions
+    const targetWidth = this.props.textureSize.x;
+    const targetHeight = this.props.textureSize.y;
+
+    // Define the original image dimensions
+    const originalWidth = image.width;
+    const originalHeight = image.height;
+
+    // Calculate the width and height ratios between the target area and the original image
+    const widthRatio = targetWidth / originalWidth;
+    const heightRatio = targetHeight / originalHeight;
+
+    // Use the smaller ratio (widthRatio or heightRatio) to determine the new dimensions of the image
+    let newWidth, newHeight;
+    if (widthRatio < heightRatio) {
+      newWidth = targetWidth;
+      newHeight = originalHeight * widthRatio;
+    } else {
+      newWidth = originalWidth * heightRatio;
+      newHeight = targetHeight;
+    }
+
+    // Calculate the top and left positions for the image to be centered in the target area
+    const topPosition = (targetHeight - newHeight) / 2;
+    const leftPosition = (targetWidth - newWidth) / 2;
+
     this.canvasObjects.push({
       type: 'image',
       image,
-      x: (this.canvas.width - image.width) / 2,
-      y: (this.canvas.height - image.height) / 2
+      x: topPosition,
+      y: leftPosition,
+      width: newWidth,
+      height: newHeight,
     });
 
     // name background
@@ -101,7 +129,7 @@ export class ProfilePicturePlane extends CanvasPlane {
       } else if (canvasObject.type === 'image') {
         this.ctx.save();
         this.ctx.globalAlpha = canvasObject.opacity;
-        this.ctx.drawImage(canvasObject.image, canvasObject.x, canvasObject.y);
+        this.ctx.drawImage(canvasObject.image, canvasObject.x, canvasObject.y, canvasObject.width, canvasObject.height);
         this.ctx.restore();
       } else if (canvasObject.type === 'name-background') {
         this.ctx.save();
