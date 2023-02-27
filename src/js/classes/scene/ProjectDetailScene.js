@@ -39,10 +39,11 @@ class ProjectDetailScene extends SceneBase {
       this.colorPlanes = [];
       this.projectPlanes = [];
 
-      // 
-      let assets = project.attributes.assets;
+      let assetsKey = (this.config.data.project.assets.key) ? this.config.data.project.assets.key : "attributes.assets.data";
+      // let assets = project.attributes.assets;
+      let assets = getValueByPath(project, assetsKey);
       if (!assets) {
-        assets = { data: [] };
+        assets = [];
       }
 
       // objects for this scene
@@ -60,23 +61,26 @@ class ProjectDetailScene extends SceneBase {
             objectConfig.dataSource.filters?.forEach(filter => {
               if (filter.type === 'landscape-images') {
                 dataForSlider = dataForSlider.filter(asset => {
-                  return asset.attributes.mime.startsWith('image') && asset.attributes.width > asset.attributes.height;
+                  const attributes = (asset.attributes) ? asset.attributes : asset;
+                  return attributes.mime.startsWith('image') && attributes.width > attributes.height;
                 });
               } else if (filter.type === 'portrait-images') {
                 dataForSlider = dataForSlider.filter(asset => {
-                  return asset.attributes.mime.startsWith('image') && asset.attributes.width < asset.attributes.height;
+                  const attributes = (asset.attributes) ? asset.attributes : asset;
+                  return attributes.mime.startsWith('image') && attributes.width < attributes.height;
                 });
               }
             });
             if (objectConfig.item?.type === 'image') {
               for (const asset of dataForSlider) {
+                const attributes = (asset.attributes) ? asset.attributes : asset;
                 const props = {
-                  name: `project-asset-${project.id}-${objectConfigIndex}-${asset.attributes.url}`,
+                  name: `project-asset-${project.id}-${objectConfigIndex}-${attributes.url}`,
                   textureSize: {
                     x: objectConfig.item.width,
                     y: objectConfig.item.height,
                   },
-                  url: asset.attributes.url,
+                  url: attributes.url,
                   appConfig: this.config,
                 };
                 const plane = new ImagePlane(props.name, props);
@@ -100,6 +104,7 @@ class ProjectDetailScene extends SceneBase {
                 planes.push(plane);
               }
             }
+            console.log("Create PlaneSlider for screen", objectConfig.screens, "with", planes.length, "planes");
             // planes are loaded, create the slider
             const slider = new PlaneSlider(this, {
               objectConfig,
@@ -124,9 +129,12 @@ class ProjectDetailScene extends SceneBase {
         }
       }
 
-      const getAssetsWithMimeStartingWith = (mimeTypeStartsWith) => assets.data.filter(asset => asset.attributes.mime.startsWith(mimeTypeStartsWith));
+      const getAssetsWithMimeStartingWith = (mimeTypeStartsWith) => assets.filter(asset => {
+        const attributes = (asset.attributes) ? asset.attributes : asset;
+        return attributes.mime.startsWith(mimeTypeStartsWith)
+      });
 
-      const videos = getAssetsWithMimeStartingWith('video').map(asset => asset.attributes);
+      const videos = getAssetsWithMimeStartingWith('video').map(asset => asset.attributes ? asset.attributes : asset);
 
       for (const screenCamera of this.camerasFromBottomToTop) {
         const screenConfig = this.screenConfigsById[screenCamera.id];
@@ -153,15 +161,19 @@ class ProjectDetailScene extends SceneBase {
         this.colorPlanes.push(colorPlane);
         // what roles does this screen have?
         let projectPlane;
+        const projectAttributes = project.attributes ? project.attributes : project;
         if (doesScreenCameraHaveRole(screenCamera, ScreenRole.MAIN_VIDEO)) {
-          if (project.attributes.mainAsset?.data) {
+          // assetKeys.mainAsset
+          const mainAsset = getValueByPath(project, this.config.data.project.mainAsset.key);
+          if (mainAsset) {
             // video or image?
-            const isVideo = project.attributes.mainAsset.data.attributes.mime.indexOf('video') === 0;
+            const attributes = mainAsset.attributes ? mainAsset.attributes : mainAsset;
+            const isVideo = attributes.mime.indexOf('video') === 0;
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-main-video-${screenCamera.id}`,
                 type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
-                url: project.attributes.mainAsset.data.attributes.url,
+                url: attributes.url,
                 layers: screenCamera.props.layers,
                 muted: this.config.muted === undefined ? false : this.config.muted
               },
@@ -192,7 +204,7 @@ class ProjectDetailScene extends SceneBase {
             }
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_BIO)) {
-          if (project.attributes.bio) {
+          if (projectAttributes.bio) {
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-bio-${screenCamera.id}`,
@@ -216,7 +228,7 @@ class ProjectDetailScene extends SceneBase {
             appConfig: this.config
           });
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_DESCRIPTION)) {
-          if (project.attributes.description) {
+          if (projectAttributes.description) {
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-description-${screenCamera.id}`,
@@ -229,7 +241,7 @@ class ProjectDetailScene extends SceneBase {
             }); 
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_QUOTE)) {
-          if (project.attributes.quote) {
+          if (projectAttributes.quote) {
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-quote-${screenCamera.id}`,
@@ -242,12 +254,12 @@ class ProjectDetailScene extends SceneBase {
             }); 
           }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.CURRICULUM_PICTURE)) {
-          if (project.attributes.curriculum.data?.attributes.image.data?.attributes.url) {
+          if (projectAttributes.curriculum.data?.attributes.image.data?.attributes.url) {
             projectPlane = await createPlaneForScreen({
               data: {
                 id: `${idPrefix}-curriculum-picture-${screenCamera.id}`,
                 type: PlaneType.IMAGE,
-                url: project.attributes.curriculum.data.attributes.image.data.attributes.url,
+                url: projectAttributes.curriculum.data.attributes.image.data.attributes.url,
                 layers: screenCamera.props.layers
               },
               screenConfig,
