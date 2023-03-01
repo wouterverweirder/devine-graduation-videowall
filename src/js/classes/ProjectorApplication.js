@@ -9,6 +9,7 @@ const BLACK = new THREE.Color(0, 0, 0);
 class ProjectorApplication extends Application {
 
   interactionTimeoutId = false;
+  autoNextProjectTimeoutId = false;
   isSingleProjection = false;
   ambientAudio = false;
 
@@ -177,6 +178,21 @@ class ProjectorApplication extends Application {
       this.ambientAudio.pause();
     }
     await super.onRequestShowProject(project);
+    // auto next project? (autoNextProjectTimeout)
+    console.log('autoNextProjectTimeout', this.config.autoNextProjectTimeout);
+    if (this.config.autoNextProjectTimeout > 0) {
+      clearTimeout(this.autoNextProjectTimeoutId);
+      this.autoNextProjectTimeoutId = setTimeout(() => {
+        console.log('autoNextProjectTimeout trigger');
+        // server connection?
+        if (this.isControlledThroughWebsocket()) {
+          console.log('autoNextProjectTimeout trigger serverConnection');
+          this.serverConnection.requestShowNextProject();
+        } else {
+          console.log('autoNextProjectTimeout trigger local');
+        }
+      }, this.config.autoNextProjectTimeout);
+    }
   }
 }
 

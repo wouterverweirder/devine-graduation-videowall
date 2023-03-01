@@ -52,6 +52,101 @@
           "mime": "image/jpeg"
         }
       ]
+    },
+    {
+      "id": "be",
+      "mainAsset": {
+        "url": "/uploads/kiosk/be/be.mp4",
+        "width": null,
+        "height": null,
+        "mime": "video/mp4"
+      },
+      "assets": [
+        {
+          "url": "/uploads/kiosk/be/Slide10.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide11.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide12.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide13.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide14.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide14b.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide15.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide16.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide17.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide18.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide19.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide19b.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide20.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/be/Slide21.jpeg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        }
+      ]
     }
   ]
 }

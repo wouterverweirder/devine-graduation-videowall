@@ -1,5 +1,6 @@
 {
   "interactionTimeout": 300000,
+  "autoNextProjectTimeout": 120000,
   "crop": 1,
   "muted": true,
   "data": {
