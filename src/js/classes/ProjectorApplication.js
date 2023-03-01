@@ -82,7 +82,12 @@ class ProjectorApplication extends Application {
       const scaleFactor = 450;
       this.renderer.setSize( this.fullBounds.width * scaleFactor, this.fullBounds.height * scaleFactor );
 
-      this.cameras.forEach(camera => {
+      // order the cameras by z-position
+      const camerasSorted = this.cameras.sort((a, b) => {
+        return a.props.position.z - b.props.position.z;
+      });
+
+      camerasSorted.forEach(camera => {
         const screenConfig = this.screenConfigsById[camera.id];
         const cameraScale = calculateScaleForScreenConfig(screenConfig);
 
@@ -183,7 +188,6 @@ class ProjectorApplication extends Application {
     if (this.config.autoNextProjectTimeout > 0) {
       clearTimeout(this.autoNextProjectTimeoutId);
       this.autoNextProjectTimeoutId = setTimeout(() => {
-        console.log('autoNextProjectTimeout trigger');
         // server connection?
         if (this.isControlledThroughWebsocket()) {
           console.log('autoNextProjectTimeout trigger serverConnection');
