@@ -74,7 +74,6 @@ class Application {
           } else if (parsedMessage.type === 'show-projects-overview') {
             await this.onRequestShowProjectsOverview();
           } else if (parsedMessage.type === 'show-project') {
-            console.log('show-project received', parsedMessage.data);
             await this.onRequestShowProject(parsedMessage.data);
           } else if (parsedMessage.type === 'show-bouncing-dvd-logo') {
             await this.onRequestShowBouncingDVDLogo();
@@ -242,7 +241,6 @@ class Application {
   }
 
   async onRequestShowProject(project) {
-    console.log("onRequestShowProject", project);
     while (this.visibleScenes.length > 0) {
       const visibleScene = this.visibleScenes.shift();
       visibleScene.animateToStateName(SceneState.OUTRO).then(() => {
