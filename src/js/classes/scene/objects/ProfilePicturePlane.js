@@ -52,31 +52,34 @@ export class ProfilePicturePlane extends CanvasPlane {
     const originalWidth = image.width;
     const originalHeight = image.height;
 
-    // Calculate the width and height ratios between the target area and the original image
-    const widthRatio = targetWidth / originalWidth;
-    const heightRatio = targetHeight / originalHeight;
-
-    // Use the smaller ratio (widthRatio or heightRatio) to determine the new dimensions of the image
-    let newWidth, newHeight;
-    if (widthRatio < heightRatio) {
-      newWidth = targetWidth;
-      newHeight = originalHeight * widthRatio;
+    // calculate the crop area to fit the image in the target area, keeping the image proportions
+    const targetRatio = targetWidth / targetHeight;
+    const originalRatio = originalWidth / originalHeight;
+    let sourceWidth = originalWidth;
+    let sourceHeight = originalHeight;
+    let sourceX = 0;
+    let sourceY = 0;
+    if (originalRatio > targetRatio) {
+      sourceWidth = originalHeight * targetRatio;
+      sourceX = (originalWidth - sourceWidth) / 2;
     } else {
-      newWidth = originalWidth * heightRatio;
-      newHeight = targetHeight;
+      sourceHeight = originalWidth / targetRatio;
+      sourceY = (originalHeight - sourceHeight) / 2;
     }
+    
 
-    // Calculate the top and left positions for the image to be centered in the target area
-    const topPosition = (targetHeight - newHeight) / 2;
-    const leftPosition = (targetWidth - newWidth) / 2;
 
     this.canvasObjects.push({
       type: 'image',
       image,
-      x: topPosition,
-      y: leftPosition,
-      width: newWidth,
-      height: newHeight,
+      x: 0,
+      y: 0,
+      width: targetWidth,
+      height: targetHeight,
+      sourceX: sourceX,
+      sourceY: sourceY,
+      sourceWidth: sourceWidth,
+      sourceHeight: sourceHeight,
     });
 
     // name background
@@ -129,7 +132,17 @@ export class ProfilePicturePlane extends CanvasPlane {
       } else if (canvasObject.type === 'image') {
         this.ctx.save();
         this.ctx.globalAlpha = canvasObject.opacity;
-        this.ctx.drawImage(canvasObject.image, canvasObject.x, canvasObject.y, canvasObject.width, canvasObject.height);
+        this.ctx.drawImage(
+          canvasObject.image,
+          canvasObject.sourceX,
+          canvasObject.sourceY,
+          canvasObject.sourceWidth,
+          canvasObject.sourceHeight,
+          canvasObject.x,
+          canvasObject.y,
+          canvasObject.width,
+          canvasObject.height,
+        );
         this.ctx.restore();
       } else if (canvasObject.type === 'name-background') {
         this.ctx.save();
