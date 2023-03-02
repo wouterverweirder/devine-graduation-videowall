@@ -2,6 +2,7 @@ import * as THREE from '../../three.js/build/three.module.js';
 import { UIPanel, UIRow, UIText, UIButton, UISelect, UIListbox } from '../../three.js/editor/js/libs/ui.js';
 import { UICheckboxList } from './UICheckboxList.js';
 import { PlaneType } from '../../consts/PlaneType.js';
+import { getValueByPath } from '../../functions/getValueByPath.js';
 
 function SidebarNew( editor ) {
 
@@ -81,7 +82,8 @@ function SidebarNew( editor ) {
 
     const projectOptions = {};
     projects.forEach((project) => {
-      projectOptions[project.id] = `${project.attributes.firstName} ${project.attributes.lastName}`;
+      // todo: allow for stringify template
+      projectOptions[project.id] = `${project.id}`;
     })
     projectSelect.setOptions(projectOptions);
     if (!firstProject && projects.length > 0) {
@@ -98,7 +100,7 @@ function SidebarNew( editor ) {
 
   const getSelectedProject = () => {
     const projectId = projectSelect.getValue();
-    return projects.find(project => project.id === projectId);
+    return projects.find(project => `${project.id}` === projectId);
   };
 
   const shouldProjectSelectBeVisible = () => {
@@ -112,8 +114,8 @@ function SidebarNew( editor ) {
   };
 
 	const fetchProjectsList = async () => {
-    const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
-    projects = data.data.students.data;
+    const data = await editor.application.fetchProjects();
+    projects = getValueByPath(data, editor.application.config.data.projectsKey);
   };
 
   refreshUI();

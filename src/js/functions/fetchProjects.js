@@ -65,6 +65,7 @@ const fetchProjects = async (argv) => {
       }
     }
   `;
+  console.log('frontend-graphql-url', argv['frontend-graphql-url']);
   // always fetch local
   let projects = await (await fetch(argv['frontend-graphql-url'], {
     method: 'POST',

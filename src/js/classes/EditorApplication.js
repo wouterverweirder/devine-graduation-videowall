@@ -24,7 +24,7 @@ class EditorApplication extends Application {
 
   setupApplicationSpecificUI() {
     this.$editorContainer = document.getElementById('editor-container');
-    this.editor = new Editor();
+    this.editor = new Editor(this);
     this.editor.serverConnection = this.serverConnection;
     this.editor.camera.position.fromArray([1.57, 2.72, 5.47]);
     this.editor.camera.lookAt(0, 0, 0);

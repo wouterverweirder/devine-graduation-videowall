@@ -1,3 +1,4 @@
+import { getValueByPath } from '../../functions/getValueByPath.js';
 import { UIPanel, UIBreak, UIRow, UIButton, UISelect, UIText } from '../../three.js/editor/js/libs/ui.js';
 import { UIOutliner } from '../../three.js/editor/js/libs/ui.three.js';
 
@@ -5,8 +6,6 @@ function SidebarScene( editor ) {
 
 	var signals = editor.signals;
 	const serverConnection = editor.serverConnection;
-
-	const serverAddress = editor.config.getKey('serverAddress');
 
 	var container = new UIPanel();
 	container.setBorderTop( '0' );
@@ -245,7 +244,8 @@ function SidebarScene( editor ) {
 
 		const projectOptions = {};
     projects.forEach((project) => {
-      projectOptions[project.id] = `${project.attributes.firstName} ${project.attributes.lastName}`;
+			// todo: allow for stringify template
+      projectOptions[project.id] = `${project.id}`;
     })
     projectSelect.setOptions(projectOptions);
 		if (!firstProject && projects.length > 0) {
@@ -256,8 +256,8 @@ function SidebarScene( editor ) {
 	}
 
 	const getSelectedProject = () => {
-    const projectId = parseInt(projectSelect.getValue());
-    return projects.find(project => parseInt(project.id) === projectId);
+    const projectId = projectSelect.getValue();
+    return projects.find(project => `${project.id}` === projectId);
   };
 
 	refreshUI();
@@ -324,8 +324,8 @@ function SidebarScene( editor ) {
 	} );
 
 	const fetchProjectsList = async () => {
-    const data = await (await fetch(`http://${serverAddress}/api/projects`)).json();
-    projects = data.data.students.data;
+		const data = await editor.application.fetchProjects();
+    projects = getValueByPath(data, editor.application.config.data.projectsKey);
   };
 
 	fetchProjectsList()
