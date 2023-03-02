@@ -55,4 +55,31 @@ export const options = [
       default: null
     },
   },
+  {
+    name: 'config-json-path',
+    value: {
+      description: 'relative of the config.json file from the public folder',
+      type: 'string',
+      default: 'config.json'
+    }
+  },
+  {
+    name: 'projects-json-path',
+    value: {
+      description: 'relative of the projects.json file from the public folder',
+      type: 'string',
+      default: 'assets/projects.json'
+    }
+  },
 ];
+
+export const getArgVFromQueryString = () => {
+  const argv = {
+    ...options.reduce((acc, option) => {
+      acc[option.name] = option.value.default;
+      return acc;
+    }, {}),
+    ...Object.fromEntries(new URLSearchParams(window.location.search))
+  };
+  return argv;
+};

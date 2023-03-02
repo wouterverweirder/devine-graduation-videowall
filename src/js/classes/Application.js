@@ -1,4 +1,4 @@
-import { options } from '../../options.js';
+import { getArgVFromQueryString } from '../../options.js';
 import { createPlaneForScreen } from '../functions/createPlaneForScreen.js';
 import { fetchProjects } from '../functions/fetchProjects.js';
 import { getValueByPath } from '../functions/getValueByPath.js';
@@ -30,13 +30,7 @@ class Application {
   async init() {
     // get the cli args
     // parse the querystring into this.argv using URLSearchParams
-    this.argv = {
-      ...options.reduce((acc, option) => {
-        acc[option.name] = option.value.default;
-        return acc;
-      }, {}),
-      ...Object.fromEntries(new URLSearchParams(window.location.search))
-    };
+    this.argv = getArgVFromQueryString();
     //replace the argv properties with string values "true" and "false" with boolean values
     Object.keys(this.argv).forEach(key => {
       if (this.argv[key] === 'true') {

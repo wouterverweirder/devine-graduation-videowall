@@ -41,7 +41,7 @@ class ProjectsOverviewScene extends SceneBase {
         pickingMethod: 'random'
       });
 
-      const peopleImages = getValueByPath(this.fetchProjectsResult, this.config.data.assetKeys.people).reduce((acc, val) => acc.concat(val), []);
+      const peopleImages = (this.config.data.assetKeys.people) ? getValueByPath(this.fetchProjectsResult, this.config.data.assetKeys.people).reduce((acc, val) => acc.concat(val), []) : [];
 
       for (let index = 0; index < peopleImages.length; index++) {
         const personImage = peopleImages[index];

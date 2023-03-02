@@ -1,5 +1,6 @@
 import { ProjectorApplication } from './js/classes/ProjectorApplication.js';
 import './js/offscreencanvas.polyfill.js';
+import { getArgVFromQueryString } from './options.js';
 
 let application;
 
@@ -17,13 +18,11 @@ const init = async () => {
     window.signals = result.default;
   }
   // end hack to get signals working
-  const config = await loadConfig();
+
+  const argv = getArgVFromQueryString();
+  const config = await (await fetch(argv['config-json-path'])).json();
   application = new ProjectorApplication(config);
   await application.init();
-};
-
-const loadConfig = async () => {
-  return await (await fetch('config.json')).json();
 };
 
 init();

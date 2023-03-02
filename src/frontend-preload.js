@@ -3,7 +3,6 @@ const util = require('util');
 const path = require('path');
 const fs = require('fs');
 const readFilePromised = util.promisify(fs.readFile);
-const configJSONPath = path.resolve(__dirname, '..', 'public', 'config.json');
 
 const getValueByPath = (object, path) => {
   const pathParts = path.split('.');
@@ -30,6 +29,8 @@ contextBridge.exposeInMainWorld('VideoWallAPI', {
     console.log('process projects called');
     console.log(projects);
     console.log(argv);
+
+    const configJSONPath = path.resolve(__dirname, '..', 'public', argv['config-json-path']);
 
     const uploadsPath = path.resolve(__dirname, '..', 'public', 'uploads');
     // create the uploadsPath folder async if it doesn't exist

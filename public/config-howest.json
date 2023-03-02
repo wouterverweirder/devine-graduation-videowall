@@ -10,6 +10,9 @@
     "project": {
       "people": {
         "key": "attributes"
+      },
+      "mainAsset": {
+        "key": "attributes.mainAsset.data.attributes"
       }
     }
   },

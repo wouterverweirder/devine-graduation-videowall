@@ -12,6 +12,9 @@
     "project": {
       "people": {
         "key": "attributes.students.data.[].attributes"
+      },
+      "mainAsset": {
+        "key": "attributes.mainAsset.data.attributes"
       }
     }
   },

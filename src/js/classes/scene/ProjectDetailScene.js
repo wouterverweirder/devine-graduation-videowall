@@ -39,7 +39,7 @@ class ProjectDetailScene extends SceneBase {
       this.colorPlanes = [];
       this.projectPlanes = [];
 
-      let assetsKey = (this.config.data.project.assets.key) ? this.config.data.project.assets.key : "attributes.assets.data";
+      let assetsKey = (this.config.data.project.assets?.key) ? this.config.data.project.assets.key : "attributes.assets.data";
       // let assets = project.attributes.assets;
       let assets = getValueByPath(project, assetsKey);
       if (!assets) {
@@ -163,7 +163,6 @@ class ProjectDetailScene extends SceneBase {
         let projectPlane;
         const projectAttributes = project.attributes ? project.attributes : project;
         if (doesScreenCameraHaveRole(screenCamera, ScreenRole.MAIN_VIDEO)) {
-          // assetKeys.mainAsset
           const mainAsset = getValueByPath(project, this.config.data.project.mainAsset.key);
           if (mainAsset) {
             // video or image?
