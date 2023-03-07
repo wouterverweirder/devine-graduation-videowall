@@ -11,7 +11,7 @@ import { DevineInfoPlane } from '../classes/scene/objects/devine/DevineInfoPlane
 import { VideoPlane } from '../classes/scene/objects/VideoPlane.js';
 import { BouncingDVD } from '../classes/scene/objects/BouncingDVD.js';
 
-const calculateTextureSizeForScreen = (screenConfig) => {
+export const calculateTextureSizeForScreen = (screenConfig) => {
   let rotation = 0;
   if (screenConfig.camera.rotation) {
     rotation = screenConfig.camera.rotation;

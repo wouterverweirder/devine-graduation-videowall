@@ -1,13 +1,14 @@
 import { DevineEasing } from '../../consts/DevineEasing.js';
 import { PlaneType } from '../../consts/PlaneType.js';
 import { ScreenRole } from "../../consts/ScreenRole.js";
-import { createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
+import { calculateTextureSizeForScreen, createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { delay } from '../../functions/delay.js';
 import { getValueByPath } from '../../functions/getValueByPath.js';
 import { calculateScaleForScreenConfig, doesScreenCameraHaveRole } from "../../functions/screenUtils.js";
 import { gsap, Power4 } from '../../gsap/src/index.js';
 import { ImagePlane } from './objects/ImagePlane.js';
 import { ProfilePicturePlane } from './objects/ProfilePicturePlane.js';
+import { VideoPlane } from './objects/VideoPlane.js';
 import { PlaneSlider } from './PlaneSlider.js';
 import { SceneBase, SceneState } from "./SceneBase.js";
 
@@ -46,88 +47,7 @@ class ProjectDetailScene extends SceneBase {
         assets = [];
       }
 
-      // objects for this scene
-      if (this.config.scenes.projectDetail?.objects?.length > 0) {
-        for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectDetail.objects.length; objectConfigIndex++) {
-          const objectConfig = this.config.scenes.projectDetail.objects[objectConfigIndex];
-          if (objectConfig.type === 'slider') {
-            // load the planes for this slider
-            const planes = [];
-            let dataForSlider = getValueByPath(project, objectConfig.dataSource.key);
-            // is dataForSlider an array?
-            if (!Array.isArray(dataForSlider)) {
-              dataForSlider = [dataForSlider];
-            }
-            objectConfig.dataSource.filters?.forEach(filter => {
-              if (filter.type === 'landscape-images') {
-                dataForSlider = dataForSlider.filter(asset => {
-                  const attributes = (asset.attributes) ? asset.attributes : asset;
-                  return attributes.mime.startsWith('image') && attributes.width > attributes.height;
-                });
-              } else if (filter.type === 'portrait-images') {
-                dataForSlider = dataForSlider.filter(asset => {
-                  const attributes = (asset.attributes) ? asset.attributes : asset;
-                  return attributes.mime.startsWith('image') && attributes.width < attributes.height;
-                });
-              }
-            });
-            if (objectConfig.item?.type === 'image') {
-              for (const asset of dataForSlider) {
-                const attributes = (asset.attributes) ? asset.attributes : asset;
-                const props = {
-                  name: `project-asset-${project.id}-${objectConfigIndex}-${attributes.url}`,
-                  textureSize: {
-                    x: objectConfig.item.width,
-                    y: objectConfig.item.height,
-                  },
-                  url: attributes.url,
-                  appConfig: this.config,
-                };
-                const plane = new ImagePlane(props.name, props);
-                await plane.init();
-                planes.push(plane);
-              }
-            } else if (objectConfig.item?.type === 'profile-picture') {
-              for (let assetIndex = 0; assetIndex < dataForSlider.length; assetIndex++) {
-                const asset = dataForSlider[assetIndex];
-                const props = {
-                  name: `project-asset-${project.id}-${objectConfigIndex}-${assetIndex}`,
-                  textureSize: {
-                    x: objectConfig.item.width,
-                    y: objectConfig.item.height,
-                  },
-                  data: asset,
-                  appConfig: this.config,
-                };
-                const plane = new ProfilePicturePlane(props.name, props);
-                await plane.init();
-                planes.push(plane);
-              }
-            }
-            console.log("Create PlaneSlider for screen", objectConfig.screens, "with", planes.length, "planes");
-            // planes are loaded, create the slider
-            const slider = new PlaneSlider(this, {
-              objectConfig,
-              nonVisiblePlanes: planes,
-              visiblePlanes: [],
-              setupNewPlane: ({ newPlane }) => {
-                const setPropsNewPlane = this.generatePropsForScreen(newPlane.customData.camera);
-                newPlane.applyProps(setPropsNewPlane);
-                return newPlane;
-              },
-              getAxis: ({ newPlane }) => {
-                const camera = newPlane.customData.camera;
-                const isLandscape = !(camera.props.rotation.z !== 0);
-                return (isLandscape) ? 'vertical' : 'horizontal';
-              },
-              getDelayForNextAnimation: () => objectConfig.slideInterval,
-              getSlideDelay: () => objectConfig.slideDelay, //TODO: make this ms instead of seconds for consistency
-              pickingMethod: objectConfig.pickingMethod,
-            })
-            this.objectsFromConfig.push(slider);
-          }
-        }
-      }
+      await this.createObjectsForThisScene();
 
       const getAssetsWithMimeStartingWith = (mimeTypeStartsWith) => assets.filter(asset => {
         const attributes = (asset.attributes) ? asset.attributes : asset;
@@ -163,23 +83,23 @@ class ProjectDetailScene extends SceneBase {
         let projectPlane;
         const projectAttributes = project.attributes ? project.attributes : project;
         if (doesScreenCameraHaveRole(screenCamera, ScreenRole.MAIN_VIDEO)) {
-          const mainAsset = getValueByPath(project, this.config.data.project.mainAsset.key);
-          if (mainAsset) {
-            // video or image?
-            const attributes = mainAsset.attributes ? mainAsset.attributes : mainAsset;
-            const isVideo = attributes.mime.indexOf('video') === 0;
-            projectPlane = await createPlaneForScreen({
-              data: {
-                id: `${idPrefix}-main-video-${screenCamera.id}`,
-                type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
-                url: attributes.url,
-                layers: screenCamera.props.layers,
-                muted: this.config.muted === undefined ? false : this.config.muted
-              },
-              screenConfig,
-              appConfig: this.config
-            });
-          }
+          // const mainAsset = getValueByPath(project, this.config.data.project.mainAsset.key);
+          // if (mainAsset) {
+          //   // video or image?
+          //   const attributes = mainAsset.attributes ? mainAsset.attributes : mainAsset;
+          //   const isVideo = attributes.mime.indexOf('video') === 0;
+          //   projectPlane = await createPlaneForScreen({
+          //     data: {
+          //       id: `${idPrefix}-main-video-${screenCamera.id}`,
+          //       type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
+          //       url: attributes.url,
+          //       layers: screenCamera.props.layers,
+          //       muted: this.config.muted === undefined ? false : this.config.muted
+          //     },
+          //     screenConfig,
+          //     appConfig: this.config
+          //   });
+          // }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.VIDEOS)) {
           if (videos.length > 0) {
             const video = videos.shift();
@@ -267,9 +187,13 @@ class ProjectDetailScene extends SceneBase {
           }
         }
         if (!projectPlane) {
-          // does a slider need to show something on this screen?
+          // does one of the objectsFromConfig show something on this screen?
           this.objectsFromConfig.forEach((object) => {
-            if (object instanceof PlaneSlider) {
+            if (object instanceof VideoPlane) {
+              if (object.objectConfig.screen.id === screenCamera.id) {
+                projectPlane = object;
+              }
+            } else if (object instanceof PlaneSlider) {
               // does this planeslider need to show something on this screen?
               const indexOfScreenInObjectConfig = object.objectConfig.screens.findIndex(screen => screen.id === screenCamera.id);
               if (indexOfScreenInObjectConfig > -1) {
@@ -422,6 +346,112 @@ class ProjectDetailScene extends SceneBase {
           });
         }
       });
+    }
+  }
+
+  async createObjectsForThisScene() {
+    const project = this.project;
+    // objects for this scene
+    if (this.config.scenes.projectDetail?.objects?.length > 0) {
+      for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectDetail.objects.length; objectConfigIndex++) {
+        const objectConfig = this.config.scenes.projectDetail.objects[objectConfigIndex];
+        if (objectConfig.type === 'video') {
+          const data = getValueByPath(project, objectConfig.dataSource.key);
+          if (data) {
+            const screenCamera = this.cameras.find(camera => camera.id === objectConfig.screen.id);
+            const screenConfig = this.screenConfigsById[objectConfig.screen.id];
+            const attributes = data.attributes ? data.attributes : data;
+            const isVideo = attributes.mime.indexOf('video') === 0;
+            const plane = await createPlaneForScreen({
+              data: {
+                id: `project-video-${project.id}-${attributes.url}`,
+                type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
+                url: attributes.url,
+                layers: screenCamera.props.layers,
+                muted: this.config.muted === undefined ? false : this.config.muted
+              },
+              screenConfig,
+              appConfig: this.config
+            });
+            plane.objectConfig = objectConfig;
+            this.objectsFromConfig.push(plane);
+          }
+        } else if (objectConfig.type === 'slider') {
+          // load the planes for this slider
+          const planes = [];
+          let dataForSlider = getValueByPath(project, objectConfig.dataSource.key);
+          // is dataForSlider an array?
+          if (!Array.isArray(dataForSlider)) {
+            dataForSlider = [dataForSlider];
+          }
+          objectConfig.dataSource.filters?.forEach(filter => {
+            if (filter.type === 'landscape-images') {
+              dataForSlider = dataForSlider.filter(asset => {
+                const attributes = (asset.attributes) ? asset.attributes : asset;
+                return attributes.mime.startsWith('image') && attributes.width > attributes.height;
+              });
+            } else if (filter.type === 'portrait-images') {
+              dataForSlider = dataForSlider.filter(asset => {
+                const attributes = (asset.attributes) ? asset.attributes : asset;
+                return attributes.mime.startsWith('image') && attributes.width < attributes.height;
+              });
+            }
+          });
+          if (objectConfig.item?.type === 'image') {
+            for (const asset of dataForSlider) {
+              const attributes = (asset.attributes) ? asset.attributes : asset;
+              const props = {
+                name: `project-asset-${project.id}-${objectConfigIndex}-${attributes.url}`,
+                textureSize: {
+                  x: objectConfig.item.width,
+                  y: objectConfig.item.height,
+                },
+                url: attributes.url,
+                appConfig: this.config,
+              };
+              const plane = new ImagePlane(props.name, props);
+              await plane.init();
+              planes.push(plane);
+            }
+          } else if (objectConfig.item?.type === 'profile-picture') {
+            for (let assetIndex = 0; assetIndex < dataForSlider.length; assetIndex++) {
+              const asset = dataForSlider[assetIndex];
+              const props = {
+                name: `project-asset-${project.id}-${objectConfigIndex}-${assetIndex}`,
+                textureSize: {
+                  x: objectConfig.item.width,
+                  y: objectConfig.item.height,
+                },
+                data: asset,
+                appConfig: this.config,
+              };
+              const plane = new ProfilePicturePlane(props.name, props);
+              await plane.init();
+              planes.push(plane);
+            }
+          }
+          // planes are loaded, create the slider
+          const slider = new PlaneSlider(this, {
+            objectConfig,
+            nonVisiblePlanes: planes,
+            visiblePlanes: [],
+            setupNewPlane: ({ newPlane }) => {
+              const setPropsNewPlane = this.generatePropsForScreen(newPlane.customData.camera);
+              newPlane.applyProps(setPropsNewPlane);
+              return newPlane;
+            },
+            getAxis: ({ newPlane }) => {
+              const camera = newPlane.customData.camera;
+              const isLandscape = !(camera.props.rotation.z !== 0);
+              return (isLandscape) ? 'vertical' : 'horizontal';
+            },
+            getDelayForNextAnimation: () => objectConfig.slideInterval,
+            getSlideDelay: () => objectConfig.slideDelay, //TODO: make this ms instead of seconds for consistency
+            pickingMethod: objectConfig.pickingMethod,
+          })
+          this.objectsFromConfig.push(slider);
+        }
+      }
     }
   }
 

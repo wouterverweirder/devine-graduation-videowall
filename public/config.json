@@ -28,6 +28,15 @@
       "screenshotSlideInterval": 4000,
       "objects": [
         {
+          "type": "video",
+          "dataSource": {
+            "key": "mainAsset"
+          },
+          "screen": {
+            "id": "screen-3"
+          }
+        },
+        {
           "type": "slider",
           "item": {
             "type": "image",
