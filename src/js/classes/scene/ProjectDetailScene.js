@@ -3,6 +3,7 @@ import { PlaneType } from '../../consts/PlaneType.js';
 import { ScreenRole } from "../../consts/ScreenRole.js";
 import { calculateTextureSizeForScreen, createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { delay } from '../../functions/delay.js';
+import { getFilteredDataSource } from '../../functions/getFilteredDataSource.js';
 import { getValueByPath } from '../../functions/getValueByPath.js';
 import { calculateScaleForScreenConfig, doesScreenCameraHaveRole } from "../../functions/screenUtils.js";
 import { gsap, Power4 } from '../../gsap/src/index.js';
@@ -40,21 +41,9 @@ class ProjectDetailScene extends SceneBase {
       this.colorPlanes = [];
       this.projectPlanes = [];
 
-      let assetsKey = (this.config.data.project.assets?.key) ? this.config.data.project.assets.key : "attributes.assets.data";
-      // let assets = project.attributes.assets;
-      let assets = getValueByPath(project, assetsKey);
-      if (!assets) {
-        assets = [];
-      }
+      this.createDataSourcesForThisScene();
 
       await this.createObjectsForThisScene();
-
-      const getAssetsWithMimeStartingWith = (mimeTypeStartsWith) => assets.filter(asset => {
-        const attributes = (asset.attributes) ? asset.attributes : asset;
-        return attributes.mime.startsWith(mimeTypeStartsWith)
-      });
-
-      const videos = getAssetsWithMimeStartingWith('video').map(asset => asset.attributes ? asset.attributes : asset);
 
       for (const screenCamera of this.camerasFromBottomToTop) {
         const screenConfig = this.screenConfigsById[screenCamera.id];
@@ -82,47 +71,7 @@ class ProjectDetailScene extends SceneBase {
         // what roles does this screen have?
         let projectPlane;
         const projectAttributes = project.attributes ? project.attributes : project;
-        if (doesScreenCameraHaveRole(screenCamera, ScreenRole.MAIN_VIDEO)) {
-          // const mainAsset = getValueByPath(project, this.config.data.project.mainAsset.key);
-          // if (mainAsset) {
-          //   // video or image?
-          //   const attributes = mainAsset.attributes ? mainAsset.attributes : mainAsset;
-          //   const isVideo = attributes.mime.indexOf('video') === 0;
-          //   projectPlane = await createPlaneForScreen({
-          //     data: {
-          //       id: `${idPrefix}-main-video-${screenCamera.id}`,
-          //       type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
-          //       url: attributes.url,
-          //       layers: screenCamera.props.layers,
-          //       muted: this.config.muted === undefined ? false : this.config.muted
-          //     },
-          //     screenConfig,
-          //     appConfig: this.config
-          //   });
-          // }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.VIDEOS)) {
-          if (videos.length > 0) {
-            const video = videos.shift();
-            projectPlane = await createPlaneForScreen({
-              data: {
-                id: `${idPrefix}-assets-${screenCamera.id}`,
-                type: PlaneType.VIDEO,
-                url: video.url,
-                layers: screenCamera.props.layers
-              },
-              screenConfig,
-              appConfig: this.config
-            }); 
-          } else {
-            // no videos - take landscape screenshots
-            console.log('no videos, take landscape screenshot');
-            if (this.nonVisibleLandscapeScreenshotPlanes.length > 0) {
-              projectPlane = this.nonVisibleLandscapeScreenshotPlanes.shift();
-              projectPlane.applyProps(this.generatePropsForScreen(screenCamera));
-              projectPlane.customData.camera = screenCamera;
-            }
-          }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_BIO)) {
+        if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_BIO)) {
           if (projectAttributes.bio) {
             projectPlane = await createPlaneForScreen({
               data: {
@@ -349,33 +298,69 @@ class ProjectDetailScene extends SceneBase {
     }
   }
 
+  createDataSourcesForThisScene() {
+    const project = this.project;
+    this.dataSources = [];
+    this.dataSourcesByKey = {};
+    if (this.config.scenes.projectDetail?.objects?.length > 0) {
+      for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectDetail.objects.length; objectConfigIndex++) {
+        const objectConfig = this.config.scenes.projectDetail.objects[objectConfigIndex];
+        if (!objectConfig.dataSource) {
+          continue;
+        }
+        if (this.dataSourcesByKey[objectConfig.dataSource.key]) {
+          continue;
+        }
+        let data = getValueByPath(project, objectConfig.dataSource.key);
+        if (!data) {
+          continue;
+        }
+        if (!Array.isArray(data)) {
+          data = [data];
+        }
+        this.dataSources.push(data);
+        this.dataSourcesByKey[objectConfig.dataSource.key] = data;
+      }
+    }
+  }
+
   async createObjectsForThisScene() {
     const project = this.project;
+    console.log(project);
     // objects for this scene
     if (this.config.scenes.projectDetail?.objects?.length > 0) {
       for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectDetail.objects.length; objectConfigIndex++) {
         const objectConfig = this.config.scenes.projectDetail.objects[objectConfigIndex];
         if (objectConfig.type === 'video') {
-          const data = getValueByPath(project, objectConfig.dataSource.key);
-          if (data) {
-            const screenCamera = this.cameras.find(camera => camera.id === objectConfig.screen.id);
-            const screenConfig = this.screenConfigsById[objectConfig.screen.id];
-            const attributes = data.attributes ? data.attributes : data;
-            const isVideo = attributes.mime.indexOf('video') === 0;
-            const plane = await createPlaneForScreen({
-              data: {
-                id: `project-video-${project.id}-${attributes.url}`,
-                type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
-                url: attributes.url,
-                layers: screenCamera.props.layers,
-                muted: this.config.muted === undefined ? false : this.config.muted
-              },
-              screenConfig,
-              appConfig: this.config
-            });
-            plane.objectConfig = objectConfig;
-            this.objectsFromConfig.push(plane);
+          let data = this.dataSourcesByKey[objectConfig.dataSource.key];
+          if (!data) {
+            continue;
           }
+          data = getFilteredDataSource(data, objectConfig.dataSource);
+          console.log(data);
+          if (data.length === 0) {
+            continue;
+          }
+          data = data[0];
+          // remove this item from the data source to prevent duplicates
+          this.dataSourcesByKey[objectConfig.dataSource.key] = this.dataSourcesByKey[objectConfig.dataSource.key].filter(item => item !== data);
+          const screenCamera = this.cameras.find(camera => camera.id === objectConfig.screen.id);
+          const screenConfig = this.screenConfigsById[objectConfig.screen.id];
+          const attributes = data.attributes ? data.attributes : data;
+          const isVideo = attributes.mime.indexOf('video') === 0;
+          const plane = await createPlaneForScreen({
+            data: {
+              id: `project-video-${project.id}-${attributes.url}`,
+              type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
+              url: attributes.url,
+              layers: screenCamera.props.layers,
+              muted: this.config.muted === undefined ? false : this.config.muted
+            },
+            screenConfig,
+            appConfig: this.config
+          });
+          plane.objectConfig = objectConfig;
+          this.objectsFromConfig.push(plane);
         } else if (objectConfig.type === 'slider') {
           // load the planes for this slider
           const planes = [];
@@ -384,19 +369,7 @@ class ProjectDetailScene extends SceneBase {
           if (!Array.isArray(dataForSlider)) {
             dataForSlider = [dataForSlider];
           }
-          objectConfig.dataSource.filters?.forEach(filter => {
-            if (filter.type === 'landscape-images') {
-              dataForSlider = dataForSlider.filter(asset => {
-                const attributes = (asset.attributes) ? asset.attributes : asset;
-                return attributes.mime.startsWith('image') && attributes.width > attributes.height;
-              });
-            } else if (filter.type === 'portrait-images') {
-              dataForSlider = dataForSlider.filter(asset => {
-                const attributes = (asset.attributes) ? asset.attributes : asset;
-                return attributes.mime.startsWith('image') && attributes.width < attributes.height;
-              });
-            }
-          });
+          dataForSlider = getFilteredDataSource(dataForSlider, objectConfig.dataSource);
           if (objectConfig.item?.type === 'image') {
             for (const asset of dataForSlider) {
               const attributes = (asset.attributes) ? asset.attributes : asset;

@@ -103,9 +103,46 @@
       "screenshotSlideInterval": 4000,
       "objects": [
         {
+          "type": "video",
+          "dataSource": {
+            "key": "attributes.mainAsset.data.attributes"
+          },
+          "screen": {
+            "id": "screen-3"
+          }
+        },
+        {
+          "type": "video",
+          "dataSource": {
+            "key": "attributes.assets.data.[].attributes",
+            "filters": [
+              {
+                "type": "videos"
+              }
+            ]
+          },
+          "screen": {
+            "id": "screen-2"
+          }
+        },
+        {
+          "type": "video",
+          "dataSource": {
+            "key": "attributes.assets.data.[].attributes",
+            "filters": [
+              {
+                "type": "videos"
+              }
+            ]
+          },
+          "screen": {
+            "id": "screen-7"
+          }
+        },
+        {
           "type": "slider",
           "item": {
-            "type" : "image",
+            "type": "image",
             "width": 1920,
             "height": 1080
           },
@@ -129,7 +166,7 @@
         {
           "type": "slider",
           "item": {
-            "type" : "image",
+            "type": "image",
             "width": 1080,
             "height": 1920
           },
@@ -156,7 +193,7 @@
         {
           "type": "slider",
           "item": {
-            "type" : "profile-picture",
+            "type": "profile-picture",
             "width": 1080,
             "height": 1920
           },
