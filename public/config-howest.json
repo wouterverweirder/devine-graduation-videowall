@@ -32,43 +32,21 @@
         "font": "400 48px 'Embedded VAGRounded'",
         "fillStyle": "#000000"
       }
-    },
-    "bioPlane": {
-      "backgroundColor": "#ffffff",
-      "marginTop": 98,
-      "gradientTop": {
-        "height": 50,
-        "y": 100,
-        "stops": {
-          "0": "rgba(255,255,255,1)",
-          "1": "rgba(255,255,255,0)"
-        }
-      },
-      "gradientBottom": {
-        "height": 50,
-        "stops": {
-          "0": "rgba(255,255,255,0)",
-          "1": "rgba(255,255,255,1)"
-        }
-      },
-      "title": {
-        "template": "BIO",
-        "font": "700 53px 'Embedded VAGRounded'",
-        "fillStyle": "rgb(68, 200, 245)",
-        "marginBottom": 100
-      },
-      "paragraphs": {
-        "template": "${attributes.bio}",
-        "font": "400 53px 'Embedded OpenSans'",
-        "fillStyle": "#000000",
-        "lineHeight": 70
-      }
     }
   },
   "scenes": {
     "projectDetail": {
       "screenshotSlideInterval": 4000,
       "objects": [
+        {
+          "type": "video",
+          "dataSource": {
+            "key": "attributes.mainAsset.data.attributes"
+          },
+          "screen": {
+            "id": "screen-3"
+          }
+        },
         {
           "type": "slider",
           "item": {
@@ -87,6 +65,62 @@
               "id": "screen-0"
             }
           ]
+        },
+        {
+          "type": "text",
+          "screen": {
+            "id": "screen-1"
+          },
+          "backgroundColor": "#ffffff",
+          "marginTop": 98,
+          "gradientTop": {
+            "height": 50,
+            "y": 100,
+            "stops": {
+              "0": "rgba(255,255,255,1)",
+              "1": "rgba(255,255,255,0)"
+            }
+          },
+          "gradientBottom": {
+            "height": 50,
+            "stops": {
+              "0": "rgba(255,255,255,0)",
+              "1": "rgba(255,255,255,1)"
+            }
+          },
+          "title": {
+            "template": "BIO",
+            "font": "700 53px 'Embedded VAGRounded'",
+            "fillStyle": "rgb(68, 200, 245)",
+            "marginBottom": 100
+          },
+          "paragraphs": {
+            "template": "${attributes.bio}",
+            "font": "400 53px 'Embedded OpenSans'",
+            "fillStyle": "#000000",
+            "lineHeight": 70
+          }
+        },
+        {
+          "type": "contact",
+          "screen": {
+            "id": "screen-5"
+          }
+        },
+        {
+          "type": "quote",
+          "screen": {
+            "id": "screen-4"
+          }
+        },
+        {
+          "type": "image",
+          "screen": {
+            "id": "screen-2"
+          },
+          "dataSource": {
+            "key": "attributes.curriculum.data.attributes.image.data"
+          }
         }
       ]
     },

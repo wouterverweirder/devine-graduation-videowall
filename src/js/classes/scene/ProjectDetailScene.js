@@ -1,14 +1,15 @@
 import { DevineEasing } from '../../consts/DevineEasing.js';
 import { PlaneType } from '../../consts/PlaneType.js';
-import { ScreenRole } from "../../consts/ScreenRole.js";
-import { calculateTextureSizeForScreen, createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
+import { createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { delay } from '../../functions/delay.js';
 import { getFilteredDataSource } from '../../functions/getFilteredDataSource.js';
 import { getValueByPath } from '../../functions/getValueByPath.js';
-import { calculateScaleForScreenConfig, doesScreenCameraHaveRole } from "../../functions/screenUtils.js";
+import { calculateScaleForScreenConfig } from "../../functions/screenUtils.js";
 import { gsap, Power4 } from '../../gsap/src/index.js';
 import { ImagePlane } from './objects/ImagePlane.js';
 import { ProfilePicturePlane } from './objects/ProfilePicturePlane.js';
+import { ProjectContactPlane } from './objects/ProjectContactPlane.js';
+import { ProjectQuotePlane } from './objects/ProjectQuotePlane.js';
 import { ProjectTextPlane } from './objects/ProjectTextPlane.js';
 import { VideoPlane } from './objects/VideoPlane.js';
 import { PlaneSlider } from './PlaneSlider.js';
@@ -73,53 +74,10 @@ class ProjectDetailScene extends SceneBase {
         this.colorPlanes.push(colorPlane);
         // what roles does this screen have?
         let projectPlane;
-        const projectAttributes = project.attributes ? project.attributes : project;
-        if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_CONTACT)) {
-          projectPlane = await createPlaneForScreen({
-            data: {
-              id: `${idPrefix}-contact-${screenCamera.id}`,
-              type: PlaneType.PROJECT_CONTACT,
-              data: project,
-              layers: screenCamera.props.layers
-            },
-            screenConfig,
-            appConfig: this.config
-          });
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_QUOTE)) {
-          if (projectAttributes.quote) {
-            projectPlane = await createPlaneForScreen({
-              data: {
-                id: `${idPrefix}-quote-${screenCamera.id}`,
-                type: PlaneType.PROJECT_QUOTE,
-                data: project,
-                layers: screenCamera.props.layers
-              },
-              screenConfig,
-              appConfig: this.config
-            }); 
-          }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.CURRICULUM_PICTURE)) {
-          if (projectAttributes.curriculum.data?.attributes.image.data?.attributes.url) {
-            projectPlane = await createPlaneForScreen({
-              data: {
-                id: `${idPrefix}-curriculum-picture-${screenCamera.id}`,
-                type: PlaneType.IMAGE,
-                url: projectAttributes.curriculum.data.attributes.image.data.attributes.url,
-                layers: screenCamera.props.layers
-              },
-              screenConfig,
-              appConfig: this.config
-            }); 
-          }
-        }
         if (!projectPlane) {
           // does one of the objectsFromConfig show something on this screen?
           this.objectsFromConfig.forEach((object) => {
-            if (object instanceof VideoPlane) {
-              if (object.objectConfig.screen.id === screenCamera.id) {
-                projectPlane = object;
-              }
-            } else if (object instanceof ProjectTextPlane) {
+            if (object instanceof ProjectTextPlane || object instanceof VideoPlane || object instanceof ImagePlane || object instanceof ProjectQuotePlane || object instanceof ProjectContactPlane) {
               if (object.objectConfig.screen.id === screenCamera.id) {
                 projectPlane = object;
               }
@@ -312,7 +270,7 @@ class ProjectDetailScene extends SceneBase {
     if (this.config.scenes.projectDetail?.objects?.length > 0) {
       for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectDetail.objects.length; objectConfigIndex++) {
         const objectConfig = this.config.scenes.projectDetail.objects[objectConfigIndex];
-        if (objectConfig.type === 'video') {
+        if (objectConfig.type === 'video' || objectConfig.type === 'image') {
           let data = this.dataSourcesByKey[objectConfig.dataSource.key];
           if (!data) {
             continue;
@@ -352,6 +310,36 @@ class ProjectDetailScene extends SceneBase {
               data: project,
               layers: screenCamera.props.layers,
               planeConfig: objectConfig,
+            },
+            screenConfig,
+            appConfig: this.config
+          });
+          plane.objectConfig = objectConfig;
+          this.objectsFromConfig.push(plane);
+        } else if (objectConfig.type === 'quote') {
+          const screenCamera = this.cameras.find(camera => camera.id === objectConfig.screen.id);
+          const screenConfig = this.screenConfigsById[objectConfig.screen.id];
+          const plane = await createPlaneForScreen({
+            data: {
+              id: `project-quote-${project.id}-${screenCamera.id}`,
+              type: PlaneType.PROJECT_QUOTE,
+              data: project,
+              layers: screenCamera.props.layers
+            },
+            screenConfig,
+            appConfig: this.config
+          });
+          plane.objectConfig = objectConfig;
+          this.objectsFromConfig.push(plane);
+        } else if (objectConfig.type === 'contact') {
+          const screenCamera = this.cameras.find(camera => camera.id === objectConfig.screen.id);
+          const screenConfig = this.screenConfigsById[objectConfig.screen.id];
+          const plane = await createPlaneForScreen({
+            data: {
+              id: `project-contact-${project.id}-${screenCamera.id}`,
+              type: PlaneType.PROJECT_CONTACT,
+              data: project,
+              layers: screenCamera.props.layers
             },
             screenConfig,
             appConfig: this.config
