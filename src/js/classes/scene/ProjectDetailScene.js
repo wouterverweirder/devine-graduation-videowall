@@ -9,9 +9,12 @@ import { calculateScaleForScreenConfig, doesScreenCameraHaveRole } from "../../f
 import { gsap, Power4 } from '../../gsap/src/index.js';
 import { ImagePlane } from './objects/ImagePlane.js';
 import { ProfilePicturePlane } from './objects/ProfilePicturePlane.js';
+import { ProjectTextPlane } from './objects/ProjectTextPlane.js';
 import { VideoPlane } from './objects/VideoPlane.js';
 import { PlaneSlider } from './PlaneSlider.js';
 import { SceneBase, SceneState } from "./SceneBase.js";
+
+// TODO: get rid of projectPlanes array and work with objectsFromConfig
 
 class ProjectDetailScene extends SceneBase {
 
@@ -71,20 +74,7 @@ class ProjectDetailScene extends SceneBase {
         // what roles does this screen have?
         let projectPlane;
         const projectAttributes = project.attributes ? project.attributes : project;
-        if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_BIO)) {
-          if (projectAttributes.bio) {
-            projectPlane = await createPlaneForScreen({
-              data: {
-                id: `${idPrefix}-bio-${screenCamera.id}`,
-                type: PlaneType.PROJECT_BIO,
-                data: project,
-                layers: screenCamera.props.layers
-              },
-              screenConfig,
-              appConfig: this.config
-            });
-          }
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_CONTACT)) {
+        if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_CONTACT)) {
           projectPlane = await createPlaneForScreen({
             data: {
               id: `${idPrefix}-contact-${screenCamera.id}`,
@@ -95,19 +85,6 @@ class ProjectDetailScene extends SceneBase {
             screenConfig,
             appConfig: this.config
           });
-        } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_DESCRIPTION)) {
-          if (projectAttributes.description) {
-            projectPlane = await createPlaneForScreen({
-              data: {
-                id: `${idPrefix}-description-${screenCamera.id}`,
-                type: PlaneType.PROJECT_DESCRIPTION,
-                data: project,
-                layers: screenCamera.props.layers
-              },
-              screenConfig,
-              appConfig: this.config
-            }); 
-          }
         } else if (doesScreenCameraHaveRole(screenCamera, ScreenRole.PROJECT_QUOTE)) {
           if (projectAttributes.quote) {
             projectPlane = await createPlaneForScreen({
@@ -139,6 +116,10 @@ class ProjectDetailScene extends SceneBase {
           // does one of the objectsFromConfig show something on this screen?
           this.objectsFromConfig.forEach((object) => {
             if (object instanceof VideoPlane) {
+              if (object.objectConfig.screen.id === screenCamera.id) {
+                projectPlane = object;
+              }
+            } else if (object instanceof ProjectTextPlane) {
               if (object.objectConfig.screen.id === screenCamera.id) {
                 projectPlane = object;
               }
@@ -355,6 +336,22 @@ class ProjectDetailScene extends SceneBase {
               url: attributes.url,
               layers: screenCamera.props.layers,
               muted: this.config.muted === undefined ? false : this.config.muted
+            },
+            screenConfig,
+            appConfig: this.config
+          });
+          plane.objectConfig = objectConfig;
+          this.objectsFromConfig.push(plane);
+        } else if (objectConfig.type === 'text') {
+          const screenCamera = this.cameras.find(camera => camera.id === objectConfig.screen.id);
+          const screenConfig = this.screenConfigsById[objectConfig.screen.id];
+          const plane = await createPlaneForScreen({
+            data: {
+              id: `project-text-${project.id}-${screenCamera.id}`,
+              type: PlaneType.TEXT,
+              data: project,
+              layers: screenCamera.props.layers,
+              planeConfig: objectConfig,
             },
             screenConfig,
             appConfig: this.config

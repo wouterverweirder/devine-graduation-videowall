@@ -34,68 +34,6 @@
         "font": "50px 'Embedded Space Grotesk'",
         "fillStyle": "#797979"
       }
-    },
-    "bioPlane": {
-      "backgroundColor": "#000000",
-      "marginTop": 105,
-      "gradientTop": {
-        "height": 100,
-        "y": 150,
-        "stops": {
-          "0": "rgba(0,0,0,1)",
-          "1": "rgba(0,0,0,0)"
-        }
-      },
-      "gradientBottom": {
-        "height": 100,
-        "stops": {
-          "0": "rgba(0,0,0,0)",
-          "1": "rgba(0,0,0,1)"
-        }
-      },
-      "title": {
-        "template": "BIO",
-        "font": "700 55px 'Embedded Space Grotesk'",
-        "fillStyle": "white",
-        "marginBottom": 200
-      },
-      "paragraphs": {
-        "template": "${attributes.bio}",
-        "font": "55px 'Embedded Space Grotesk'",
-        "fillStyle": "white",
-        "lineHeight": 70
-      }
-    },
-    "descriptionPlane": {
-      "backgroundColor": "#000000",
-      "marginTop": 105,
-      "gradientTop": {
-        "height": 100,
-        "y": 150,
-        "stops": {
-          "0": "rgba(0,0,0,1)",
-          "1": "rgba(0,0,0,0)"
-        }
-      },
-      "gradientBottom": {
-        "height": 100,
-        "stops": {
-          "0": "rgba(0,0,0,0)",
-          "1": "rgba(0,0,0,1)"
-        }
-      },
-      "title": {
-        "template": "Project Description",
-        "font": "700 55px 'Embedded Space Grotesk'",
-        "fillStyle": "white",
-        "marginBottom": 200
-      },
-      "paragraphs": {
-        "template": "${attributes.description}",
-        "font": "55px 'Embedded Space Grotesk'",
-        "fillStyle": "white",
-        "lineHeight": 70
-      }
     }
   },
   "scenes": {
@@ -208,6 +146,41 @@
               "id": "screen-0"
             }
           ]
+        },
+        {
+          "type": "text",
+          "screen": {
+            "id": "screen-6"
+          },
+          "backgroundColor": "#000000",
+          "marginTop": 105,
+          "gradientTop": {
+            "height": 100,
+            "y": 150,
+            "stops": {
+              "0": "rgba(0,0,0,1)",
+              "1": "rgba(0,0,0,0)"
+            }
+          },
+          "gradientBottom": {
+            "height": 100,
+            "stops": {
+              "0": "rgba(0,0,0,0)",
+              "1": "rgba(0,0,0,1)"
+            }
+          },
+          "title": {
+            "template": "Project Description",
+            "font": "700 55px 'Embedded Space Grotesk'",
+            "fillStyle": "white",
+            "marginBottom": 200
+          },
+          "paragraphs": {
+            "template": "${attributes.description}",
+            "font": "55px 'Embedded Space Grotesk'",
+            "fillStyle": "white",
+            "lineHeight": 70
+          }
         }
       ]
     },

@@ -59,6 +59,8 @@ const createPlaneForScreen = async ({data, screenConfig, appConfig}) => {
     plane = new CanvasPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_DESCRIPTION) {
     plane = new ProjectTextPlane(data.id, { ...props, planeConfig: props.appConfig.planes.descriptionPlane });
+  } else if (data.type === PlaneType.TEXT) {
+    plane = new ProjectTextPlane(data.id, props);
   } else if (data.type === PlaneType.PROJECT_BIO) {
     plane = new ProjectTextPlane(data.id, { ...props, planeConfig: props.appConfig.planes.bioPlane });
   } else if (data.type === PlaneType.PROJECT_QUOTE) {
