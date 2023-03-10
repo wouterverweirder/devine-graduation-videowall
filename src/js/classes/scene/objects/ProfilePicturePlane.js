@@ -13,7 +13,7 @@ export class ProfilePicturePlane extends CanvasPlane {
   maxTriangleHeight = 80;
 
   async createMaterial() {
-    this.planeConfig = this.props.appConfig.planes.namePlane || {};
+    this.planeConfig = this.props.namePlane || {};
     this.transparent = true;
     return await super.createMaterial();
   }

@@ -18,24 +18,6 @@
       }
     }
   },
-  "planes": {
-    "namePlane": {
-      "height": 280,
-      "maxHeight": 280,
-      "marginTop": 120,
-      "name": {
-        "template": "${firstName} ${lastName}",
-        "font": "70px 'Embedded Space Grotesk'",
-        "fillStyle": "#000000",
-        "marginBottom": 70
-      },
-      "tagLine": {
-        "template": "Expert ${expert.data.attributes.name}",
-        "font": "50px 'Embedded Space Grotesk'",
-        "fillStyle": "#797979"
-      }
-    }
-  },
   "scenes": {
     "projectDetail": {
       "screenshotSlideInterval": 4000,
@@ -133,7 +115,23 @@
           "item": {
             "type": "profile-picture",
             "width": 1080,
-            "height": 1920
+            "height": 1920,
+            "namePlane": {
+              "height": 280,
+              "maxHeight": 280,
+              "marginTop": 120,
+              "name": {
+                "template": "${firstName} ${lastName}",
+                "font": "70px 'Embedded Space Grotesk'",
+                "fillStyle": "#000000",
+                "marginBottom": 70
+              },
+              "tagLine": {
+                "template": "Expert ${expert.data.attributes.name}",
+                "font": "50px 'Embedded Space Grotesk'",
+                "fillStyle": "#797979"
+              }
+            }
           },
           "dataSource": {
             "key": "attributes.students.data.[].attributes"

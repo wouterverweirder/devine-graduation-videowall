@@ -381,6 +381,7 @@ class ProjectDetailScene extends SceneBase {
                   y: objectConfig.item.height,
                 },
                 data: asset,
+                namePlane: objectConfig.item.namePlane,
                 appConfig: this.config,
               };
               const plane = new ProfilePicturePlane(props.name, props);
