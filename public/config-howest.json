@@ -1,6 +1,6 @@
 {
   "interactionTimeout": 300000,
-  "crop": 1,
+  "crop": 2,
   "data": {
     "projectsKey": "data.students.data",
     "assetKeys": {

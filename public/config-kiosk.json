@@ -1,7 +1,7 @@
 {
   "interactionTimeout": 300000,
   "autoNextProjectTimeout": 120000,
-  "crop": 1,
+  "crop": 2,
   "muted": true,
   "data": {
     "projectsKey": "curricula",
