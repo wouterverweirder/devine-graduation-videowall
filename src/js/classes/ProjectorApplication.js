@@ -65,11 +65,11 @@ class ProjectorApplication extends Application {
   }
 
   resetScreensaver() {
-    if (!isNaN(this.config.screensaverTimeout) && this.config.screensaverTimeout > 0) {
+    if (!isNaN(this.config.interactionTimeout) && this.config.interactionTimeout > 0) {
       clearTimeout(this.interactionTimeoutId);
       this.interactionTimeoutId = setTimeout(() => {
         this.startScreensaver();
-      }, this.config.screensaverTimeout);
+      }, this.config.interactionTimeout);
     }
   }
 
