@@ -171,7 +171,7 @@ class ProjectorApplication extends Application {
 
   async onRequestShowProjectsOverview () {
     await super.onRequestShowProjectsOverview();
-    if (!this.hasProjectsOverview()) {
+    if (this.hasProjectsOverview()) {
       if (this.ambientAudio) {
         this.ambientAudio.play();
       }

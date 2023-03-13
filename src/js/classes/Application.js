@@ -210,6 +210,9 @@ class Application {
   }
 
   async onRequestShowProjectsOverview () {
+    if (!this.hasProjectsOverview()) {
+      return;
+    }
     const visibleSceneIsOverview = (this.visibleScenes.length === 1 && this.visibleScenes[0] instanceof ProjectsOverviewScene);
     if (visibleSceneIsOverview) {
       return;
