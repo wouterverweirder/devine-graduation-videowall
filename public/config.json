@@ -3,6 +3,7 @@
   "crop": 2,
   "muted": true,
   "data": {
+    "path": "assets/projects-devine.json",
     "projectsKey": "data.projects.data",
     "assetKeys": {
       "mainAsset": "data.projects.data.[].attributes.mainAsset.data.attributes",

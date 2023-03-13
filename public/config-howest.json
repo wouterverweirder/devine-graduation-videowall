@@ -2,6 +2,7 @@
   "interactionTimeout": 300000,
   "crop": 2,
   "data": {
+    "path": "assets/projects-howest.json",
     "projectsKey": "data.students.data",
     "assetKeys": {
       "mainAsset": "data.students.data.[].attributes.mainAsset.data.attributes",

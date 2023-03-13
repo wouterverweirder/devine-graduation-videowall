@@ -63,14 +63,6 @@ export const options = [
       default: 'config.json'
     }
   },
-  {
-    name: 'projects-json-path',
-    value: {
-      description: 'relative of the projects.json file from the public folder',
-      type: 'string',
-      default: 'assets/projects.json'
-    }
-  },
 ];
 
 export const getArgVFromQueryString = () => {
