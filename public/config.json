@@ -37,6 +37,15 @@
           }
         },
         {
+          "type": "image",
+          "screen": {
+            "id": "screen-2"
+          },
+          "dataSource": {
+            "key": "pancarte"
+          }
+        },
+        {
           "type": "slider",
           "item": {
             "type": "image",
@@ -60,9 +69,6 @@
             },
             {
               "id": "screen-1"
-            },
-            {
-              "id": "screen-2"
             },
             {
               "id": "screen-4"

@@ -8,45 +8,45 @@
         "height": null,
         "mime": "video/mp4"
       },
+      "pancarte": {
+        "url": "/uploads/kiosk/pancarte-devine.jpg",
+        "width": 1920,
+        "height": 1080,
+        "mime": "image/jpeg"
+      },
       "assets": [
         {
-          "url": "/uploads/kiosk/devine/001.jpg",
+          "url": "/uploads/kiosk/devine/deetjes.jpg",
           "width": 1920,
           "height": 1080,
           "mime": "image/jpeg"
         },
         {
-          "url": "/uploads/kiosk/devine/002.jpg",
+          "url": "/uploads/kiosk/devine/Devine 1_VR.jpg",
           "width": 1920,
           "height": 1080,
           "mime": "image/jpeg"
         },
         {
-          "url": "/uploads/kiosk/devine/template-001.jpg",
+          "url": "/uploads/kiosk/devine/Ipad paars.jpg",
           "width": 1920,
           "height": 1080,
           "mime": "image/jpeg"
         },
         {
-          "url": "/uploads/kiosk/devine/template-002.jpg",
+          "url": "/uploads/kiosk/devine/Projection mapping.jpg",
           "width": 1920,
           "height": 1080,
           "mime": "image/jpeg"
         },
         {
-          "url": "/uploads/kiosk/devine/template-003.jpg",
+          "url": "/uploads/kiosk/devine/Silke_Mixbox.jpg",
           "width": 1920,
           "height": 1080,
           "mime": "image/jpeg"
         },
         {
-          "url": "/uploads/kiosk/devine/template-004.jpg",
-          "width": 1920,
-          "height": 1080,
-          "mime": "image/jpeg"
-        },
-        {
-          "url": "/uploads/kiosk/devine/template-005.jpg",
+          "url": "/uploads/kiosk/devine/Websites.jpg",
           "width": 1920,
           "height": 1080,
           "mime": "image/jpeg"
@@ -60,6 +60,12 @@
         "width": null,
         "height": null,
         "mime": "video/mp4"
+      },
+      "pancarte": {
+        "url": "/uploads/kiosk/pancarte-be.jpg",
+        "width": 1920,
+        "height": 1080,
+        "mime": "image/jpeg"
       },
       "assets": [
         {
@@ -155,6 +161,12 @@
         "width": null,
         "height": null,
         "mime": "video/mp4"
+      },
+      "pancarte": {
+        "url": "/uploads/kiosk/pancarte-ipo.jpg",
+        "width": 1920,
+        "height": 1080,
+        "mime": "image/jpeg"
       },
       "assets": [
         {
