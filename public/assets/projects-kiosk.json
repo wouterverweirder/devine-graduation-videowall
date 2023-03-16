@@ -16,7 +16,7 @@
       },
       "assets": [
         {
-          "url": "/uploads/kiosk/devine/deetjes.jpg",
+          "url": "/uploads/kiosk/devine/Creuset_website.jpg",
           "width": 1920,
           "height": 1080,
           "mime": "image/jpeg"
@@ -46,7 +46,37 @@
           "mime": "image/jpeg"
         },
         {
-          "url": "/uploads/kiosk/devine/Websites.jpg",
+          "url": "/uploads/kiosk/devine/Varmland_Gitte.jpg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/devine/close up game.jpg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/devine/deetjes.jpg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/devine/devine logo.jpg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/devine/schermen_zwarte achtergrond.jpg",
+          "width": 1920,
+          "height": 1080,
+          "mime": "image/jpeg"
+        },
+        {
+          "url": "/uploads/kiosk/devine/sfeerbeeld buda.jpg",
           "width": 1920,
           "height": 1080,
           "mime": "image/jpeg"
