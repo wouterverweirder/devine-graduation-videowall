@@ -119,8 +119,8 @@ class PlaneSlider {
     const direction = this.getDirection({ oldPlane, newPlane });
     const slideDuration = this.getSlideDuration();
 
-    const distanceXOldPlane = (oldPlane) ? oldPlane.props.scale.x : 0;
-    const distanceYOldPlane = (oldPlane) ? oldPlane.props.scale.y : 0;
+    const distanceXOldPlane = (oldPlane) ? oldPlane.props.screenScale.x : 0;
+    const distanceYOldPlane = (oldPlane) ? oldPlane.props.screenScale.y : 0;
 
     const setPropsNewPlane = {
       position: {
@@ -150,18 +150,18 @@ class PlaneSlider {
     if (isVertical) {
       if (direction < 0) {
         targetPropsOldPlane.position.y += distanceYOldPlane;
-        setPropsNewPlane.position.y -= setPropsNewPlane.scale.y;
+        setPropsNewPlane.position.y -= oldPlane.props.screenScale.y;
       } else {
         targetPropsOldPlane.position.y -= distanceYOldPlane;
-        setPropsNewPlane.position.y += setPropsNewPlane.scale.y;
+        setPropsNewPlane.position.y += oldPlane.props.screenScale.y;
       }
     } else {
       if (direction < 0) {
         targetPropsOldPlane.position.x -= distanceXOldPlane;
-        setPropsNewPlane.position.x += setPropsNewPlane.scale.x;
+        setPropsNewPlane.position.x += oldPlane.props.screenScale.x;
       } else {
         targetPropsOldPlane.position.x += distanceXOldPlane;
-        setPropsNewPlane.position.x -= setPropsNewPlane.scale.x;
+        setPropsNewPlane.position.x -= oldPlane.props.screenScale.x;
       }
     }
 

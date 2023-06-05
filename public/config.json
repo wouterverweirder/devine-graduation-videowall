@@ -1,19 +1,14 @@
 {
   "interactionTimeout": 300000,
-  "autoNextProjectTimeout": 120000,
   "crop": 2,
   "muted": true,
   "data": {
-    "path": "assets/projects-kiosk.json",
-    "projectsKey": "curricula",
+    "path": "assets/projects-bump2023.json",
+    "projectsKey": "partners",
     "assetKeys": {
-      "mainAsset": "curricula.[].mainAsset",
-      "assets": "curricula.[].assets"
+      "assets": "partners.[].assets"
     },
     "project": {
-      "mainAsset": {
-        "key": "mainAsset"
-      },
       "assets": {
         "key": "assets"
       }
@@ -28,37 +23,15 @@
       "screenshotSlideInterval": 4000,
       "objects": [
         {
-          "type": "video",
-          "dataSource": {
-            "key": "mainAsset"
-          },
-          "screen": {
-            "id": "screen-3"
-          }
-        },
-        {
-          "type": "image",
-          "screen": {
-            "id": "screen-2"
-          },
-          "dataSource": {
-            "key": "pancarte"
-          }
-        },
-        {
           "type": "slider",
           "item": {
             "type": "image",
-            "width": 1920,
-            "height": 1080
+            "width": 360,
+            "height": 360
           },
           "dataSource": {
             "key": "assets",
-            "filters": [
-              {
-                "type": "landscape-images"
-              }
-            ]
+            "filters": []
           },
           "pickingMethod": "random",
           "slideInterval": 4000,
@@ -69,6 +42,9 @@
             },
             {
               "id": "screen-1"
+            },
+            {
+              "id": "screen-2"
             },
             {
               "id": "screen-4"
@@ -95,7 +71,7 @@
     {
       "id": "screen-0",
       "roles": [
-        "landscape-screenshots"
+        "profile-picture"
       ],
       "output": {
         "left": 0,
@@ -109,17 +85,17 @@
           "height": 0.392
         },
         "position": [
-          -1.0492254772774388,
-          0.7495841002068762,
-          1.0637852743634246
+          -1.66,
+          0.77,
+          1
         ],
-        "rotation": 0
+        "rotation": -1.5707963267948966
       }
     },
     {
       "id": "screen-1",
       "roles": [
-        "landscape-screenshots"
+        "portrait-screenshots"
       ],
       "output": {
         "left": 0.25,
@@ -133,17 +109,17 @@
           "height": 0.269
         },
         "position": [
-          -0.88854503131732,
-          0.48087545629305806,
-          1.1447330041887316
+          -1.1,
+          1.15,
+          1
         ],
-        "rotation": 0
+        "rotation": -1.5707963267948966
       }
     },
     {
       "id": "screen-2",
       "roles": [
-        "landscape-screenshots"
+        "videos"
       ],
       "output": {
         "left": 0,
@@ -157,9 +133,9 @@
           "height": 0.392
         },
         "position": [
-          -0.8590054134921233,
-          1.1874197047297745,
-          0.9513521308503154
+          -0.81,
+          0.16,
+          1
         ],
         "rotation": 0
       }
@@ -181,8 +157,8 @@
           "height": 0.678
         },
         "position": [
-          -0.1616339527044387,
-          0.7718479225900536,
+          -0.14,
+          1.14,
           1
         ],
         "rotation": 0
@@ -205,8 +181,8 @@
           "height": 0.269
         },
         "position": [
-          0.7307571962395609,
-          0.8531083897439918,
+          0.89,
+          1.04,
           1
         ],
         "rotation": 0
@@ -215,7 +191,7 @@
     {
       "id": "screen-5",
       "roles": [
-        "landscape-screenshots"
+        "portrait-screenshots"
       ],
       "output": {
         "left": 0.75,
@@ -229,17 +205,17 @@
           "height": 0.392
         },
         "position": [
-          0.46529491285283875,
-          1.2195498730121606,
-          0.8478479946329562
+          1.46,
+          1.07,
+          1
         ],
-        "rotation": 0
+        "rotation": -1.5707963267948966
       }
     },
     {
       "id": "screen-6",
       "roles": [
-        "landscape-screenshots"
+        "project-description"
       ],
       "output": {
         "left": 0.5,
@@ -253,17 +229,17 @@
           "height": 0.269
         },
         "position": [
-          0.053925566603731795,
-          0.4407524411318855,
-          1.0468111798841586
+          0.16,
+          0.14,
+          1
         ],
-        "rotation": 0
+        "rotation": -1.5707963267948966
       }
     },
     {
       "id": "screen-7",
       "roles": [
-        "landscape-screenshots"
+        "videos"
       ],
       "output": {
         "left": 0.75,
@@ -277,9 +253,9 @@
           "height": 0.392
         },
         "position": [
-          0.5988755535339687,
-          0.4870702756520774,
-          1.2
+          1.05,
+          0.17,
+          1
         ],
         "rotation": 0
       }

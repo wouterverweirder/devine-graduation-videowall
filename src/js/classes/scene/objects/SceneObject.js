@@ -82,6 +82,9 @@ class SceneObject {
       this.props.name = newProps.name;
       this.object3D.name = this.props.name;
     }
+    if (newProps.screenScale) {
+      this.props.screenScale = newProps.screenScale;
+    }
     this.signals.onPropsApplied.dispatch();
   }
 
