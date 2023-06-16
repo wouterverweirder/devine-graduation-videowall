@@ -6,7 +6,7 @@
     "path": "assets/projects-bump2023.json",
     "projectsKey": "partners",
     "assetKeys": {
-      "mainAsset": "partners[].mainAsset",
+      "mainAsset": "partners.[].mainAsset",
       "assets": "partners.[].assets"
     },
     "project": {
