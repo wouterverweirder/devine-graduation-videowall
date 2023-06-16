@@ -2,6 +2,12 @@
   "partners": [
     {
       "id": "all",
+      "mainAsset": {
+        "url": "/uploads/bump2023/loop-partner-screen.mp4",
+        "width": null,
+        "height": null,
+        "mime": "video/mp4"
+      },
       "assets": [
         {
           "url": "/uploads/bump2023/logo-digitalpulse.png",
