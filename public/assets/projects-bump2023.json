@@ -10,129 +10,123 @@
       },
       "assets": [
         {
-          "url": "/uploads/bump2023/logo-digitalpulse.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-black-glue.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-black-lab9.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-black-make-it-fly.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-black-the-craft.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-black-craftzing.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-black-design-regio-kortrijk.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-black-stad-kortrijk.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-devine.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
-          "url": "/uploads/bump2023/logo-howest.png",
-          "width": 360,
-          "height": 360,
-          "mime": "image/png"
-        },
-        {
           "url": "/uploads/bump2023/logo-amplo.png",
-          "width": 360,
-          "height": 360,
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-black-barco.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-barco.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-create-color.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-craftzing.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-create.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
           "url": "/uploads/bump2023/logo-creativeskills.png",
-          "width": 360,
-          "height": 360,
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-black-in-the-pocket.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-digitalpulse.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-black-kortrijk-design-regio.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-drk.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-black-leyard.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-glue.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-black-little-miss-robot.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-itp.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-black-typographics2.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-kortrijk.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-black-vivalyte.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-lab9.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         },
         {
-          "url": "/uploads/bump2023/logo-black-whojo.png",
-          "width": 360,
-          "height": 360,
+          "url": "/uploads/bump2023/logo-leyard.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-lmr.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-makeitfly.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-the-craft.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-the-nerd.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-typografics.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-unesco.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-vivalyte.png",
+          "width": 1080,
+          "height": 1080,
+          "mime": "image/png"
+        },
+        {
+          "url": "/uploads/bump2023/logo-whojo.png",
+          "width": 1080,
+          "height": 1080,
           "mime": "image/png"
         }
       ]

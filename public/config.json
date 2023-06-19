@@ -39,8 +39,8 @@
           "type": "slider",
           "item": {
             "type": "image",
-            "width": 360,
-            "height": 360
+            "width": 1080,
+            "height": 1080
           },
           "dataSource": {
             "key": "assets",
