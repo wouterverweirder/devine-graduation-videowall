@@ -1,4 +1,7 @@
 export const getValueByPath = (object, path) => {
+  if (path === '') {
+    return object;
+  }
   const pathParts = path.split('.');
   let value = object;
   for (let i = 0; i < pathParts.length; i++) {

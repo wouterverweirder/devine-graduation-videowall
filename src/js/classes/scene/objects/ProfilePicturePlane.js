@@ -43,7 +43,8 @@ export class ProfilePicturePlane extends CanvasPlane {
     });
 
     // image
-    const image = await loadImage(this.props.data.profilePicture.data?.attributes.url);
+    let imageUrl = this.props.data.profilePicture?.data?.attributes?.url || this.props.data.profilePicture?.data?.url || this.props.data.profilePicture?.url;
+    const image = await loadImage(imageUrl);
     // Define the target area dimensions
     const targetWidth = this.props.textureSize.x;
     const targetHeight = this.props.textureSize.y;

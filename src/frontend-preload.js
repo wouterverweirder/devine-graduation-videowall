@@ -5,6 +5,9 @@ const fs = require('fs');
 const readFilePromised = util.promisify(fs.readFile);
 
 const getValueByPath = (object, path) => {
+  if (path === '') {
+    return object;
+  }
   const pathParts = path.split('.');
   let value = object;
   for (let i = 0; i < pathParts.length; i++) {
@@ -40,7 +43,7 @@ contextBridge.exposeInMainWorld('VideoWallAPI', {
     const assetKeyNames = Object.keys(config.data.assetKeys);
     for (const assetKeyName of assetKeyNames) {
       const assets = getValueByPath(projects, config.data.assetKeys[assetKeyName]);
-      console.log(assetKeyName, assets);
+      console.log(assetKeyName, config.data.assetKeys[assetKeyName], assets);
       const flattenedAssets = assets.reduce((acc, val) => acc.concat(val), []);
       for (const asset of flattenedAssets) {
         await updateUrlToLocalFileIfNeeded(asset, uploadsPath);
