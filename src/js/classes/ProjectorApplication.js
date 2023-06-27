@@ -15,10 +15,10 @@ class ProjectorApplication extends Application {
 
   setupApplicationSpecificUI() {
 
-    if (!this.hasProjectsOverview()) {
+    if (this.hasProjectsOverview()) {
       this.ambientAudio = document.createElement('audio');
       this.ambientAudio.oncanplaythrough = () => {
-        if (!this.hasProjectsOverview() || this.activeScene.constructor.name !== 'ProjectsOverviewScene') {
+        if (this.activeScene.constructor.name !== 'ProjectsOverviewScene') {
           this.ambientAudio.pause()
         }
       };

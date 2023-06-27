@@ -1,7 +1,7 @@
 {
   "interactionTimeout": 300000,
   "crop": 2,
-  "muted": true,
+  "muted": false,
   "data": {
     "path": "assets/projects-devine2023.json",
     "projectsKey": "projects",
