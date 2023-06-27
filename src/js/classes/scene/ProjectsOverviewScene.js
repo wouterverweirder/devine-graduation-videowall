@@ -172,6 +172,7 @@ class ProjectsOverviewScene extends SceneBase {
       layers,
       position,
       scale,
+      screenScale,
       anchor
     };
   };

@@ -1,0 +1,388 @@
+{
+  "interactionTimeout": 300000,
+  "crop": 2,
+  "muted": true,
+  "data": {
+    "path": "assets/projects-devine2023.json",
+    "projectsKey": "projects",
+    "assetKeys": {
+      "mainAsset": "projects.[].mainAsset",
+      "assets": "projects.[].assets.[]",
+      "people": "projects.[].students.[].profilePicture"
+    },
+    "project": {
+      "people": {
+        "key": "students.[]"
+      },
+      "mainAsset": {
+        "key": "mainAsset"
+      }
+    }
+  },
+  "scenes": {
+    "projectDetail": {
+      "screenshotSlideInterval": 4000,
+      "objects": [
+        {
+          "type": "video",
+          "dataSource": {
+            "key": "mainAsset"
+          },
+          "screen": {
+            "id": "screen-3"
+          }
+        },
+        {
+          "type": "video",
+          "dataSource": {
+            "key": "assets.[]",
+            "filters": [
+              {
+                "type": "videos"
+              }
+            ]
+          },
+          "screen": {
+            "id": "screen-2"
+          }
+        },
+        {
+          "type": "video",
+          "dataSource": {
+            "key": "assets.[]",
+            "filters": [
+              {
+                "type": "videos"
+              }
+            ]
+          },
+          "screen": {
+            "id": "screen-7"
+          }
+        },
+        {
+          "type": "slider",
+          "item": {
+            "type": "image",
+            "width": 1920,
+            "height": 1080
+          },
+          "dataSource": {
+            "key": "assets",
+            "filters": [
+              {
+                "type": "landscape-images"
+              }
+            ]
+          },
+          "pickingMethod": "random",
+          "slideInterval": 4000,
+          "slideDelay": 0,
+          "screens": [
+            {
+              "id": "screen-4"
+            }
+          ]
+        },
+        {
+          "type": "slider",
+          "item": {
+            "type": "image",
+            "width": 1080,
+            "height": 1920
+          },
+          "dataSource": {
+            "key": "assets",
+            "filters": [
+              {
+                "type": "portrait-images"
+              }
+            ]
+          },
+          "pickingMethod": "random",
+          "slideInterval": 4000,
+          "slideDelay": 1,
+          "screens": [
+            {
+              "id": "screen-1"
+            },
+            {
+              "id": "screen-5"
+            }
+          ]
+        },
+        {
+          "type": "slider",
+          "item": {
+            "type": "profile-picture",
+            "width": 1080,
+            "height": 1920,
+            "namePlane": {
+              "height": 280,
+              "maxHeight": 280,
+              "marginTop": 120,
+              "name": {
+                "template": "${firstName} ${lastName}",
+                "font": "70px 'Embedded Space Grotesk'",
+                "fillStyle": "#000000",
+                "marginBottom": 70
+              },
+              "tagLine": {
+                "template": "Expert ${expert}",
+                "font": "50px 'Embedded Space Grotesk'",
+                "fillStyle": "#797979"
+              }
+            }
+          },
+          "dataSource": {
+            "key": "students.[]"
+          },
+          "pickingMethod": "first",
+          "slideInterval": 4000,
+          "slideDelay": 2,
+          "screens": [
+            {
+              "id": "screen-0"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "screen": {
+            "id": "screen-6"
+          },
+          "backgroundColor": "#000000",
+          "marginTop": 105,
+          "gradientTop": {
+            "height": 100,
+            "y": 150,
+            "stops": {
+              "0": "rgba(0,0,0,1)",
+              "1": "rgba(0,0,0,0)"
+            }
+          },
+          "gradientBottom": {
+            "height": 100,
+            "stops": {
+              "0": "rgba(0,0,0,0)",
+              "1": "rgba(0,0,0,1)"
+            }
+          },
+          "title": {
+            "template": "Project Description",
+            "font": "700 55px 'Embedded Space Grotesk'",
+            "fillStyle": "white",
+            "marginBottom": 200
+          },
+          "paragraphs": {
+            "template": "${description}",
+            "font": "55px 'Embedded Space Grotesk'",
+            "fillStyle": "white",
+            "lineHeight": 70
+          }
+        }
+      ]
+    },
+    "projectsOverview": {
+      "updateInterval": 4000
+    }
+  },
+  "appDimensions": {
+    "width": 7680,
+    "height": 2160
+  },
+  "screens": [
+    {
+      "id": "screen-0",
+      "roles": [
+        "profile-picture"
+      ],
+      "output": {
+        "left": 0,
+        "bottom": 0.5,
+        "width": 0.25,
+        "height": 0.5
+      },
+      "camera": {
+        "size": {
+          "width": 0.698,
+          "height": 0.392
+        },
+        "position": [
+          -1.66,
+          0.77,
+          1
+        ],
+        "rotation": -1.5707963267948966
+      }
+    },
+    {
+      "id": "screen-1",
+      "roles": [
+        "portrait-screenshots"
+      ],
+      "output": {
+        "left": 0.25,
+        "bottom": 0.5,
+        "width": 0.25,
+        "height": 0.5
+      },
+      "camera": {
+        "size": {
+          "width": 0.478,
+          "height": 0.269
+        },
+        "position": [
+          -1.1,
+          1.15,
+          1
+        ],
+        "rotation": -1.5707963267948966
+      }
+    },
+    {
+      "id": "screen-2",
+      "roles": [
+        "videos"
+      ],
+      "output": {
+        "left": 0,
+        "bottom": 0,
+        "width": 0.25,
+        "height": 0.5
+      },
+      "camera": {
+        "size": {
+          "width": 0.698,
+          "height": 0.392
+        },
+        "position": [
+          -0.81,
+          0.16,
+          1
+        ],
+        "rotation": 0
+      }
+    },
+    {
+      "id": "screen-3",
+      "roles": [
+        "main-video"
+      ],
+      "output": {
+        "left": 0.25,
+        "bottom": 0,
+        "width": 0.25,
+        "height": 0.5
+      },
+      "camera": {
+        "size": {
+          "width": 1.206,
+          "height": 0.678
+        },
+        "position": [
+          -0.14,
+          1.14,
+          1
+        ],
+        "rotation": 0
+      }
+    },
+    {
+      "id": "screen-4",
+      "roles": [
+        "landscape-screenshots"
+      ],
+      "output": {
+        "left": 0.5,
+        "bottom": 0.5,
+        "width": 0.25,
+        "height": 0.5
+      },
+      "camera": {
+        "size": {
+          "width": 0.478,
+          "height": 0.269
+        },
+        "position": [
+          0.89,
+          1.04,
+          1
+        ],
+        "rotation": 0
+      }
+    },
+    {
+      "id": "screen-5",
+      "roles": [
+        "portrait-screenshots"
+      ],
+      "output": {
+        "left": 0.75,
+        "bottom": 0.5,
+        "width": 0.25,
+        "height": 0.5
+      },
+      "camera": {
+        "size": {
+          "width": 0.698,
+          "height": 0.392
+        },
+        "position": [
+          1.46,
+          1.07,
+          1
+        ],
+        "rotation": -1.5707963267948966
+      }
+    },
+    {
+      "id": "screen-6",
+      "roles": [
+        "project-description"
+      ],
+      "output": {
+        "left": 0.5,
+        "bottom": 0,
+        "width": 0.25,
+        "height": 0.5
+      },
+      "camera": {
+        "size": {
+          "width": 0.478,
+          "height": 0.269
+        },
+        "position": [
+          0.16,
+          0.14,
+          1
+        ],
+        "rotation": -1.5707963267948966
+      }
+    },
+    {
+      "id": "screen-7",
+      "roles": [
+        "videos"
+      ],
+      "output": {
+        "left": 0.75,
+        "bottom": 0,
+        "width": 0.25,
+        "height": 0.5
+      },
+      "camera": {
+        "size": {
+          "width": 0.698,
+          "height": 0.392
+        },
+        "position": [
+          1.05,
+          0.17,
+          1
+        ],
+        "rotation": 0
+      }
+    }
+  ]
+}
