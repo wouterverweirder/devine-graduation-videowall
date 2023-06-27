@@ -88,7 +88,7 @@ class ProjectDetailScene extends SceneBase {
                 // yes, it does
                 if (object.nonVisiblePlanes.length > 0) {
                   projectPlane = object.nonVisiblePlanes.shift();
-                  projectPlane.applyProps(this.generatePropsForScreen(screenCamera));
+                  projectPlane.applyProps(this.generatePropsForScreenPlane(screenCamera, projectPlane));
                   projectPlane.customData.camera = screenCamera;
                   object.visiblePlanes.push(projectPlane);
                 }
@@ -395,7 +395,7 @@ class ProjectDetailScene extends SceneBase {
             nonVisiblePlanes: planes,
             visiblePlanes: [],
             setupNewPlane: ({ newPlane }) => {
-              const setPropsNewPlane = this.generatePropsForScreen(newPlane.customData.camera);
+              const setPropsNewPlane = this.generatePropsForScreenPlane(newPlane.customData.camera, newPlane);
               newPlane.applyProps(setPropsNewPlane);
               return newPlane;
             },
@@ -414,9 +414,20 @@ class ProjectDetailScene extends SceneBase {
     }
   }
 
-  generatePropsForScreen(camera) {
+  generatePropsForScreenPlane(camera, projectPlane) {
     const screenConfig = this.screenConfigsById[camera.id];
     const screenScale = calculateScaleForScreenConfig(screenConfig);
+
+    const large = 1920;
+    const small = 1080;
+    const screenWidth = (screenScale.x > screenScale.y) ? large : small;
+    const screenHeight = (screenScale.x > screenScale.y) ? small : large;
+
+    const textureScale = {
+      x: projectPlane.props.textureSize.x / screenWidth * screenScale.x,
+      y: projectPlane.props.textureSize.y / screenHeight * screenScale.y,
+    };
+
     const layers = (camera.props.layers) ? camera.props.layers.concat() : false;
     const position = {
       x: screenConfig.camera.position[0],
@@ -424,13 +435,14 @@ class ProjectDetailScene extends SceneBase {
       z: 0
     };
     const scale = {
-      x: screenScale.x,
-      y: screenScale.y
+      x: textureScale.x,
+      y: textureScale.y
     };
     return {
       layers,
       position,
-      scale
+      scale,
+      screenScale
     };
   };
 }
