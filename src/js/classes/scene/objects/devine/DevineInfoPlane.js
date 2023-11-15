@@ -23,7 +23,7 @@ class DevineInfoPlane extends CanvasPlane {
 
     this.bachelor = {
       type: 'text',
-      font: `${fontSize}px "Embedded VAGRounded"`,
+      font: `${fontSize}px "Embedded Space Grotesk"`,
       fillStyle: 'white',
       content: 'Bachelor',
       x: marginLeft,
@@ -34,7 +34,7 @@ class DevineInfoPlane extends CanvasPlane {
 
     this.digitalDesignAnd = {
       type: 'text',
-      font: `${fontSize}px "Embedded VAGRounded"`,
+      font: `${fontSize}px "Embedded Space Grotesk"`,
       fillStyle: 'white',
       content: 'Digital Design &',
       x: marginLeft,
@@ -45,7 +45,7 @@ class DevineInfoPlane extends CanvasPlane {
 
     this.development = {
       type: 'text',
-      font: `${fontSize}px "Embedded VAGRounded"`,
+      font: `${fontSize}px "Embedded Space Grotesk"`,
       fillStyle: 'white',
       content: 'Development',
       x: marginLeft,
@@ -56,7 +56,7 @@ class DevineInfoPlane extends CanvasPlane {
 
     this.www = {
       type: 'text',
-      font: `70px "Embedded VAGRounded"`,
+      font: `70px "Embedded Space Grotesk"`,
       fillStyle: 'white',
       content: 'www.devine.be',
       x: marginLeft,
