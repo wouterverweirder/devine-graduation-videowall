@@ -9,8 +9,7 @@
     "debug-local": "electron . --websocket=127.0.0.1 --devtools=true --editor=true",
     "server": "electron . --only-server",
     "build": "vite build",
-    "dev:web": "vite",
-    "dev:server": "nodemon main.js --only-server"
+    "dev:web": "vite"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -31,7 +30,6 @@
     "cors": "^2.8.5",
     "esm": "^3.2.25",
     "express": "^4.17.1",
-    "glob": "^7.1.6",
     "serialport": "^10.4.0",
     "websocket": "^1.0.33",
     "yargs": "^17.0.1"
