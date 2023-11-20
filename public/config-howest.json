@@ -7,7 +7,8 @@
     "projectsKey": "data.students.data",
     "assetKeys": {
       "mainAsset": "data.students.data.[].attributes.mainAsset.data.attributes",
-      "people": "data.students.data.[].attributes.profilePicture.data.attributes"
+      "people": "data.students.data.[].attributes.profilePicture.data.attributes",
+      "curriculum": "data.students.data.[].attributes.curriculum.data.attributes.image.data.attributes"
     },
     "project": {
       "people": {
