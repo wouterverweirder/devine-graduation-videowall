@@ -1,5 +1,6 @@
 {
   "interactionTimeout": 300000,
+  "autoNextProjectTimeout": 30000,
   "crop": 2,
   "data": {
     "path": "assets/projects-howest.json",

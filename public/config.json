@@ -1,21 +1,20 @@
 {
   "interactionTimeout": 300000,
+  "autoNextProjectTimeout": 30000,
   "crop": 2,
-  "muted": false,
   "data": {
-    "path": "assets/projects-devine2023.json",
-    "projectsKey": "projects",
+    "path": "assets/projects-howest.json",
+    "projectsKey": "data.students.data",
     "assetKeys": {
-      "mainAsset": "projects.[].mainAsset",
-      "assets": "projects.[].assets.[]",
-      "people": "projects.[].students.[].profilePicture"
+      "mainAsset": "data.students.data.[].attributes.mainAsset.data.attributes",
+      "people": "data.students.data.[].attributes.profilePicture.data.attributes"
     },
     "project": {
       "people": {
-        "key": "students.[]"
+        "key": "attributes"
       },
       "mainAsset": {
-        "key": "mainAsset"
+        "key": "attributes.mainAsset.data.attributes"
       }
     }
   },
@@ -26,90 +25,11 @@
         {
           "type": "video",
           "dataSource": {
-            "key": "mainAsset"
+            "key": "attributes.mainAsset.data.attributes"
           },
           "screen": {
             "id": "screen-3"
           }
-        },
-        {
-          "type": "video",
-          "dataSource": {
-            "key": "assets.[]",
-            "filters": [
-              {
-                "type": "videos"
-              }
-            ]
-          },
-          "screen": {
-            "id": "screen-2"
-          }
-        },
-        {
-          "type": "video",
-          "dataSource": {
-            "key": "assets.[]",
-            "filters": [
-              {
-                "type": "videos"
-              }
-            ]
-          },
-          "screen": {
-            "id": "screen-7"
-          }
-        },
-        {
-          "type": "slider",
-          "item": {
-            "type": "image",
-            "width": 1920,
-            "height": 1080
-          },
-          "dataSource": {
-            "key": "assets",
-            "filters": [
-              {
-                "type": "landscape-images"
-              }
-            ]
-          },
-          "pickingMethod": "random",
-          "slideInterval": 4000,
-          "slideDelay": 0,
-          "screens": [
-            {
-              "id": "screen-4"
-            }
-          ]
-        },
-        {
-          "type": "slider",
-          "item": {
-            "type": "image",
-            "width": 1080,
-            "height": 1920
-          },
-          "dataSource": {
-            "key": "assets",
-            "filters": [
-              {
-                "type": "portrait-images"
-              }
-            ]
-          },
-          "pickingMethod": "random",
-          "slideInterval": 4000,
-          "slideDelay": 1,
-          "screens": [
-            {
-              "id": "screen-1"
-            },
-            {
-              "id": "screen-5"
-            }
-          ]
         },
         {
           "type": "slider",
@@ -119,23 +39,23 @@
             "height": 1920,
             "namePlane": {
               "height": 280,
-              "maxHeight": 280,
+              "maxHeight": 360,
               "marginTop": 120,
               "name": {
                 "template": "${firstName} ${lastName}",
-                "font": "70px 'Embedded Space Grotesk'",
-                "fillStyle": "#000000",
+                "font": "700 80px 'Embedded VAGRounded'",
+                "fillStyle": "rgb(68,200,245)",
                 "marginBottom": 70
               },
               "tagLine": {
-                "template": "Expert ${expert}",
-                "font": "50px 'Embedded Space Grotesk'",
-                "fillStyle": "#797979"
+                "template": "Alumnus ${curriculum.data.attributes.name}",
+                "font": "400 48px 'Embedded VAGRounded'",
+                "fillStyle": "#000000"
               }
             }
           },
           "dataSource": {
-            "key": "students.[]"
+            "key": "attributes"
           },
           "pickingMethod": "first",
           "slideInterval": 4000,
@@ -149,41 +69,63 @@
         {
           "type": "text",
           "screen": {
-            "id": "screen-6"
+            "id": "screen-1"
           },
-          "backgroundColor": "#000000",
-          "marginTop": 105,
+          "backgroundColor": "#ffffff",
+          "marginTop": 98,
           "gradientTop": {
-            "height": 100,
-            "y": 150,
+            "height": 50,
+            "y": 100,
             "stops": {
-              "0": "rgba(0,0,0,1)",
-              "1": "rgba(0,0,0,0)"
+              "0": "rgba(255,255,255,1)",
+              "1": "rgba(255,255,255,0)"
             }
           },
           "gradientBottom": {
-            "height": 100,
+            "height": 50,
             "stops": {
-              "0": "rgba(0,0,0,0)",
-              "1": "rgba(0,0,0,1)"
+              "0": "rgba(255,255,255,0)",
+              "1": "rgba(255,255,255,1)"
             }
           },
           "title": {
-            "template": "Project Description",
-            "font": "700 55px 'Embedded Space Grotesk'",
-            "fillStyle": "white",
-            "marginBottom": 200
+            "template": "BIO",
+            "font": "700 53px 'Embedded VAGRounded'",
+            "fillStyle": "rgb(68, 200, 245)",
+            "marginBottom": 100
           },
           "paragraphs": {
-            "template": "${description}",
-            "font": "55px 'Embedded Space Grotesk'",
-            "fillStyle": "white",
+            "template": "${attributes.bio}",
+            "font": "400 53px 'Embedded OpenSans'",
+            "fillStyle": "#000000",
             "lineHeight": 70
+          }
+        },
+        {
+          "type": "contact",
+          "screen": {
+            "id": "screen-5"
+          }
+        },
+        {
+          "type": "quote",
+          "screen": {
+            "id": "screen-4"
+          }
+        },
+        {
+          "type": "image",
+          "screen": {
+            "id": "screen-2"
+          },
+          "dataSource": {
+            "key": "attributes.curriculum.data.attributes.image.data"
           }
         }
       ]
     },
     "projectsOverview": {
+      "disabled": true,
       "updateInterval": 4000
     }
   },
@@ -205,12 +147,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.698,
-          "height": 0.392
+          "width": 1.217,
+          "height": 0.686
         },
         "position": [
-          -1.66,
-          0.77,
+          -0.5499595734924212,
+          1.1115584387522723,
           1
         ],
         "rotation": -1.5707963267948966
@@ -219,7 +161,7 @@
     {
       "id": "screen-1",
       "roles": [
-        "portrait-screenshots"
+        "project-bio"
       ],
       "output": {
         "left": 0.25,
@@ -229,12 +171,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 1.217,
+          "height": 0.686
         },
         "position": [
-          -1.1,
-          1.15,
+          -2.1520076113271154,
+          -0.08021683467658347,
           1
         ],
         "rotation": -1.5707963267948966
@@ -243,7 +185,7 @@
     {
       "id": "screen-2",
       "roles": [
-        "videos"
+        "curriculum-picture"
       ],
       "output": {
         "left": 0,
@@ -253,12 +195,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.698,
-          "height": 0.392
+          "width": 0.508,
+          "height": 0.3059023508137432
         },
         "position": [
-          -0.81,
-          0.16,
+          -1.3219593529324618,
+          1.6371481828410144,
           1
         ],
         "rotation": 0
@@ -277,12 +219,12 @@
       },
       "camera": {
         "size": {
-          "width": 1.206,
-          "height": 0.678
+          "width": 1.217,
+          "height": 0.685066225165563
         },
         "position": [
-          -0.14,
-          1.14,
+          -1.6790524500690247,
+          1.050958977099024,
           1
         ],
         "rotation": 0
@@ -291,7 +233,7 @@
     {
       "id": "screen-4",
       "roles": [
-        "landscape-screenshots"
+        "project-quote"
       ],
       "output": {
         "left": 0.5,
@@ -301,12 +243,12 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 0.99,
+          "height": 0.5580443714050946
         },
         "position": [
-          0.89,
-          1.04,
+          -0.9686911273152247,
+          -0.017294011249959607,
           1
         ],
         "rotation": 0
@@ -315,31 +257,7 @@
     {
       "id": "screen-5",
       "roles": [
-        "portrait-screenshots"
-      ],
-      "output": {
-        "left": 0.75,
-        "bottom": 0.5,
-        "width": 0.25,
-        "height": 0.5
-      },
-      "camera": {
-        "size": {
-          "width": 0.698,
-          "height": 0.392
-        },
-        "position": [
-          1.46,
-          1.07,
-          1
-        ],
-        "rotation": -1.5707963267948966
-      }
-    },
-    {
-      "id": "screen-6",
-      "roles": [
-        "project-description"
+        "project-contact"
       ],
       "output": {
         "left": 0.5,
@@ -349,39 +267,15 @@
       },
       "camera": {
         "size": {
-          "width": 0.478,
-          "height": 0.269
+          "width": 1.217,
+          "height": 0.686
         },
         "position": [
-          0.16,
-          0.14,
+          0.35005035388405303,
+          0.6052216351391068,
           1
         ],
         "rotation": -1.5707963267948966
-      }
-    },
-    {
-      "id": "screen-7",
-      "roles": [
-        "videos"
-      ],
-      "output": {
-        "left": 0.75,
-        "bottom": 0,
-        "width": 0.25,
-        "height": 0.5
-      },
-      "camera": {
-        "size": {
-          "width": 0.698,
-          "height": 0.392
-        },
-        "position": [
-          1.05,
-          0.17,
-          1
-        ],
-        "rotation": 0
       }
     }
   ]
