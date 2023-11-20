@@ -4,7 +4,7 @@ import path from 'path';
 import yargs from 'yargs';
 
 import { init as initServer, goToNextProject, sendKeyPressed } from './server.js';
-import { options } from '../src/options'
+import { options } from '../options'
 
 let argv = yargs;
 options.forEach(option => {
@@ -64,7 +64,7 @@ if (!isServerOnly) {
             nodeIntegration: false, // is default value after Electron v5
             contextIsolation: true, // protect against prototype pollution
             enableRemoteModule: false, // turn off remote
-            preload: path.join(__dirname, '..', 'src', 'frontend-preload.js'),
+            preload: path.join(__dirname, '..', 'frontend-preload.js'),
           }
         }
         if (!isSingleProjection) {

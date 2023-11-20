@@ -1,2 +1,2 @@
 require = require("esm")(module)
-module.exports = require("./lib/main-module.js");
+module.exports = require("./src/main/main-module.js");
