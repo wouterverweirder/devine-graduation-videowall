@@ -28,7 +28,7 @@ export const options = [
     value: {
       description: 'Choose a projection mode',
       choices: ['multi', 'single'],
-      default: 'single'
+      default: 'multi'
     },
   },
   {
@@ -36,7 +36,7 @@ export const options = [
     value: {
       description: 'hostname of websocket server',
       type: 'string',
-      default: null
+      default: '127.0.0.1'
     },
   },
   {

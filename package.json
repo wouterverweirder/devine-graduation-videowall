@@ -1,37 +1,39 @@
 {
-  "name": "electron-quick-start",
+  "name": "videowall",
+  "productName": "videowall",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
-  "main": "main.js",
+  "description": "My Electron application description",
+  "main": "src/index.js",
   "scripts": {
-    "start": "electron . --projection=multi --websocket=127.0.0.1",
-    "debug": "electron . --projection=multi --websocket=127.0.0.1 --devtools=true --editor=true",
-    "debug-local": "electron . --websocket=127.0.0.1 --devtools=true --editor=true",
-    "server": "electron . --only-server",
-    "build": "vite build",
-    "dev:web": "vite"
+    "start": "electron-forge start -- ../content/devine2023",
+    "debug-local": "electron-forge start -- ../content/devine2023 --projection=single --devtools=true --editor=true",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "server": "electron . ../content/devine2023 --only-server"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
-  "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
-  ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
-  "devDependencies": {
-    "electron": "^13.0.1",
-    "vite": "^3.0.7"
+  "keywords": [],
+  "author": {
+    "name": "Wouter Verweirder",
+    "email": "wouter.verweirder@gmail.com"
   },
+  "license": "MIT",
   "dependencies": {
+    "@electron-forge/maker-dmg": "^7.1.0",
     "body-parser": "^1.20.0",
     "cors": "^2.8.5",
+    "electron-log": "^4.4.8",
+    "electron-squirrel-startup": "^1.0.0",
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "serialport": "^10.4.0",
     "websocket": "^1.0.33",
     "yargs": "^17.0.1"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.1.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.1.0",
+    "dotenv": "^16.3.1",
+    "electron": "27.1.0"
   }
 }

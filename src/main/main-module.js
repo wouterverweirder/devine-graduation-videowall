@@ -3,29 +3,51 @@
 import path from 'path';
 import yargs from 'yargs';
 
-import { init as initServer, goToNextProject, sendKeyPressed } from './server.js';
-import { options } from '../options'
+import { options } from '../options';
+import { goToNextProject, init as initServer, sendKeyPressed } from './server.js';
+
+const log = require('electron-log');
+Object.assign(console, log.functions);
 
 let argv = yargs;
 options.forEach(option => {
   argv = argv.option(option.name, option.value);
 });
 argv = argv.argv;
-
-console.log('devtools: ' + argv.devtools);
-console.log('editor: ' + argv.editor);
-console.log('only-server: ' + argv.onlyServer);
-console.log('projection: ' + argv.projection);
-
-// convert the argv object to a querystring
-const querystring = Object.keys(argv).map(key => {
-  return key + '=' + argv[key];
-}).join('&');
-
-const isSingleProjection = (argv.projection === 'single');
 const isServerOnly = argv.onlyServer;
 
-initServer(argv);
+const startServer = (app = undefined) => {
+  let appPath = (app) ? app.getPath('exe') : process.cwd();
+  const isMacOS = process.platform === 'darwin';
+  const isMacOSAppBundle = isMacOS && app && app.isPackaged;
+  if (isMacOSAppBundle) {
+    // go up 4 levels to get to the folder containing the app bundle
+    appPath = path.resolve(appPath, '../../../../');
+  } else if (isMacOS) {
+    appPath = process.cwd();
+  }
+  console.log('appPath: ' + appPath)
+
+  const hasProjectDirectoryAsArgument = argv._.length > 0;
+  if (hasProjectDirectoryAsArgument) {
+    let projectDirectory = argv._[0];
+    const isAbsolute = path.isAbsolute(projectDirectory);
+    if (!isAbsolute) {
+      projectDirectory = path.resolve(appPath, projectDirectory);
+    }
+    argv.projectDirectory = projectDirectory;
+  } else {
+    argv.projectDirectory = appPath;
+  }
+
+  console.log('devtools: ' + argv.devtools);
+  console.log('editor: ' + argv.editor);
+  console.log('only-server: ' + argv.onlyServer);
+  console.log('projection: ' + argv.projection);
+  console.log('projectDirectory: ' + argv.projectDirectory);
+
+  initServer(argv);
+};
 
 if (!isServerOnly) {
   import('electron').then(({ app, BrowserWindow, screen, globalShortcut }) => {
@@ -33,6 +55,20 @@ if (!isServerOnly) {
       console.log('app is undefined');
       return;
     }
+    // Handle creating/removing shortcuts on Windows when installing/uninstalling.
+    if (require('electron-squirrel-startup')) {
+      app.quit();
+    }
+
+    // start the server
+    startServer(app);
+
+    // convert the argv object to a querystring
+    const querystring = Object.keys(argv).map(key => {
+      return key + '=' + argv[key];
+    }).join('&');
+
+    const isSingleProjection = (argv.projection === 'single');
     const createMainWindow = true;
     const createControlPanel = argv.editor;
 
@@ -64,7 +100,7 @@ if (!isServerOnly) {
             nodeIntegration: false, // is default value after Electron v5
             contextIsolation: true, // protect against prototype pollution
             enableRemoteModule: false, // turn off remote
-            preload: path.join(__dirname, '..', 'frontend-preload.js'),
+            preload: `http://127.0.0.1/frontend-preload.js`,
           }
         }
         if (!isSingleProjection) {
@@ -141,4 +177,6 @@ if (!isServerOnly) {
     // In this file you can include the rest of your app's specific main process
     // code. You can also put them in separate files and require them here.
   }).catch(err => console.log(err));
+} else {
+  startServer();
 }

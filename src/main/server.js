@@ -21,7 +21,7 @@ const isWindows = process.platform === "win32";
 
 let htmlFolderPath;
 let srcFolderPath;
-let publicPath;
+let projectDirectory;
 let configJSONPath;
 
 let expressApp, server, port, wsServer;
@@ -34,10 +34,10 @@ let arduinoPort;
 
 const init = async (argvValue) => {
   argv = argvValue;
-  htmlFolderPath = path.resolve(__dirname, '..', '..');
+  htmlFolderPath = path.resolve(__dirname, '..');
   srcFolderPath = path.resolve(__dirname, '..', '..', 'src');
-  publicPath = path.resolve(__dirname, '..', '..', 'public');
-  configJSONPath = path.resolve(publicPath, argv['config-json-path']);
+  projectDirectory = argvValue.projectDirectory ? argvValue.projectDirectory : path.resolve(__dirname, '..', '..');
+  configJSONPath = path.resolve(projectDirectory, argv['config-json-path']);
   expressApp = express();
   expressApp.use(cors());
   // parse application/x-www-form-urlencoded
@@ -98,7 +98,7 @@ const init = async (argvValue) => {
 
   // only used in editor
   expressApp.get('/api/images', async (req, res) => {
-    const localPath = path.resolve(publicPath);
+    const localPath = path.resolve(projectDirectory);
     const localPathLength = localPath.length;
     const serverURL = req.protocol + '://' + req.get('host') + '/';
     // find all jpg, png or gif files in folder and subfolders, without an external package
@@ -130,7 +130,7 @@ const init = async (argvValue) => {
           // cache the projects locally
           readFilePromised(configJSONPath, 'utf8').then((configJSON) => {
             const config = JSON.parse(configJSON);
-            const localPath = path.resolve(publicPath, config.data.path);
+            const localPath = path.resolve(projectDirectory, config.data.path);
             fs.writeFile(localPath, data, (err) => {
               if (err) {
                 console.log(err);
@@ -160,8 +160,9 @@ const init = async (argvValue) => {
   expressApp.get('/controlpanel.html', (req, res) => {
     res.sendFile(path.resolve(htmlFolderPath, 'controlpanel.html'));
   });
-  expressApp.use(express.static(path.resolve(publicPath)));
+  expressApp.use(express.static(path.resolve(projectDirectory)));
   expressApp.use('/src', express.static(srcFolderPath));
+  expressApp.use(express.static(path.resolve(srcFolderPath)));
   server.listen(port, () => {
    console.log(`App listening on port ${port}!`);
   });
@@ -243,7 +244,7 @@ const handleParsedMessage = parsedMessage => {
 
 const getProjects = async (serverURL = 'http://localhost/') => {
   const config = JSON.parse(await readFilePromised(configJSONPath, 'utf8'));
-  const localPath = path.resolve(publicPath, config.data.path);
+  const localPath = path.resolve(projectDirectory, config.data.path);
   const result = JSON.parse(await readFilePromised(localPath, 'utf8'));
   return result;
 };

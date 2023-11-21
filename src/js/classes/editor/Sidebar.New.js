@@ -9,7 +9,12 @@ function SidebarNew( editor ) {
   const signals = editor.signals;
   const serverConnection = editor.serverConnection;
 
-  const serverAddress = editor.config.getKey('serverAddress');
+  let serverAddress = editor.config.getKey('serverAddress');
+  if (!serverAddress) {
+    console.error('serverAddress not set in config');
+    serverAddress = window.location.host;
+    editor.config.setKey('serverAddress', serverAddress);
+  }
 
   const container = new UIPanel();
 

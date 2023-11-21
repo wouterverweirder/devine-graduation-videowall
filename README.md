@@ -1,5 +1,8 @@
 # Devine Graduation Videowall
 
+Repo for videowall player, using multiple video splitters.
+Content is in a separate directory, and is not a part of this repo.
+
 ## Computer Setup
 
 ### macOS
@@ -7,7 +10,18 @@
 - System Preferences > Mission Control > Uncheck "Displays have separate spaces"
 - System Preferences > Dock & Menu Bar > Automatically hide and show the menu bar on desktop
 
-## SQLite to Postgres
+### recompress videos
+
+Not all source videos have the correct codec, it's best to recompress them with ffmpeg.
+
+```
+#/bin/bash
+find . -name *.mp4 -exec ffmpeg -i {} -c:v libx264 -preset slow -crf 15 -c:a copy {}-recompressed.mp4 \;
+```
+
+## Useful info when working with Strapi 
+
+### Migrations from SQLite to Postgres
 
 Conversion happens using the sequel Ruby GEM. Make sure to have an up-to-date Ruby installation first: (based upon https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/#start-here-if-you-choose-the-long-and-manual-route)
 
@@ -88,19 +102,12 @@ UPDATE up_roles SET created_at = created_at + MAKE_INTERVAL(YEARS := 2020 - EXTR
 UPDATE up_roles SET updated_at = updated_at + MAKE_INTERVAL(YEARS := 2020 - EXTRACT(YEAR FROM updated_at)::INTEGER)
 ```
 
-## recompress videos
-
-```
-#/bin/bash
-find . -name *.mp4 -exec ffmpeg -i {} -c:v libx264 -preset slow -crf 15 -c:a copy {}-recompressed.mp4 \;
-```
-
-## GraphQL query for data
+### GraphQL query for data
 
 Get the data out of strapi using graphql: http://localhost:1337/graphql
 See Application.js for the query.
 
-## assets sync
+### assets sync
 
 Sync the assets from local strapi to this project:
 
