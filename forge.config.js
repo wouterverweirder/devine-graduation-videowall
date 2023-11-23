@@ -6,6 +6,7 @@ dotenv.config();
 module.exports = {
   packagerConfig: {
     asar: true,
+    icon: './src/assets/icon/icon',
     osxSign: {
       identity: process.env.OSXSIGN_IDENTITY
     } // object must exist even if empty
