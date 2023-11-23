@@ -4,7 +4,7 @@ import { createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { delay } from '../../functions/delay.js';
 import { getFilteredDataSource } from '../../functions/getFilteredDataSource.js';
 import { getValueByPath } from '../../functions/getValueByPath.js';
-import { calculateScaleForScreenConfig } from "../../functions/screenUtils.js";
+import { calculateScaleForScreenConfig, getOrientationForRotation, ORIENTATION_LANDSCAPE } from "../../functions/screenUtils.js";
 import { gsap, Power4 } from '../../gsap/src/index.js';
 import { ImagePlane } from './objects/ImagePlane.js';
 import { ProfilePicturePlane } from './objects/ProfilePicturePlane.js';
@@ -401,7 +401,8 @@ class ProjectDetailScene extends SceneBase {
             },
             getAxis: ({ newPlane }) => {
               const camera = newPlane.customData.camera;
-              const isLandscape = !(camera.props.rotation.z !== 0);
+              const orientation = getOrientationForRotation(camera.props.rotation.z);
+              const isLandscape = orientation.orientation === ORIENTATION_LANDSCAPE;
               return (isLandscape) ? 'vertical' : 'horizontal';
             },
             getDelayForNextAnimation: () => objectConfig.slideInterval,

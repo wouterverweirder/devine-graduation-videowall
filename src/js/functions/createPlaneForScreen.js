@@ -1,4 +1,4 @@
-import { calculateScaleForScreenConfig } from './screenUtils.js';
+import { ORIENTATION_LANDSCAPE, calculateScaleForScreenConfig, getOrientationForRotation } from './screenUtils.js';
 
 import { VisualBase } from '../classes/scene/objects/VisualBase.js';
 import { ImagePlane } from '../classes/scene/objects/ImagePlane.js';
@@ -23,7 +23,9 @@ export const calculateTextureSizeForScreen = (screenConfig) => {
     x,
     y
   };
-  if (rotation !== 0) {
+  const orientation = getOrientationForRotation(rotation);
+  const isLandscape = orientation.orientation === ORIENTATION_LANDSCAPE;
+  if (!isLandscape) {
     textureSize.x = y;
     textureSize.y = x;
   }

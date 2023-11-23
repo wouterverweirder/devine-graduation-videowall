@@ -1,4 +1,4 @@
-import { getScreenCamerasForRoles, calculateScaleForScreenConfig, getFirstScreenCameraForRole } from "../../functions/screenUtils.js";
+import { getScreenCamerasForRoles, calculateScaleForScreenConfig, getFirstScreenCameraForRole, getOrientationForRotation, ORIENTATION_LANDSCAPE } from "../../functions/screenUtils.js";
 import { createPlaneForScreen } from "../../functions/createPlaneForScreen.js";
 import { ScreenRole } from "../../consts/ScreenRole.js";
 import { SceneBase, SceneState } from "./SceneBase.js";
@@ -32,7 +32,8 @@ class ProjectsOverviewScene extends SceneBase {
         },
         getAxis: ({ newPlane }) => {
           const camera = newPlane.customData.camera;
-          const isLandscape = !(camera.props.rotation.z !== 0);
+          const orientation = getOrientationForRotation(camera.props.rotation.z);
+          const isLandscape = orientation.orientation === ORIENTATION_LANDSCAPE;
           return (isLandscape) ? 'vertical' : 'horizontal';
         },
         getDirection: ({ oldPlane, newPlane }) => (Math.random() < .5) ? 1 : -1,

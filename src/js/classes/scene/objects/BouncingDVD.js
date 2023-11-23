@@ -1,4 +1,5 @@
 import { loadImage } from "../../../functions/loadImage.js";
+import { ORIENTATION_LANDSCAPE, getOrientationForRotation } from "../../../functions/screenUtils.js";
 import { CanvasPlane } from "./CanvasPlane.js";
 
 class BouncingDVD extends CanvasPlane {
@@ -27,7 +28,9 @@ class BouncingDVD extends CanvasPlane {
     const scale = this.props.scale;
     let changeColor = false;
     // is screen vertical?
-    const isScreenVertical = screenConfig.camera.rotation !== 0;
+    const orientation = getOrientationForRotation(screenConfig.camera.rotation);
+    const isLandscape = orientation.orientation === ORIENTATION_LANDSCAPE;
+    const isScreenVertical = !isLandscape;
     const minX = screenConfig.camera.position[0] - (screenConfig.camera.size[isScreenVertical ? 'height' : 'width'] / 2);
     const maxX = screenConfig.camera.position[0] + screenConfig.camera.size[isScreenVertical ? 'height' : 'width'] / 2;
     const minY = screenConfig.camera.position[1] - screenConfig.camera.size[isScreenVertical ? 'width' : 'height'] / 2;

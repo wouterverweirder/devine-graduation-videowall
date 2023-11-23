@@ -1,7 +1,7 @@
 import * as THREE from '../three.js/build/three.module.js';
 
 import { Application } from './Application.js';
-import { calculateScaleForScreenConfig, getBoundsForSize } from '../functions/screenUtils.js';
+import { ORIENTATION_LANDSCAPE, ORIENTATION_PORTRAIT, ORIENTATION_STATE_FLIPPED, calculateScaleForScreenConfig, getBoundsForSize, getOrientationForRotation } from '../functions/screenUtils.js';
 import { getValueByPath } from '../functions/getValueByPath.js';
 
 const BLACK = new THREE.Color(0, 0, 0);
@@ -95,7 +95,9 @@ class ProjectorApplication extends Application {
         if (screenConfig.camera.rotation) {
           rotation = screenConfig.camera.rotation;
         }
-        const isLandscape = (rotation === 0);
+        const orientation = getOrientationForRotation(rotation);
+        const isPortrait = orientation.orientation === ORIENTATION_PORTRAIT;
+        const isFlipped = orientation.state === ORIENTATION_STATE_FLIPPED;
 
         const left = (Math.abs(this.fullBounds.left) + camera.props.position.x - cameraScale.x / 2) * scaleFactor;
         const bottom = (Math.abs(this.fullBounds.bottom) + camera.props.position.y - cameraScale.y / 2) * scaleFactor;
@@ -116,8 +118,11 @@ class ProjectorApplication extends Application {
           bottom: camera.object3D.bottom,
         };
 
-        if (!isLandscape) {
+        if (isPortrait) {
           camera.object3D.rotation.z = 0;
+          if (isFlipped) {
+            camera.object3D.rotation.z = Math.PI;
+          }
 
           camera.object3D.right *= 9/16;
           camera.object3D.left *= 9/16;

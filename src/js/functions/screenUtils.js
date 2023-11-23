@@ -1,7 +1,15 @@
 import { ScreenCamera } from '../classes/scene/objects/ScreenCamera.js';
-import * as THREE from '../three.js/build/three.module.js';
 
-const calculateScaleForScreenConfig = (screenConfig) => {
+export const ORIENTATION_LANDSCAPE = 'landscape';
+export const ORIENTATION_PORTRAIT = 'portrait';
+export const ORIENTATION_STATE_NORMAL = 'normal';
+export const ORIENTATION_STATE_FLIPPED = 'flipped';
+
+const precision = 2;
+const PI_PRECISION = parseFloat((Math.PI).toFixed(precision));
+const TAU_PRECISION = parseFloat((Math.PI * 2).toFixed(precision));
+
+export const calculateScaleForScreenConfig = (screenConfig) => {
   let rotation = 0;
   if (screenConfig.camera.rotation) {
     rotation = screenConfig.camera.rotation;
@@ -12,8 +20,9 @@ const calculateScaleForScreenConfig = (screenConfig) => {
   const x = bounds.right - bounds.left;
   const y = bounds.top - bounds.bottom;
 
-  // dirty fix, just assume 90 degrees when non-zero
-  if (rotation === 0) {
+  const orientation = getOrientationForRotation(rotation);
+  const isLandscape = orientation.orientation === ORIENTATION_LANDSCAPE;
+  if (isLandscape) {
     return {
       x,
       y
@@ -25,7 +34,23 @@ const calculateScaleForScreenConfig = (screenConfig) => {
   }
 };
 
-const getBoundsForSize = ({width, height}) => {
+export const toPositiveRadians = (angle) => {
+  return ((angle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+}
+
+export const getOrientationForRotation = (rotation) => {
+  // make the rotation (radians) a positive number
+  const positiveRotation = toPositiveRadians(rotation);
+  const normalizedRotation = parseFloat((positiveRotation % TAU_PRECISION).toFixed(precision)) % TAU_PRECISION; // we need an extra remainder to handle rounding errors
+  const quadrant = Math.floor(normalizedRotation / (PI_PRECISION / 2));
+  const isLandscape = (quadrant % 2 === 0);
+  const isFlipped = (isLandscape && quadrant === 2) || (!isLandscape && quadrant === 1);
+  const orientation = isLandscape ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+  const state = isFlipped ? ORIENTATION_STATE_FLIPPED : ORIENTATION_STATE_NORMAL;
+  return {orientation, state};
+};
+
+export const getBoundsForSize = ({width, height}) => {
   const halfWidth = width / 2;
   const halfHeight = height / 2;
   const left = -1 * halfWidth;
@@ -40,11 +65,11 @@ const getBoundsForSize = ({width, height}) => {
   }
 };
 
-const getSizeForBounds = ({left, right, top, bottom}) => {
+export const getSizeForBounds = ({left, right, top, bottom}) => {
   return { width: right - left, height: top - bottom };
 };
 
-const createCamerasForConfig = async (config) => {
+export const createCamerasForConfig = async (config) => {
   const cameras = [];
   for ( let ii = 0; ii < config.screens.length; ++ ii ) {
     const screen = config.screens[ ii ];
@@ -82,17 +107,17 @@ const createCamerasForConfig = async (config) => {
   return cameras;
 };
 
-const getScreenCamerasForRoles = (screenCameras, roles) => {
+export const getScreenCamerasForRoles = (screenCameras, roles) => {
   const applicableCameras = [];
   roles.forEach(role => applicableCameras.push(...getScreenCamerasForRole(screenCameras, role)));
   return Array.from(new Set(applicableCameras));
 };
 
-const getScreenCamerasForRole = (screenCameras, role) => {
+export const getScreenCamerasForRole = (screenCameras, role) => {
   return screenCameras.filter(screenCamera => doesScreenCameraHaveRole(screenCamera, role));
 };
 
-const getFirstScreenCameraForRole = (screenCameras, role) => {
+export const getFirstScreenCameraForRole = (screenCameras, role) => {
   const applicableCameras = getScreenCamerasForRole(screenCameras, role);
   if (applicableCameras.length > 0) {
     return applicableCameras[0];
@@ -100,11 +125,11 @@ const getFirstScreenCameraForRole = (screenCameras, role) => {
   return null;
 };
 
-const doesScreenCameraHaveRole = (screenCamera, role) => {
+export const doesScreenCameraHaveRole = (screenCamera, role) => {
   return screenCamera.props.roles.includes(role);
 };
 
-const calculateBoundsOfAllScreenCameras = (screenCameras) => {
+export const calculateBoundsOfAllScreenCameras = (screenCameras) => {
   let left = 0, right = 0, bottom = 0, top = 0;
   screenCameras.forEach(screenCamera => {
     if (screenCamera.props.rotation.z !== 0) {
@@ -134,16 +159,4 @@ const calculateBoundsOfAllScreenCameras = (screenCameras) => {
   totalBounds.bottom = totalBounds.y - height_2;
   totalBounds.top = totalBounds.y + height_2;
   return totalBounds;
-}
-
-export {
-  calculateScaleForScreenConfig,
-  getBoundsForSize,
-  getSizeForBounds,
-  createCamerasForConfig,
-  calculateBoundsOfAllScreenCameras,
-  getScreenCamerasForRole,
-  getFirstScreenCameraForRole,
-  getScreenCamerasForRoles,
-  doesScreenCameraHaveRole
 }
