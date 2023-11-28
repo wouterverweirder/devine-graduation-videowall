@@ -9,6 +9,20 @@ Content is in a separate directory, and is not a part of this repo.
 
 - System Preferences > Mission Control > Uncheck "Displays have separate spaces"
 - System Preferences > Dock & Menu Bar > Automatically hide and show the menu bar on desktop
+- System Preferences > Focus > Do Not Disturb > Set it to a schedule covering the entire day.
+- Systen Preferences > Lock Screen > Disable all screen savers / standby
+
+#### Energy Schedule
+
+System Pref option is no longer there since macOS Ventura.
+
+https://www.macrumors.com/how-to/schedule-shut-down-boot-up-macos-ventura/
+
+Shut down each day at 10pm and boot up each week day at 8am:
+
+```
+sudo pmset repeat shutdown MTWRFSU 22:00:00 wakeorpoweron MTWRF 08:00:00
+```
 
 ### recompress videos
 
