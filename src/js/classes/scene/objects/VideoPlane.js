@@ -1,8 +1,8 @@
 import { CanvasPlane } from "./CanvasPlane.js";
 
 class VideoPlane extends CanvasPlane {
+  
   async createInitalCanvasContent() {
-    console.log(this.props);
     const video = document.createElement('video');
     video.autoplay = true;
     video.loop = true;
@@ -16,7 +16,10 @@ class VideoPlane extends CanvasPlane {
       this.ctx.drawImage(video, offsetX, offsetY);
 
       this.texture.needsUpdate = true;
-      video.requestVideoFrameCallback( updateVideo );
+
+      if (!this.disposed) {
+        video.requestVideoFrameCallback( updateVideo );
+      }
     }
 
     if ( 'requestVideoFrameCallback' in video ) {
@@ -30,8 +33,7 @@ class VideoPlane extends CanvasPlane {
     if (this.video) {
       const video = this.video;
       video.pause();
-      video.removeAttribute('src');
-      video.load();
+      video.src = "";
     }
     super.dispose();
   }

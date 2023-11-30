@@ -138,9 +138,6 @@ class Application {
       this.objects.splice(index, 1);
     }
     this.onSceneObjectRemoved(object);
-    if (object.dispose) {
-      object.dispose();
-    }
   }
 
   onSceneObjectAdded(object) {

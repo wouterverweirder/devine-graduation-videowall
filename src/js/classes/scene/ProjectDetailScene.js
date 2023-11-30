@@ -3,19 +3,13 @@ import { PlaneType } from '../../consts/PlaneType.js';
 import { createPlaneForScreen } from '../../functions/createPlaneForScreen.js';
 import { delay } from '../../functions/delay.js';
 import { getFilteredDataSource } from '../../functions/getFilteredDataSource.js';
-import { getValueByPath } from '../../functions/getValueByPath.js';
 import { calculateScaleForScreenConfig, getOrientationForRotation, ORIENTATION_LANDSCAPE } from "../../functions/screenUtils.js";
 import { gsap, Power4 } from '../../gsap/src/index.js';
 import { ImagePlane } from './objects/ImagePlane.js';
 import { ProfilePicturePlane } from './objects/ProfilePicturePlane.js';
-import { ProjectContactPlane } from './objects/ProjectContactPlane.js';
-import { ProjectQuotePlane } from './objects/ProjectQuotePlane.js';
-import { ProjectTextPlane } from './objects/ProjectTextPlane.js';
-import { VideoPlane } from './objects/VideoPlane.js';
+import { VisualBase } from './objects/VisualBase.js';
 import { PlaneSlider } from './PlaneSlider.js';
 import { SceneBase, SceneState } from "./SceneBase.js";
-
-// TODO: get rid of projectPlanes array and work with objectsFromConfig
 
 class ProjectDetailScene extends SceneBase {
 
@@ -25,27 +19,15 @@ class ProjectDetailScene extends SceneBase {
 
   objectsFromConfig = []; // objects created from the scene config, !== objects (visible in the scene)
 
-  constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
-    super(id, props);
-    this.project = props.project;
-
-    // sort cameras from bottom to top
-    this.camerasFromBottomToTop = this.cameras.sort((a, b) => {
-      return (a.props.position.y < b.props.position.y) ? -1 : 1;
-    });
-  }
-
   async _executeStateName(stateName) {
-    const project = this.project;
+    const project = this.props.project;
     console.log(`project-${project.id}: ${stateName}`);
     if (stateName === SceneState.LOAD) {
-      const idPrefix = `project-${project.id}`;
-
       // create planes per screen
       this.colorPlanes = [];
       this.projectPlanes = [];
 
-      this.createDataSourcesForThisScene();
+      this.createDataSourcesForThisScene(project, this.config.scenes.projectDetail);
 
       await this.createObjectsForThisScene();
 
@@ -53,7 +35,7 @@ class ProjectDetailScene extends SceneBase {
         const screenConfig = this.screenConfigsById[screenCamera.id];
         const colorPlane = await createPlaneForScreen({
           data: {
-            id: `${idPrefix}-color-${screenCamera.id}`,
+            id: `${this.id}-color-${screenCamera.id}`,
             color: 0xffffff,
             position: {
               z: 0.1
@@ -63,6 +45,7 @@ class ProjectDetailScene extends SceneBase {
           screenConfig,
           appConfig: this.config
         });
+        colorPlane.customData.screenConfig = screenConfig;
         // offset position
         colorPlane.applyProps({
           position: {
@@ -72,52 +55,52 @@ class ProjectDetailScene extends SceneBase {
           }
         });
         this.colorPlanes.push(colorPlane);
-        // what roles does this screen have?
-        let projectPlane;
-        if (!projectPlane) {
+        let projectPlanes = [];
+        if (projectPlanes.length === 0) {
           // does one of the objectsFromConfig show something on this screen?
           this.objectsFromConfig.forEach((object) => {
-            if (object instanceof ProjectTextPlane || object instanceof VideoPlane || object instanceof ImagePlane || object instanceof ProjectQuotePlane || object instanceof ProjectContactPlane) {
+            if (object instanceof VisualBase) {
               if (object.objectConfig.screen.id === screenCamera.id) {
-                projectPlane = object;
+                object.customData.sliderScreen = { id: screenCamera.id };
+                projectPlanes.push(object);
               }
             } else if (object instanceof PlaneSlider) {
               // does this planeslider need to show something on this screen?
-              const indexOfScreenInObjectConfig = object.objectConfig.screens.findIndex(screen => screen.id === screenCamera.id);
-              if (indexOfScreenInObjectConfig > -1) {
-                // yes, it does
+              object.objectConfig.screens.filter(screen => screen.id === screenCamera.id).forEach(sliderScreen => {
                 if (object.nonVisiblePlanes.length > 0) {
-                  projectPlane = object.nonVisiblePlanes.shift();
-                  projectPlane.applyProps(this.generatePropsForScreenPlane(screenCamera, projectPlane));
-                  projectPlane.customData.camera = screenCamera;
+                  const projectPlane = object.nonVisiblePlanes.shift();
+                  projectPlane.applyProps(this.generatePropsForSliderPlane(sliderScreen, projectPlane));
+                  projectPlane.customData.sliderScreen = sliderScreen;
                   object.visiblePlanes.push(projectPlane);
+                  projectPlanes.push(projectPlane);
                 }
-              }
+              });
             }
           });
         }
-        if (!projectPlane) {
+        if (projectPlanes.length === 0) {
           // add an empty plane on the screen when we have no plane on that screen
-          projectPlane = await createPlaneForScreen({
+          const projectPlane = await createPlaneForScreen({
             data: {
-              id: `${idPrefix}-empty-${screenCamera.id}`,
+              id: `${this.id}-empty-${screenCamera.id}`,
               color: 0x000000,
               layers: screenCamera.props.layers
             },
             screenConfig,
             appConfig: this.config
           });
+          projectPlanes.push(projectPlane);
         }
 
-        this.projectPlanes.push(projectPlane);
+        this.projectPlanes = this.projectPlanes.concat(projectPlanes);
       };
 
     } else if (stateName === SceneState.INTRO) {
-
       const projectPlanes = this.projectPlanes;
       const colorPlanes = this.colorPlanes;
 
       this.tl = gsap.timeline({
+        paused: true,
         onUpdate: () => {
           colorPlanes.forEach(plane => {
             const props = {
@@ -140,8 +123,8 @@ class ProjectDetailScene extends SceneBase {
       const outroColorPlaneDuration = 0.5;
       const introProjectPlaneDuration = 1.0;
       colorPlanes.forEach((colorPlane, index) => {
-        const projectPlane = this.projectPlanes[index];
-        if (!projectPlane) {
+        const projectPlanesOnTheSameScreen = projectPlanes.filter(plane => plane.customData.sliderScreen?.id === colorPlane.customData.screenConfig.id);
+        if (projectPlanesOnTheSameScreen.length === 0) {
           // when tabbing through the project really fast, we might not have created the project plane yet
           console.log(`no project plane for index ${index}`);
           return;
@@ -167,17 +150,20 @@ class ProjectDetailScene extends SceneBase {
           this.tl.to(colorPlane.props.scale, {x: middlePropValues.scale.x, y: middlePropValues.scale.y, ease: DevineEasing.COLOR_PLANE, delay: colorPlaneIntroDelay, duration: introColorPlaneDuration}, 0);
           this.tl.to(colorPlane.props.position, {x: middlePropValues.position.x, y: middlePropValues.position.y, ease: DevineEasing.COLOR_PLANE, delay: colorPlaneIntroDelay, duration: introColorPlaneDuration}, 0);
   
-          // add the project plane once the color plane has full scale
+          // add the project planes once the color plane has full scale
           this.tl.add(() => {
-            this.addObject(projectPlane);
-            projectPlane.intro();
+            projectPlanesOnTheSameScreen.forEach(projectPlane => {
+              this.addObject(projectPlane);
+              projectPlane.intro();
+            });
           }, projectPlaneIntroDelay);
   
           // outro color plane
           this.tl.to(colorPlane.props.scale, {x: endPropValues.scale.x, y: endPropValues.scale.y, ease: DevineEasing.COLOR_PLANE, delay: projectPlaneIntroDelay, duration: outroColorPlaneDuration}, 0);
           this.tl.to(colorPlane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: DevineEasing.COLOR_PLANE, delay: projectPlaneIntroDelay, duration: outroColorPlaneDuration}, 0);
         }
-        {
+        // intro project planes
+        projectPlanesOnTheSameScreen.forEach(projectPlane => {
           // intro project plane
           const startPropValues = JSON.parse(JSON.stringify(projectPlane.props));
           const endPropValues = JSON.parse(JSON.stringify(projectPlane.props));
@@ -188,7 +174,7 @@ class ProjectDetailScene extends SceneBase {
           projectPlane.applyProps(startPropValues);
 
           this.tl.to(projectPlane.props.position, {x: endPropValues.position.x, y: endPropValues.position.y, ease: Power4.easeOut, delay: projectPlaneIntroDelay, duration: introProjectPlaneDuration}, 0);
-        }
+        });
 
         this.addObject(colorPlane);
       });
@@ -199,6 +185,8 @@ class ProjectDetailScene extends SceneBase {
           object.start();
         }
       });
+
+      this.tl.play();
 
     } else if (stateName === SceneState.OUTRO) {
 
@@ -237,59 +225,76 @@ class ProjectDetailScene extends SceneBase {
     }
   }
 
-  createDataSourcesForThisScene() {
-    const project = this.project;
-    this.dataSources = [];
-    this.dataSourcesByKey = {};
-    if (this.config.scenes.projectDetail?.objects?.length > 0) {
-      for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectDetail.objects.length; objectConfigIndex++) {
-        const objectConfig = this.config.scenes.projectDetail.objects[objectConfigIndex];
-        if (!objectConfig.dataSource) {
-          continue;
-        }
-        if (this.dataSourcesByKey[objectConfig.dataSource.key]) {
-          continue;
-        }
-        let data = getValueByPath(project, objectConfig.dataSource.key);
-        if (!data) {
-          continue;
-        }
-        if (!Array.isArray(data)) {
-          data = [data];
-        }
-        this.dataSources.push(data);
-        this.dataSourcesByKey[objectConfig.dataSource.key] = data;
+  dispose() {
+    super.dispose();
+    this.colorPlanes.forEach(plane => {
+      if (plane.dispose) {
+        plane.dispose();
       }
-    }
+    });
+
+    this.projectPlanes.forEach(plane => {
+      if (plane.dispose) {
+        plane.dispose();
+      }
+    });
+
+    this.objectsFromConfig.forEach(object => {
+      // is the object a plane slider?
+      if (object instanceof PlaneSlider) {
+        object.dispose();
+      }
+    });
   }
 
   async createObjectsForThisScene() {
-    const project = this.project;
+    const project = this.props.project;
     console.log(project);
     // objects for this scene
     if (this.config.scenes.projectDetail?.objects?.length > 0) {
       for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectDetail.objects.length; objectConfigIndex++) {
         const objectConfig = this.config.scenes.projectDetail.objects[objectConfigIndex];
         if (objectConfig.type === 'video' || objectConfig.type === 'image') {
-          let data = this.dataSourcesByKey[objectConfig.dataSource.key];
+          let data = [];
+          if (Array.isArray(objectConfig.dataSource)) {
+            data = objectConfig.dataSource;
+          } else {
+            data = this.dataSourcesByKey[objectConfig.dataSource.key];
+          }
           if (!data) {
+            console.warn(`No dataSource found for key ${objectConfig.dataSource.key}`);
             continue;
           }
-          data = getFilteredDataSource(data, objectConfig.dataSource);
-          console.log(data);
+          if (!Array.isArray(objectConfig.dataSource)) {
+            data = getFilteredDataSource(data, objectConfig.dataSource);
+          }
           if (data.length === 0) {
             continue;
           }
           data = data[0];
-          // remove this item from the data source to prevent duplicates
-          this.dataSourcesByKey[objectConfig.dataSource.key] = this.dataSourcesByKey[objectConfig.dataSource.key].filter(item => item !== data);
+          if (objectConfig.dataSource.key) {
+            // remove this item from the data source to prevent duplicates
+            this.dataSourcesByKey[objectConfig.dataSource.key] = this.dataSourcesByKey[objectConfig.dataSource.key].filter(item => item !== data);
+          }
           const screenCamera = this.cameras.find(camera => camera.id === objectConfig.screen.id);
           const screenConfig = this.screenConfigsById[objectConfig.screen.id];
           const attributes = data.attributes ? data.attributes : data;
+          // if no mime attributes are set, generate them
+          if (!attributes.mime) {
+            if (attributes.url.indexOf('.mp4') > -1) {
+              attributes.mime = 'video/mp4';
+            } else if (attributes.url.indexOf('.webm') > -1) {
+              attributes.mime = 'video/webm';
+            } else if (attributes.url.indexOf('.jpg') > -1) {
+              attributes.mime = 'image/jpg';
+            } else if (attributes.url.indexOf('.png') > -1) {
+              attributes.mime = 'image/png';
+            }
+          }
           const isVideo = attributes.mime.indexOf('video') === 0;
           const plane = await createPlaneForScreen({
             data: {
-              id: `project-video-${project.id}-${attributes.url}`,
+              id: `${this.id}-video-${attributes.url}`,
               type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
               url: attributes.url,
               layers: screenCamera.props.layers,
@@ -305,7 +310,7 @@ class ProjectDetailScene extends SceneBase {
           const screenConfig = this.screenConfigsById[objectConfig.screen.id];
           const plane = await createPlaneForScreen({
             data: {
-              id: `project-text-${project.id}-${screenCamera.id}`,
+              id: `${this.id}-text-${screenCamera.id}`,
               type: PlaneType.TEXT,
               data: project,
               layers: screenCamera.props.layers,
@@ -321,7 +326,7 @@ class ProjectDetailScene extends SceneBase {
           const screenConfig = this.screenConfigsById[objectConfig.screen.id];
           const plane = await createPlaneForScreen({
             data: {
-              id: `project-quote-${project.id}-${screenCamera.id}`,
+              id: `${this.id}-quote-${screenCamera.id}`,
               type: PlaneType.PROJECT_QUOTE,
               data: project,
               layers: screenCamera.props.layers
@@ -336,7 +341,7 @@ class ProjectDetailScene extends SceneBase {
           const screenConfig = this.screenConfigsById[objectConfig.screen.id];
           const plane = await createPlaneForScreen({
             data: {
-              id: `project-contact-${project.id}-${screenCamera.id}`,
+              id: `${this.id}-contact-${screenCamera.id}`,
               type: PlaneType.PROJECT_CONTACT,
               data: project,
               layers: screenCamera.props.layers
@@ -349,7 +354,7 @@ class ProjectDetailScene extends SceneBase {
         } else if (objectConfig.type === 'slider') {
           // load the planes for this slider
           const planes = [];
-          let dataForSlider = getValueByPath(project, objectConfig.dataSource.key);
+          let dataForSlider = this.dataSourcesByKey[objectConfig.dataSource.key];
           // is dataForSlider an array?
           if (!Array.isArray(dataForSlider)) {
             dataForSlider = [dataForSlider];
@@ -359,10 +364,10 @@ class ProjectDetailScene extends SceneBase {
             for (const asset of dataForSlider) {
               const attributes = (asset.attributes) ? asset.attributes : asset;
               const props = {
-                name: `project-asset-${project.id}-${objectConfigIndex}-${attributes.url}`,
+                name: `${this.id}-assets-${objectConfigIndex}-${attributes.url}`,
                 textureSize: {
-                  x: objectConfig.item.width,
-                  y: objectConfig.item.height,
+                  x: objectConfig.item.width || 1920,
+                  y: objectConfig.item.height || 1920,
                 },
                 url: attributes.url,
                 appConfig: this.config,
@@ -375,7 +380,7 @@ class ProjectDetailScene extends SceneBase {
             for (let assetIndex = 0; assetIndex < dataForSlider.length; assetIndex++) {
               const asset = dataForSlider[assetIndex];
               const props = {
-                name: `project-asset-${project.id}-${objectConfigIndex}-${assetIndex}`,
+                name: `${this.id}-asset-${objectConfigIndex}-${assetIndex}`,
                 textureSize: {
                   x: objectConfig.item.width,
                   y: objectConfig.item.height,
@@ -395,13 +400,14 @@ class ProjectDetailScene extends SceneBase {
             nonVisiblePlanes: planes,
             visiblePlanes: [],
             setupNewPlane: ({ newPlane }) => {
-              const setPropsNewPlane = this.generatePropsForScreenPlane(newPlane.customData.camera, newPlane);
+              const setPropsNewPlane = this.generatePropsForSliderPlane(newPlane.customData.sliderScreen, newPlane);
               newPlane.applyProps(setPropsNewPlane);
               return newPlane;
             },
             getAxis: ({ newPlane }) => {
-              const camera = newPlane.customData.camera;
-              const orientation = getOrientationForRotation(camera.props.rotation.z);
+              const sliderScreen = newPlane.customData.sliderScreen;
+              const screenCamera = this.cameras.find(camera => camera.id === sliderScreen.id);
+              const orientation = getOrientationForRotation(screenCamera.props.rotation.z);
               const isLandscape = orientation.orientation === ORIENTATION_LANDSCAPE;
               return (isLandscape) ? 'vertical' : 'horizontal';
             },
@@ -415,35 +421,46 @@ class ProjectDetailScene extends SceneBase {
     }
   }
 
-  generatePropsForScreenPlane(camera, projectPlane) {
+  generatePropsForSliderPlane(sliderScreen, plane) {
+    const camera = this.cameras.find(camera => camera.id === sliderScreen.id);
     const screenConfig = this.screenConfigsById[camera.id];
     const screenScale = calculateScaleForScreenConfig(screenConfig);
 
-    const large = 1920;
-    const small = 1080;
-    const screenWidth = (screenScale.x > screenScale.y) ? large : small;
-    const screenHeight = (screenScale.x > screenScale.y) ? small : large;
+    const layers = (camera.props.layers) ? camera.props.layers.concat() : false;
 
-    const textureScale = {
-      x: projectPlane.props.textureSize.x / screenWidth * screenScale.x,
-      y: projectPlane.props.textureSize.y / screenHeight * screenScale.y,
+    // default area is set to fill the entire screen
+    const area = {
+      x: 0,
+      y: 0,
+      width: 1,
+      height: 1
+    }
+
+    if (sliderScreen?.area) {
+      area.x = sliderScreen.area.x;
+      area.y = sliderScreen.area.y;
+      area.width = sliderScreen.area.width;
+      area.height = sliderScreen.area.height;
+    }
+
+    const scale = {
+      x: screenScale.x * area.width,
+      y: screenScale.y * area.height
     };
 
-    const layers = (camera.props.layers) ? camera.props.layers.concat() : false;
+    const diffWidth = screenScale.x - scale.x;
+    const diffHeight = screenScale.y - scale.y;
+
     const position = {
-      x: screenConfig.camera.position[0],
-      y: screenConfig.camera.position[1],
+      x: screenConfig.camera.position[0] + diffWidth / 2 - area.x * screenScale.x,
+      y: screenConfig.camera.position[1] + diffHeight / 2 - area.y * screenScale.y,
       z: 0
     };
-    const scale = {
-      x: textureScale.x,
-      y: textureScale.y
-    };
+
     return {
       layers,
       position,
-      scale,
-      screenScale
+      scale
     };
   };
 }

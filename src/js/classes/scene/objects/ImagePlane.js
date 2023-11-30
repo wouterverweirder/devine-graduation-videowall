@@ -7,13 +7,15 @@ import { setTextureRepeatAndOffset } from "../../../functions/setTextureRepeatAn
 class ImagePlane extends VisualBase {
 
   transparent = false;
+  imageLoad = null;
   
   async createMaterial() {
 
     let image, texture, material;
     if (this.props.url) {
       try {
-        image = await loadImage(this.props.url);
+        this.imageLoad = loadImage(this.props.url);
+        image = await this.imageLoad;
         texture = new THREE.Texture(image);
         setTextureRepeatAndOffset(texture, image, this.props);
         const isJPEG = this.props.url.search( /\.jpe?g($|\?)/i ) > 0 || this.props.url.search( /^data\:image\/jpeg/ ) === 0;
@@ -42,6 +44,10 @@ class ImagePlane extends VisualBase {
   }
 
   dispose() {
+    console.log('ImagePlane.dispose()');
+    if (this.imageLoad) {
+      this.imageLoad.cancel();
+    }
     if (this.material.map) {
       this.material.map.dispose();
     }

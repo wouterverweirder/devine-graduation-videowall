@@ -54,6 +54,10 @@ class PlaneSlider {
     clearTimeout(this.animationTimeoutId);
   }
 
+  dispose() {
+    this.stop();
+  }
+
   scheduleAnimationTimeout() {
     this.killAnimationTimeout();
     const delayForNextAnimation = this.getDelayForNextAnimation();
@@ -69,21 +73,22 @@ class PlaneSlider {
       return null;
     }
     if (oldPlane) {
-      newPlane.customData.camera = oldPlane.customData.camera;
+      newPlane.customData.sliderScreen = oldPlane.customData.sliderScreen;
     }
     return newPlane;
   }
 
   getOldPlane() {
+    const nonAnimatingVisiblePlanes = this.visiblePlanes.filter(o => !o.customData.isAnimating);
     if (this.pickingMethod === 'next') {
-      return this.visiblePlanes[0];
+      return nonAnimatingVisiblePlanes[0];
     }
     // random
-    const index = Math.floor(Math.random() * this.visiblePlanes.length);
-    if (index >= this.visiblePlanes.length) {
+    const index = Math.floor(Math.random() * nonAnimatingVisiblePlanes.length);
+    if (index >= nonAnimatingVisiblePlanes.length) {
       return;
     }
-    return this.visiblePlanes[index];
+    return nonAnimatingVisiblePlanes[index];
   }
 
   addObject(o) {
@@ -119,8 +124,8 @@ class PlaneSlider {
     const direction = this.getDirection({ oldPlane, newPlane });
     const slideDuration = this.getSlideDuration();
 
-    const distanceXOldPlane = (oldPlane) ? oldPlane.props.screenScale.x : 0;
-    const distanceYOldPlane = (oldPlane) ? oldPlane.props.screenScale.y : 0;
+    const distanceXOldPlane = (oldPlane) ? oldPlane.props.scale.x : 0;
+    const distanceYOldPlane = (oldPlane) ? oldPlane.props.scale.y : 0;
 
     const setPropsNewPlane = {
       position: {
@@ -150,24 +155,25 @@ class PlaneSlider {
     if (isVertical) {
       if (direction < 0) {
         targetPropsOldPlane.position.y += distanceYOldPlane;
-        setPropsNewPlane.position.y -= oldPlane.props.screenScale.y;
+        setPropsNewPlane.position.y -= oldPlane.props.scale.y;
       } else {
         targetPropsOldPlane.position.y -= distanceYOldPlane;
-        setPropsNewPlane.position.y += oldPlane.props.screenScale.y;
+        setPropsNewPlane.position.y += oldPlane.props.scale.y;
       }
     } else {
       if (direction < 0) {
         targetPropsOldPlane.position.x -= distanceXOldPlane;
-        setPropsNewPlane.position.x += oldPlane.props.screenScale.x;
+        setPropsNewPlane.position.x += oldPlane.props.scale.x;
       } else {
         targetPropsOldPlane.position.x += distanceXOldPlane;
-        setPropsNewPlane.position.x -= oldPlane.props.screenScale.x;
+        setPropsNewPlane.position.x -= oldPlane.props.scale.x;
       }
     }
 
     newPlane.applyProps(setPropsNewPlane);
 
     const tl = gsap.timeline({
+      paused: true,
       onUpdate: () => {
         if (oldPlane) {
           oldPlane.applyProps({
@@ -185,7 +191,11 @@ class PlaneSlider {
         });
       },
       onComplete: () => {
-        this.removeObject(oldPlane);
+        if (oldPlane) {
+          oldPlane.customData.isAnimating = false;
+          this.removeObject(oldPlane);
+        }
+        newPlane.customData.isAnimating = false;
       }
     });
 
@@ -193,13 +203,17 @@ class PlaneSlider {
 
     if (oldPlane) {
       tl.to(oldPlane.props.position, {...targetPropsOldPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE, delay}, 0);
+      oldPlane.customData.isAnimating = true;
     }
     tl.to(newPlane.props.position, {...targetPropsNewPlane.position, duration: slideDuration, ease: DevineEasing.COLOR_PLANE, delay}, 0);
+    newPlane.customData.isAnimating = true;
     if (newPlane.intro) {
       newPlane.intro();
     }
 
     this.addObject(newPlane);
+
+    tl.play();
   }
 
 }

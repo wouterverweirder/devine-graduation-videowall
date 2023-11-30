@@ -2,6 +2,7 @@ import * as THREE from '../../../three.js/build/three.module.js';
 
 class SceneObject {
 
+  disposed = false;
   customData = {};
 
   constructor(id = THREE.MathUtils.generateUUID(), props = {}) {
@@ -82,9 +83,6 @@ class SceneObject {
       this.props.name = newProps.name;
       this.object3D.name = this.props.name;
     }
-    if (newProps.screenScale) {
-      this.props.screenScale = newProps.screenScale;
-    }
     this.signals.onPropsApplied.dispatch();
   }
 
@@ -92,6 +90,7 @@ class SceneObject {
   }
 
   dispose() {
+    this.disposed = true;
   }
 }
 

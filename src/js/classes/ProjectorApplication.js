@@ -1,8 +1,8 @@
 import * as THREE from '../three.js/build/three.module.js';
 
-import { Application } from './Application.js';
-import { ORIENTATION_LANDSCAPE, ORIENTATION_PORTRAIT, ORIENTATION_STATE_FLIPPED, calculateScaleForScreenConfig, getBoundsForSize, getOrientationForRotation } from '../functions/screenUtils.js';
 import { getValueByPath } from '../functions/getValueByPath.js';
+import { ORIENTATION_PORTRAIT, ORIENTATION_STATE_FLIPPED, calculateScaleForScreenConfig, getOrientationForRotation } from '../functions/screenUtils.js';
+import { Application } from './Application.js';
 
 const BLACK = new THREE.Color(0, 0, 0);
 
@@ -24,7 +24,7 @@ class ProjectorApplication extends Application {
       };
       this.ambientAudio.src = 'assets/ambient-01.mp3';
       this.ambientAudio.loop = true;
-      this.ambientAudio.volume = 0.1;
+      this.ambientAudio.volume = this.config.muted ? 0 : 0.1;
     }
 
     this.isSingleProjection = (this.argv.projection !== 'multi');
@@ -205,4 +205,4 @@ class ProjectorApplication extends Application {
   }
 }
 
-export { ProjectorApplication }
+export { ProjectorApplication };

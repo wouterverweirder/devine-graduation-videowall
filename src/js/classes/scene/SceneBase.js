@@ -1,3 +1,4 @@
+import { getValueByPath } from '../../functions/getValueByPath.js';
 import * as THREE from '../../three.js/build/three.module.js';
 
 const StateProgress = {
@@ -64,6 +65,11 @@ class SceneBase {
     this.signals.stateComplete.add(this.onStateComplete, this);
 
     this.stateProgress = StateProgress.COMPLETE;
+
+    // sort cameras from bottom to top
+    this.camerasFromBottomToTop = this.cameras.sort((a, b) => {
+      return (a.props.position.y < b.props.position.y) ? -1 : 1;
+    });
   }
 
   // load() {
@@ -150,6 +156,47 @@ class SceneBase {
   }
 
   dispose() {
+    this.signals.stateStart.removeAll();
+    this.signals.stateProgress.removeAll();
+    this.signals.stateComplete.removeAll();
+  }
+
+  createDataSourcesForThisScene(dataRoot, sceneConfig) {
+    this.dataSources = [];
+    this.dataSourcesByKey = {};
+    if (sceneConfig?.objects?.length > 0) {
+      for (let objectConfigIndex = 0; objectConfigIndex < sceneConfig.objects.length; objectConfigIndex++) {
+        const objectConfig = sceneConfig.objects[objectConfigIndex];
+        if (!objectConfig.dataSource) {
+          continue;
+        }
+        if (!objectConfig.dataSource.key) {
+          continue;
+        }
+        if (this.dataSourcesByKey[objectConfig.dataSource.key]) {
+          continue;
+        }
+        let data = getValueByPath(dataRoot, objectConfig.dataSource.key);
+        if (!data) {
+          continue;
+        }
+        if (!Array.isArray(data)) {
+          data = [data];
+        }
+        if (objectConfig.dataSource.flatten === true) {
+          data = data.flat();
+        }
+        // tmp
+        // if (objectConfig.dataSource.key === "projects.[].students.[].profilePicture") { 
+        //   console.log('students')
+        //   // limit to 13 items
+        //   data = data.slice(0, 13);
+        // }
+        // end tmp
+        this.dataSources.push(data);
+        this.dataSourcesByKey[objectConfig.dataSource.key] = data;
+      }
+    }
   }
 }
 

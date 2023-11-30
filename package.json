@@ -5,12 +5,12 @@
   "description": "My Electron application description",
   "main": "src/index.js",
   "scripts": {
-    "start": "electron-forge start -- ../content/howest2020",
-    "debug-local": "electron-forge start -- ../content/howest2020 --projection=single --devtools=true --editor=true",
+    "start": "electron-forge start -- ../content/devine2023",
+    "debug-local": "electron-forge start -- ../content/devine2023 --projection=single --devtools=true --editor=true",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "server": "electron . ../content/howest2020 --only-server"
+    "server": "electron . ../content/devine2023 --only-server"
   },
   "keywords": [],
   "author": {

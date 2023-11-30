@@ -11,6 +11,7 @@ export class ProfilePicturePlane extends CanvasPlane {
   triangleProgress = 0;
   canvasObjects = [];
   maxTriangleHeight = 80;
+  imageLoad = null;
 
   async createMaterial() {
     this.planeConfig = this.props.namePlane || {};
@@ -44,7 +45,8 @@ export class ProfilePicturePlane extends CanvasPlane {
 
     // image
     let imageUrl = this.props.data.profilePicture?.data?.attributes?.url || this.props.data.profilePicture?.data?.url || this.props.data.profilePicture?.url;
-    const image = await loadImage(imageUrl);
+    this.imageLoad = loadImage(imageUrl);
+    const image = await this.imageLoad;
     // Define the target area dimensions
     const targetWidth = this.props.textureSize.x;
     const targetHeight = this.props.textureSize.y;
@@ -67,8 +69,6 @@ export class ProfilePicturePlane extends CanvasPlane {
       sourceHeight = originalWidth / targetRatio;
       sourceY = (originalHeight - sourceHeight) / 2;
     }
-    
-
 
     this.canvasObjects.push({
       type: 'image',
@@ -176,6 +176,9 @@ export class ProfilePicturePlane extends CanvasPlane {
   }
 
   dispose() {
+    if (this.imageLoad) {
+      this.imageLoad.cancel();
+    }
     if (this.tl) {
       this.tl.kill();
     }
