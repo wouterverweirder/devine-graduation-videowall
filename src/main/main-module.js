@@ -49,6 +49,22 @@ const startServer = (app = undefined) => {
   initServer(argv);
 };
 
+const getSpannedDisplayBounds = (screen) => {
+  let displays = screen.getAllDisplays()
+
+  // try to limit to 4K windows
+  displays = displays.filter(o => o.bounds.height === 2160).sort();
+  
+  if (displays.length === 0) {
+    // no 4K window? (eg developping locally) span over all displays
+    displays = screen.getAllDisplays().sort((a, b) => (a.bounds.width > b.size.width) ? -1 : 1);
+  }
+  
+  const spannedDisplay = displays.reduce((prev, curr) => ({ bounds: { x: Math.min(prev.bounds.x, curr.bounds.x), y: Math.min(prev.bounds.y, curr.bounds.y)}, size: { width: prev.size.width + curr.size.width, height: Math.max(prev.size.height, curr.size.height)}}), { size: { width: 0, height: 0 }, bounds: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }});
+
+  return spannedDisplay;
+};
+
 if (!isServerOnly) {
   import('electron').then(({ app, BrowserWindow, screen, globalShortcut }) => {
     if (!app) {
@@ -76,26 +92,16 @@ if (!isServerOnly) {
       if (isServerOnly) {
         return;
       }
-      let displays = screen.getAllDisplays()
-
-      // try to limit to 4K windows
-      displays = displays.filter(o => o.bounds.height === 2160).sort();
       
-      if (displays.length === 0) {
-        // no 4K window? (eg developping locally) span over all displays
-        displays = screen.getAllDisplays().sort((a, b) => (a.bounds.width > b.size.width) ? -1 : 1);
-      }
-      
-      const spannedDisplay = displays.reduce((prev, curr) => ({ bounds: { x: Math.min(prev.bounds.x, curr.bounds.x), y: Math.min(prev.bounds.y, curr.bounds.y)}, size: { width: prev.size.width + curr.size.width, height: Math.max(prev.size.height, curr.size.height)}}), { size: { width: 0, height: 0 }, bounds: { x: Number.MAX_VALUE, y: Number.MAX_VALUE }});  
-      console.log(spannedDisplay);
+      const spannedDisplay = getSpannedDisplayBounds(screen);
 
       if (createMainWindow) {
         // Create the output window, make it span all displays
         const windowSettings = {
           x: spannedDisplay.bounds.x,
           y: spannedDisplay.bounds.y,
-          width: displays[0].size.width,
-          height: displays[0].size.height,
+          width: 800,
+          height: 600,
           webPreferences: {
             nodeIntegration: false, // is default value after Electron v5
             contextIsolation: true, // protect against prototype pollution
@@ -118,6 +124,13 @@ if (!isServerOnly) {
         // and load the index.html of the app.
         mainWindow.loadURL(`http://127.0.0.1/index.html?${querystring}`);
 
+        const handleScreenChange = (e) => {
+          // close the windows
+          mainWindow.close();
+          // open the window again
+          createWindows();
+        };
+
         if (argv.devtools) {
           mainWindow.webContents.openDevTools()
         }
@@ -126,6 +139,12 @@ if (!isServerOnly) {
           mainWindow.once('ready-to-show', () => {
             mainWindow.setAlwaysOnTop(true, "normal");
             mainWindow.focus();
+          });
+
+          screen.on('display-metrics-changed', handleScreenChange);
+
+          mainWindow.on('closed', () => {
+            screen.removeListener('display-metrics-changed', handleScreenChange);
           });
         }
       }
