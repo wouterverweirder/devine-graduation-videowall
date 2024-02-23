@@ -17,7 +17,7 @@ argv = argv.argv;
 const isServerOnly = argv.onlyServer;
 
 const startServer = (app = undefined) => {
-  let appPath = (app) ? app.getPath('exe') : process.cwd();
+  let appPath = (app) ? path.resolve(app.getPath('exe'), '..') : process.cwd();
   const isMacOS = process.platform === 'darwin';
   const isMacOSAppBundle = isMacOS && app && app.isPackaged;
   if (isMacOSAppBundle) {
