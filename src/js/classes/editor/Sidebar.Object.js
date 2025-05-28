@@ -194,7 +194,7 @@ function SidebarObject( editor ) {
       screenWidth.setValue(size.width);
       screenHeight.setValue(size.height);
 
-      screenRolesList.setValue(sceneObject.props.roles);
+      // screenRolesList.setValue(sceneObject.props.roles);
     }
     if (isPlane) {
       planeWidth.setValue(object.scale.x);
