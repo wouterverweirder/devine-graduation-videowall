@@ -1,16 +1,17 @@
 {
-  "name": "videowall",
-  "productName": "videowall",
-  "version": "1.0.2",
+  "name": "devine-graduation-videowall-2025",
+  "productName": "devine-graduation-videowall-2025",
+  "version": "1.0.0",
   "description": "My Electron application description",
-  "main": "src/index.js",
+  "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start -- ../content/devine2024",
-    "debug-local": "electron-forge start -- ../content/devine2024 --projection=single --devtools=true --editor=true",
+    "dev": "electron-forge start -- ../content/devine2024 --projection=single --devtools=true",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "server": "electron . ../content/devine2024 --only-server"
+    "lint": "eslint --ext .ts,.tsx ./src",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": {
@@ -18,22 +19,47 @@
     "email": "wouter.verweirder@gmail.com"
   },
   "license": "MIT",
-  "dependencies": {
-    "@electron-forge/maker-dmg": "^7.1.0",
-    "body-parser": "^1.20.0",
-    "cors": "^2.8.5",
-    "electron-log": "^4.4.8",
-    "electron-squirrel-startup": "^1.0.0",
-    "esm": "^3.2.25",
-    "express": "^4.17.1",
-    "serialport": "^10.4.0",
-    "websocket": "^1.0.33",
-    "yargs": "^17.0.1"
-  },
   "devDependencies": {
-    "@electron-forge/cli": "^7.1.0",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.1.0",
-    "dotenv": "^16.3.1",
-    "electron": "27.1.0"
+    "@electron-forge/cli": "^7.8.1",
+    "@electron-forge/maker-deb": "^7.8.1",
+    "@electron-forge/maker-rpm": "^7.8.1",
+    "@electron-forge/maker-squirrel": "^7.8.1",
+    "@electron-forge/maker-zip": "^7.8.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.8.1",
+    "@electron-forge/plugin-fuses": "^7.8.1",
+    "@electron-forge/plugin-vite": "^7.8.1",
+    "@electron/fuses": "^1.8.0",
+    "@eslint/compat": "^1.2.9",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.27.0",
+    "@types/cors": "^2.8.18",
+    "@types/electron-squirrel-startup": "^1.0.2",
+    "@types/express": "^5.0.2",
+    "@types/three": "^0.176.0",
+    "@types/websocket": "^1.0.10",
+    "@types/yargs": "^17.0.33",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.0",
+    "electron": "36.3.1",
+    "eslint": "^9.27.0",
+    "eslint-plugin-import": "^2.31.0",
+    "globals": "^16.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@bwip-js/browser": "^4.6.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "electron-log": "^5.4.0",
+    "electron-squirrel-startup": "^1.0.1",
+    "eventemitter3": "^5.0.1",
+    "express": "^5.1.0",
+    "gsap": "^3.13.0",
+    "serialport": "^13.0.0",
+    "three": "^0.176.0",
+    "websocket": "^1.0.35",
+    "yargs": "^18.0.0"
   }
 }
