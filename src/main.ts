@@ -52,9 +52,7 @@ const startServer = (app:Electron.App = undefined) => {
   console.log('projection: ' + argv.projection);
   console.log('projectDirectory: ' + argv.projectDirectory);
 
-  const htmlFolderPath = (MAIN_WINDOW_VITE_DEV_SERVER_URL) ? path.join(__dirname) : path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/`);
-
-  initServer(htmlFolderPath, argv);
+  initServer(argv);
 };
 
 const getSpannedDisplayBounds = (screen:Electron.Screen) => {

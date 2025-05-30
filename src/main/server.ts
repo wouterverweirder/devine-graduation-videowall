@@ -39,7 +39,7 @@ let argv:ArgV;
 let udpServer:dgram.Socket;
 // let arduinoPort:SerialPort;
 
-const init = async (htmlFolderPath: string, argvValue:ArgV) => {
+const init = async (argvValue:ArgV) => {
   argv = argvValue;
   // srcFolderPath = path.resolve(__dirname, '..', '..', 'src');
   projectDirectory = argvValue.projectDirectory ? argvValue.projectDirectory : path.resolve(__dirname, '..', '..');

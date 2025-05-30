@@ -1,8 +1,7 @@
 {
-  "name": "devine-graduation-videowall-2025",
-  "productName": "devine-graduation-videowall-2025",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "name": "videowall",
+  "productName": "videowall",
+  "version": "1.1.0",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start -- ../content/devine2024",
@@ -25,7 +24,6 @@
     "@electron-forge/maker-rpm": "^7.8.1",
     "@electron-forge/maker-squirrel": "^7.8.1",
     "@electron-forge/maker-zip": "^7.8.1",
-    "@electron-forge/plugin-auto-unpack-natives": "^7.8.1",
     "@electron-forge/plugin-fuses": "^7.8.1",
     "@electron-forge/plugin-vite": "^7.8.1",
     "@electron/fuses": "^1.8.0",
