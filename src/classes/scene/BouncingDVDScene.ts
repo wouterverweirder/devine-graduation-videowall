@@ -33,7 +33,7 @@ class BouncingDVDScene extends SceneBase {
             screenConfig
           },
           screenConfig,
-          appConfig: this.config
+          applicationConfig: this.applicationConfig
         });
         this.visiblePlanes.push(plane);
       }

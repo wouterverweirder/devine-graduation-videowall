@@ -1,9 +1,10 @@
+import EventEmitter from 'eventemitter3';
 import * as THREE from 'three';
 import { getValueByPath } from '../../functions/getValueByPath';
-import { ApplicationConfig, FetchProjectsResult, SceneConfig, ScreenConfig } from '../../types';
+import { calculateScaleForScreenConfig } from '../../functions/screenUtils';
+import { ApplicationConfig, FetchProjectsResult, SceneConfig, SceneObjectConfigScreen, ScreenConfig } from '../../types';
 import { SceneObject } from './objects/SceneObject';
 import { ScreenCamera } from './objects/ScreenCamera';
-import EventEmitter from 'eventemitter3';
 
 const StateProgress = {
   START: -1,
@@ -29,7 +30,7 @@ const SceneStateOrder = [
 
 export type SceneBaseProps = {
   [key: string]: unknown;
-  config?: ApplicationConfig;
+  applicationConfig?: ApplicationConfig;
   cameras?: ScreenCamera[];
   screenConfigsById?:Record<string, ScreenConfig>;
   fetchProjectsResult?: FetchProjectsResult;
@@ -54,8 +55,7 @@ class SceneBase {
     stateComplete: new EventEmitter()
   };
 
-  config:ApplicationConfig;
-  objects:SceneObject[] = [];
+  applicationConfig:ApplicationConfig;
   stateName = SceneState.BOOT;
   targetStateName = SceneState.BOOT;
   stateProgress = StateProgress.START;
@@ -75,7 +75,7 @@ class SceneBase {
     props = mergedProps;
     this.id = id;
     this.props = props;
-    this.config = this.props.config;
+    this.applicationConfig = this.props.applicationConfig;
     this.cameras = props.cameras;
     this.screenConfigsById = props.screenConfigsById;
     this.fetchProjectsResult = props.fetchProjectsResult;
@@ -209,6 +209,49 @@ class SceneBase {
       }
     }
   }
+
+  generatePropsForSliderPlane(sliderScreen:SceneObjectConfigScreen) {
+    const camera = this.cameras.find(camera => camera.id === sliderScreen.id);
+    const screenConfig = this.screenConfigsById[camera.id];
+    const screenScale = calculateScaleForScreenConfig(screenConfig);
+
+    const layers = (Array.isArray(camera.props.layers)) ? camera.props.layers.concat() : false;
+
+    // default area is set to fill the entire screen
+    const area = {
+      x: 0,
+      y: 0,
+      width: 1,
+      height: 1
+    }
+
+    if (sliderScreen?.area) {
+      area.x = sliderScreen.area.x;
+      area.y = sliderScreen.area.y;
+      area.width = sliderScreen.area.width;
+      area.height = sliderScreen.area.height;
+    }
+
+    const scale = {
+      x: screenScale.x * area.width,
+      y: screenScale.y * area.height
+    };
+
+    const diffWidth = screenScale.x - scale.x;
+    const diffHeight = screenScale.y - scale.y;
+
+    const position = {
+      x: screenConfig.camera.position[0] + diffWidth / 2 - area.x * screenScale.x,
+      y: screenConfig.camera.position[1] + diffHeight / 2 - area.y * screenScale.y,
+      z: 0
+    };
+
+    return {
+      layers,
+      position,
+      scale
+    };
+  };
 }
 
 export { SceneBase, SceneState, SceneStateOrder, StateProgress };

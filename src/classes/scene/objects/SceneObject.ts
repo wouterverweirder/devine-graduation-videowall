@@ -29,7 +29,7 @@ export type SceneObjectProps = {
   roles: string[];
   layers: number[] | boolean;
   screenConfig?: ScreenConfig; // Configuration for the screen this object is associated with
-  appConfig: object; // Application-specific configuration
+  applicationConfig: object; // Application-specific configuration
   [key: string]: unknown; // Allow additional properties
 };
 
@@ -85,7 +85,7 @@ class SceneObject {
       },
       roles: [],
       layers: false,
-      appConfig: {},
+      applicationConfig: {},
       ...props
     };
     this.id = id;

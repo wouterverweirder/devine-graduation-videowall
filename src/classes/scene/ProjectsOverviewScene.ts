@@ -2,8 +2,8 @@ import { PlaneType } from '../../consts/PlaneType';
 import { createPlaneForScreen } from '../../functions/createPlaneForScreen';
 import { delay } from '../../functions/delay';
 import { getFilteredDataSource } from '../../functions/getFilteredDataSource';
-import { calculateScaleForScreenConfig, getOrientationForRotation, ORIENTATION_LANDSCAPE } from "../../functions/screenUtils";
-import { isSliderSceneObjectConfig, SceneObjectConfigScreen } from '../../types';
+import { getOrientationForRotation, ORIENTATION_LANDSCAPE } from "../../functions/screenUtils";
+import { isSliderSceneObjectConfig } from '../../types';
 import { ImagePlane } from './objects/ImagePlane';
 import { ProfilePicturePlane, ProfilePicturePlaneConfig } from './objects/ProfilePicturePlane';
 import { VisualBase } from './objects/VisualBase';
@@ -27,7 +27,7 @@ class ProjectsOverviewScene extends SceneBase {
       // create planes per screen
       this.projectPlanes = [];
 
-      this.createDataSourcesForThisScene(this.fetchProjectsResult, this.config.scenes.projectsOverview);
+      this.createDataSourcesForThisScene(this.fetchProjectsResult, this.applicationConfig.scenes.projectsOverview);
 
       await this.createObjectsForThisScene();
 
@@ -64,7 +64,7 @@ class ProjectsOverviewScene extends SceneBase {
               layers: screenCamera.props.layers
             },
             screenConfig,
-            appConfig: this.config
+            applicationConfig: this.applicationConfig
           });
           projectPlanes.push(projectPlane);
         }
@@ -133,9 +133,9 @@ class ProjectsOverviewScene extends SceneBase {
 
   async createObjectsForThisScene() {
     // objects for this scene
-    if (this.config.scenes.projectsOverview?.objects?.length > 0) {
-      for (let objectConfigIndex = 0; objectConfigIndex < this.config.scenes.projectsOverview.objects.length; objectConfigIndex++) {
-        const objectConfig = this.config.scenes.projectsOverview.objects[objectConfigIndex];
+    if (this.applicationConfig.scenes.projectsOverview?.objects?.length > 0) {
+      for (let objectConfigIndex = 0; objectConfigIndex < this.applicationConfig.scenes.projectsOverview.objects.length; objectConfigIndex++) {
+        const objectConfig = this.applicationConfig.scenes.projectsOverview.objects[objectConfigIndex];
         if (objectConfig.type === 'video' || objectConfig.type === 'image') {
           let data = [];
           if (Array.isArray(objectConfig.dataSource)) {
@@ -144,7 +144,7 @@ class ProjectsOverviewScene extends SceneBase {
             data = this.dataSourcesByKey[objectConfig.dataSource.key];
           }
           if (!data) {
-            console.warn(`No dataSource found for key ${JSON.stringify(objectConfig.dataSource)}`);
+            console.warn(`No dataSource found for ${JSON.stringify(objectConfig.dataSource)}`);
             continue;
           }
           if (!Array.isArray(objectConfig.dataSource)) {
@@ -180,10 +180,10 @@ class ProjectsOverviewScene extends SceneBase {
               type: (isVideo) ? PlaneType.VIDEO : PlaneType.IMAGE,
               url: attributes.url,
               layers: screenCamera.props.layers,
-              muted: this.config.muted === undefined ? false : this.config.muted
+              muted: this.applicationConfig.muted === undefined ? false : this.applicationConfig.muted
             },
             screenConfig,
-            appConfig: this.config
+            applicationConfig: this.applicationConfig
           });
           plane.objectConfig = objectConfig;
           this.objectsFromConfig.push(plane);
@@ -195,11 +195,11 @@ class ProjectsOverviewScene extends SceneBase {
               type: PlaneType.DEVINE_INFO
             },
             screenConfig,
-            appConfig: this.config
+            applicationConfig: this.applicationConfig
           });
           plane.objectConfig = objectConfig;
           this.objectsFromConfig.push(plane);
-        }else if (isSliderSceneObjectConfig(objectConfig)) {
+        } else if (isSliderSceneObjectConfig(objectConfig)) {
           // load the planes for this slider
           const planes = [];
           let dataForSlider = ('key' in objectConfig.dataSource) ? this.dataSourcesByKey[objectConfig.dataSource.key] : [];
@@ -208,7 +208,7 @@ class ProjectsOverviewScene extends SceneBase {
             dataForSlider = [dataForSlider];
           }
           dataForSlider = getFilteredDataSource(dataForSlider, objectConfig.dataSource);
-          if (objectConfig.item?.type === 'image') {
+          if (objectConfig.item.type === 'image') {
             for (const asset of dataForSlider) {
               const attributes = ('attributes' in asset) ? asset.attributes as Attributes : asset as Attributes;
               const props = {
@@ -218,7 +218,7 @@ class ProjectsOverviewScene extends SceneBase {
                   y: objectConfig.item.height || 1920,
                 },
                 url: attributes.url,
-                appConfig: this.config,
+                applicationConfig: this.applicationConfig,
               };
               const plane = new ImagePlane(props.name, props);
               await plane.init();
@@ -236,7 +236,7 @@ class ProjectsOverviewScene extends SceneBase {
                   },
                   data: asset,
                   namePlane: objectConfig.item.namePlane as ProfilePicturePlaneConfig,
-                  appConfig: this.config,
+                  applicationConfig: this.applicationConfig,
                 };
                 const plane = new ProfilePicturePlane(props.name, props);
                 await plane.init();
@@ -270,49 +270,6 @@ class ProjectsOverviewScene extends SceneBase {
       }
     }
   }
-
-  generatePropsForSliderPlane(sliderScreen:SceneObjectConfigScreen) {
-    const camera = this.cameras.find(camera => camera.id === sliderScreen.id);
-    const screenConfig = this.screenConfigsById[camera.id];
-    const screenScale = calculateScaleForScreenConfig(screenConfig);
-
-    const layers = (Array.isArray(camera.props.layers)) ? camera.props.layers.concat() : false;
-
-    // default area is set to fill the entire screen
-    const area = {
-      x: 0,
-      y: 0,
-      width: 1,
-      height: 1
-    }
-
-    if (sliderScreen?.area) {
-      area.x = sliderScreen.area.x;
-      area.y = sliderScreen.area.y;
-      area.width = sliderScreen.area.width;
-      area.height = sliderScreen.area.height;
-    }
-
-    const scale = {
-      x: screenScale.x * area.width,
-      y: screenScale.y * area.height
-    };
-
-    const diffWidth = screenScale.x - scale.x;
-    const diffHeight = screenScale.y - scale.y;
-
-    const position = {
-      x: screenConfig.camera.position[0] + diffWidth / 2 - area.x * screenScale.x,
-      y: screenConfig.camera.position[1] + diffHeight / 2 - area.y * screenScale.y,
-      z: 0
-    };
-
-    return {
-      layers,
-      position,
-      scale
-    };
-  };
 }
 
 export { ProjectsOverviewScene };

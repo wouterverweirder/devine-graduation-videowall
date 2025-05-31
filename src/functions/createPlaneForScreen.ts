@@ -38,14 +38,14 @@ export type CreatePlaneForScreenData = OptionalVisualBaseProps & {
   screenId?: string;
   type?: string;
 }
-const createPlaneForScreen = async ({data, screenConfig, appConfig}: {data:CreatePlaneForScreenData, screenConfig: ScreenConfig, appConfig: ApplicationConfig}) => {
+const createPlaneForScreen = async ({data, screenConfig, applicationConfig}: {data:CreatePlaneForScreenData, screenConfig: ScreenConfig, applicationConfig: ApplicationConfig}) => {
 
   const scale = (data.scale) ? data.scale : calculateScaleForScreenConfig(screenConfig);
   const textureSize = (data.textureSize) ? data.textureSize : calculateTextureSizeForScreen(screenConfig);
   const zPosition = (data.position && data.position.z) ? data.position.z : 0;
 
-  const props:OptionalVisualBaseProps = { ...data }
-  Object.assign(props, {
+  const props:OptionalVisualBaseProps = {
+    ...data,
     name: `${data.id}`,
     position: {
       x: screenConfig.camera.position[0],
@@ -54,8 +54,8 @@ const createPlaneForScreen = async ({data, screenConfig, appConfig}: {data:Creat
     },
     scale,
     textureSize,
-    appConfig
-  });
+    applicationConfig
+  };
 
   let plane;
   if (data.type === PlaneType.IMAGE) {

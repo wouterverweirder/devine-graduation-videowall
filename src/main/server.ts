@@ -4,14 +4,13 @@ import express from 'express';
 import * as core from "express-serve-static-core";
 import { writeFileSync } from 'fs';
 import { readdir, readFile, stat, writeFile } from 'fs/promises';
-import http from 'http';
+import http, { Server } from 'http';
 import https from 'https';
 import path from 'path';
 import { connection, request, server as WebSocketServer } from 'websocket';
 import { requestKeyPressed, requestShowProject, requestShowProjectsOverview } from '../classes/ServerConnection';
 import { getValueByPath } from '../functions/getValueByPath';
 import { ArgV } from '../options';
-import { Server } from 'http';
 
 let projectDirectory:string;
 let configJSONPath:string;
@@ -251,6 +250,5 @@ const findFiles = async (dirPath:string, regex:RegExp, arrayOfFiles:string[] = [
   return arrayOfFiles;
 };
 
-export {
-  initializeView, goToNextProject, init, sendKeyPressed
-};
+export { goToNextProject, init, initializeView, sendKeyPressed };
+

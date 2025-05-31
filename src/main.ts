@@ -34,7 +34,7 @@ const resolveAppPath = (app:Electron.App = undefined) => {
 };
 
 const resolveProjectDirectory = (projectDirectory:string | undefined, app:Electron.App = undefined) => {
-  let appPath = resolveAppPath(app);
+  const appPath = resolveAppPath(app);
   if (!projectDirectory) {
     return appPath;
   }
@@ -45,7 +45,7 @@ const resolveProjectDirectory = (projectDirectory:string | undefined, app:Electr
   return projectDirectory;
 };
 
-const startServer = async (argv:ArgV, app:Electron.App = undefined) => {
+const startServer = async (argv:ArgV) => {
   console.log('devtools: ' + argv.devtools);
   console.log('editor: ' + argv.editor);
   console.log('only-server: ' + argv.onlyServer);
@@ -125,7 +125,7 @@ const createWindows = () => {
                   argv.projectDirectory = selectedDirectory;
                   console.log('Selected project directory:', selectedDirectory);
                   mainWindow.close();
-                  startServer(argv, app);
+                  startServer(argv);
                   createWindows();
                 } catch (error) {
                   console.error('Error selecting directory:', error);
@@ -213,7 +213,7 @@ if (!isServerOnly) {
 
   app.whenReady().then(() => {
     argv.projectDirectory = resolveProjectDirectory(argv._[0], app);
-    startServer(argv, app);
+    startServer(argv);
     createWindows()
     if (argv.websocket) {
       globalShortcut.register('Right', () => {

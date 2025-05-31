@@ -157,7 +157,7 @@ class Application {
     if (!screenConfig) {
       return;
     }
-    const plane = await createPlaneForScreen({data, screenConfig, appConfig: this.config});
+    const plane = await createPlaneForScreen({data, screenConfig, applicationConfig: this.config});
     this.addObject(plane);
   }
 
@@ -221,7 +221,7 @@ class Application {
       });
     }
     const scene = new ProjectsOverviewScene('projects-overview', {
-      config: this.config,
+      applicationConfig: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
       fetchProjectsResult: this.fetchProjectsResult,
@@ -242,7 +242,7 @@ class Application {
       });
     }
     const scene = new ProjectDetailScene(`project-detail-${project.id}`, {
-      config: this.config,
+      applicationConfig: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
       addObject: this.addObject.bind(this),
@@ -259,7 +259,7 @@ class Application {
 
   async onRequestShowBouncingDVDLogo() {
     const scene = new BouncingDVDScene('bouncing-dvd', {
-      config: this.config,
+      applicationConfig: this.config,
       cameras: this.cameras,
       screenConfigsById: this.screenConfigsById,
       addObject: this.addObject.bind(this),

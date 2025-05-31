@@ -70,10 +70,10 @@ export const getSizeForBounds = ({left, right, top, bottom}:{left:number, right:
   return { width: right - left, height: top - bottom };
 };
 
-export const createCamerasForConfig = async (config:ApplicationConfig) => {
+export const createCamerasForConfig = async (applicationConfig:ApplicationConfig) => {
   const cameras = [];
-  for ( let ii = 0; ii < config.screens.length; ++ ii ) {
-    const screen = config.screens[ ii ];
+  for ( let ii = 0; ii < applicationConfig.screens.length; ++ ii ) {
+    const screen = applicationConfig.screens[ ii ];
 
     const bounds = getBoundsForSize(screen.camera.size);
     let rotation = 0;
