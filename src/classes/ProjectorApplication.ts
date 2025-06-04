@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 
-import { getExpressURLIfNeeded } from '../functions/getExpressURLIfNeeded';
 import { getValueByPath } from '../functions/getValueByPath';
 import { ORIENTATION_PORTRAIT, ORIENTATION_STATE_FLIPPED, calculateScaleForScreenConfig, getOrientationForRotation } from '../functions/screenUtils';
 import { Project } from '../types';
@@ -91,7 +90,9 @@ class ProjectorApplication extends Application {
 
   applicationSpecificRender() {
     if (this.isSingleProjection) {
-      const scaleFactor = 450;
+      const widthMeters = this.fullBounds.width;
+      const availableWidthPixels = window.innerWidth;
+      const scaleFactor = availableWidthPixels / widthMeters;
       this.renderer.setSize( this.fullBounds.width * scaleFactor, this.fullBounds.height * scaleFactor );
 
       // order the cameras by z-position

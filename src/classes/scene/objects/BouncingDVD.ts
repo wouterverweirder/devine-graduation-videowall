@@ -1,4 +1,3 @@
-import { getExpressURLIfNeeded } from "../../../functions/getExpressURLIfNeeded";
 import { loadImage } from "../../../functions/loadImage";
 import { ORIENTATION_LANDSCAPE, getOrientationForRotation } from "../../../functions/screenUtils";
 import { CanvasPlane } from "./CanvasPlane";
