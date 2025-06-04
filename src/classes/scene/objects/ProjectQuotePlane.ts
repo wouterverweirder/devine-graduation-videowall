@@ -6,6 +6,8 @@ import { CanvasPlane } from "./CanvasPlane";
 import { CanvasObject, TextLine } from '../../../types';
 import { VisualBaseProps } from './VisualBase';
 
+import quoteSVG from '../../../assets/imgs/quote.svg';
+
 type ProjectQuotePlaneData = Record<string, unknown> & {
   attributes: {
     quote: string;
@@ -49,7 +51,7 @@ export class ProjectQuotePlane extends CanvasPlane {
     if (backgroundColor) {
       this.backgroundColor = `#${backgroundColor}`;
     }
-    this.quoteImage = await loadImage(getExpressURLIfNeeded('assets/quote.svg'));
+    this.quoteImage = await loadImage(quoteSVG);
     const marginLeft = 100;
     const marginRight = 100;
     const marginTop = 0;

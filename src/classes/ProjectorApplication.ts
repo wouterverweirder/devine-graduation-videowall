@@ -7,6 +7,8 @@ import { Project } from '../types';
 import { Application } from './Application';
 import { SceneObject } from './scene/objects/SceneObject';
 
+import ambientSound from '../assets/sounds/ambient-01.mp3';
+
 const BLACK = new THREE.Color(0, 0, 0);
 
 class ProjectorApplication extends Application {
@@ -25,7 +27,7 @@ class ProjectorApplication extends Application {
           this.ambientAudio.pause()
         }
       };
-      this.ambientAudio.src = getExpressURLIfNeeded('assets/ambient-01.mp3');
+      this.ambientAudio.src = ambientSound;
       this.ambientAudio.loop = true;
       this.ambientAudio.volume = this.config.muted ? 0 : 0.1;
     }

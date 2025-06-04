@@ -4,6 +4,8 @@ import { ORIENTATION_LANDSCAPE, getOrientationForRotation } from "../../../funct
 import { CanvasPlane } from "./CanvasPlane";
 import { VisualBaseProps } from "./VisualBase";
 
+import DVDLogo from '../../../assets/imgs/dvd-logo.png';
+
 export type BouncingDVDProps = VisualBaseProps & {
   velocity: {
     x: number;
@@ -21,7 +23,7 @@ class BouncingDVD extends CanvasPlane {
   async createInitalCanvasContent() {
     this.transparent = true;
     this.hueAngle = 0;
-    this.dvdImage = await loadImage(getExpressURLIfNeeded('assets/dvd-logo.png'));
+    this.dvdImage = await loadImage(DVDLogo);
     this.draw();
   }
 

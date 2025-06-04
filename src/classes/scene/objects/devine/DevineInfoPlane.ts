@@ -7,6 +7,8 @@ import { loadImage } from '../../../../functions/loadImage';
 import { getExpressURLIfNeeded } from '../../../../functions/getExpressURLIfNeeded';
 import { CanvasObject } from '../../../../types';
 
+import kaskConservatoriumLogo from '../../../../assets/imgs/kask-conservatorium-hogent-howest.png';
+
 class DevineInfoPlane extends CanvasPlane {
 
   canvasObjects:CanvasObject[] = [];
@@ -72,7 +74,7 @@ class DevineInfoPlane extends CanvasPlane {
       opacity: 0
     };
 
-    const logo = await loadImage(getExpressURLIfNeeded('/assets/kask-conservatorium-hogent-howest.png'));
+    const logo = await loadImage(kaskConservatoriumLogo);
     this.logo = {
       type: 'image',
       image: logo,

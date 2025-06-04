@@ -113,7 +113,7 @@ const createWindows = () => {
       windowSettings.height = spannedDisplay.size.height;
     } else {
       // create a menu with an option to select the project directory
-      const menu = [
+      const menu:Electron.MenuItemConstructorOptions[] = [
         {
           label: 'File',
           submenu: [
@@ -133,7 +133,17 @@ const createWindows = () => {
               }
             },
             {
+              label: 'Devtools',
+              click: () => {
+                if (BrowserWindow.getAllWindows().length > 0) {
+                  BrowserWindow.getAllWindows()[0].webContents.openDevTools();
+                }
+              }
+            },
+            {
               label: 'Quit',
+              accelerator: 'CmdOrCtrl+Q',
+              role: 'quit',
               click: () => {
                 app.quit();
               }
