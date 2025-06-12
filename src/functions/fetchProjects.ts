@@ -114,8 +114,9 @@ export const processProjects = async (config:ApplicationConfig, projectsResult:a
   // apply the base property of projects if it exists
   for (const project of projects) {
     const hasBaseProperty = Object.prototype.hasOwnProperty.call(project, 'base');
+    let base:string = '';
     if (hasBaseProperty && project.base && typeof project.base === 'string') {
-      const base:string = project.base;
+      base = project.base;
       for (const assetKeyName of assetKeyNames) {
         const assetKey = config.data.assetKeys[assetKeyName];
         if (assetKey.startsWith(projectAssetsKeyPrefixToRemove)) {
@@ -151,12 +152,29 @@ export const processProjects = async (config:ApplicationConfig, projectsResult:a
               console.warn(`Asset ${assetKeyName} has no url`, asset);
               continue;
             }
-            if (!(asset.url.startsWith('http://') || asset.url.startsWith('https://'))) {
+            if (!isRemoteURL(asset.url)) {
               // if the url is relative, prepend the base
               asset.url = `${base}/${asset.url}`;
               // console.log(`Updated asset url to ${asset.url}`);
             }
           }
+        }
+      }
+    }
+    // process files if they exist
+    // the contents of a file will become the property value
+    const hasFilesProperty = Object.prototype.hasOwnProperty.call(project, 'files');
+    if (hasFilesProperty && project.files) {
+      const fileNames = Object.keys(project.files);
+      for (const fileName of fileNames) {
+        try {
+          const fileURL = !isRemoteURL(project.files[fileName]) ? `${base}/${project.files[fileName]}` : project.files[fileName];
+          const fileContent = (await (await fetch(getExpressURLIfNeeded(fileURL))).text()).trim();
+          project[fileName] = fileContent; // set the file content as a property
+        }
+        catch (error) {
+          console.error(`Failed to fetch file ${fileName} for project`, project, error);
+          continue;
         }
       }
     }
@@ -213,6 +231,10 @@ export const processProjects = async (config:ApplicationConfig, projectsResult:a
     }
   }
   return projectsResult;
+}
+
+const isRemoteURL = (url: string) => {
+  return url.startsWith('http://') || url.startsWith('https://');
 }
 
 export {
