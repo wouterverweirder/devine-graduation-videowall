@@ -113,7 +113,7 @@ class Application {
   }
 
   async fetchProjects() {
-    return await fetchProjects(this.argv);
+    return await fetchProjects(this.config, this.argv);
   }
   
   isControlledThroughWebsocket() {
