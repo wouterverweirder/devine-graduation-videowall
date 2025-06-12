@@ -1,7 +1,7 @@
 import { ApplicationConfig } from "../types";
 import { ArgV } from "../options";
 import { getExpressURLIfNeeded } from "./getExpressURLIfNeeded";
-import { getValueByPath } from "./getValueByPath";
+import { getValueByPath, getValueByPathAdvanced } from "./getValueByPath";
 
 const fetchProjects = async (config: ApplicationConfig, argv:ArgV) => {
   const query = `# Write your query or mutation here
@@ -121,20 +121,32 @@ export const processProjects = async (config:ApplicationConfig, projectsResult:a
         if (assetKey.startsWith(projectAssetsKeyPrefixToRemove)) {
           // remove the prefix from the asset key
           const assetKeyWithoutPrefix = assetKey.replace(projectAssetsKeyPrefixToRemove, '');
-          let assets = getValueByPath(project, assetKeyWithoutPrefix);
-          if (!assets) {
+          let assetsAdvanced = getValueByPathAdvanced(project, assetKeyWithoutPrefix, project, '');
+          if (!assetsAdvanced) {
             console.warn(`No assets found for key: ${assetKeyName} in project`, project);
             continue;
           }
-          if (!Array.isArray(assets)) {
-            assets = [assets]; // ensure assets is an array
-          }
-          if (!Array.isArray(assets)) { // typescript enforcement
-            continue; // skip if assets is not an array
-          }
-          const flattenedAssets = assets.reduce((acc:any, val:any) => acc.concat(val), []).filter((asset:any) => asset !== undefined);
           // set the base property for each asset
-          for (const asset of flattenedAssets) {
+          for (const assetAdvanced of assetsAdvanced) {
+            let asset = assetAdvanced.value;
+            if (asset !== assetAdvanced.parent[assetAdvanced.parentProperty]) {
+              console.warn(`Asset ${assetKeyName} is not the same as its parent`, asset, assetAdvanced.parent, assetAdvanced.parentProperty);
+              continue;
+            }
+            if (typeof asset === 'string') {
+              // wrap it as an object with url
+              asset = assetAdvanced.value = assetAdvanced.parent[assetAdvanced.parentProperty] = {
+                url: asset,
+              };
+            }
+            if (typeof asset !== 'object' || !asset) {
+              console.warn(`Asset ${assetKeyName} is not an object`, asset);
+              continue;
+            }
+            if (!('url' in asset) || typeof asset.url !== 'string') {
+              console.warn(`Asset ${assetKeyName} has no url string property`, asset);
+              continue;
+            }
             if (!asset.url) {
               console.warn(`Asset ${assetKeyName} has no url`, asset);
               continue;
@@ -142,7 +154,7 @@ export const processProjects = async (config:ApplicationConfig, projectsResult:a
             if (!(asset.url.startsWith('http://') || asset.url.startsWith('https://'))) {
               // if the url is relative, prepend the base
               asset.url = `${base}/${asset.url}`;
-              console.log(`Updated asset url to ${asset.url}`);
+              // console.log(`Updated asset url to ${asset.url}`);
             }
           }
         }
