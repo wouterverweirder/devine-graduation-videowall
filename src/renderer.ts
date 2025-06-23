@@ -7,9 +7,18 @@ let application: ProjectorApplication;
 
 const init = async () => {
   const argv = getArgVFromQueryString();
-  const config = await (await fetch(getExpressURLIfNeeded(argv['config-json-path']))).json();
-  application = new ProjectorApplication(config);
-  await application.init();
+  console.log(argv);
+  if (window.VideoWallAPI) {
+    await window.VideoWallAPI.startServer(argv);
+  }
+  try {
+    const config = await (await fetch(getExpressURLIfNeeded(argv['config-json-path']))).json();
+    application = new ProjectorApplication(config);
+    await application.init();
+  } catch (error) {
+    console.error('Failed to fetch config JSON:', error);
+    return;
+  }
 };
 
 init();

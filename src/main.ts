@@ -56,10 +56,6 @@ const startServer = async (argv:ArgV) => {
   initializeView();
 };
 
-ipcMain.handle('process-projects', async (_, projects: unknown, argv:ArgV) => {
-  return await processProjects(projects, argv);
-});
-
 const selectDirectory = async ():Promise<string> => {
   return new Promise((resolve, reject) => {
     dialog.showOpenDialog({
@@ -75,6 +71,26 @@ const selectDirectory = async ():Promise<string> => {
     });
   });
 };
+
+ipcMain.handle('process-projects', async (_, projects: unknown, argv:ArgV) => {
+  return await processProjects(projects, argv);
+});
+
+ipcMain.handle('start-server', async (_, argv:ArgV) => {
+  console.log('Starting server with argv:', argv);
+  await startServer(argv);
+  return true;
+});
+
+ipcMain.handle('select-directory', async () => {
+  try {
+    const directory = await selectDirectory();
+    return directory;
+  } catch (error) {
+    console.error('Error selecting directory:', error);
+    throw error;
+  }
+});
 
 const createWindows = () => {
   // convert the argv object to a querystring
@@ -111,48 +127,6 @@ const createWindows = () => {
       windowSettings.titleBarStyle = 'customButtonsOnHover';
       windowSettings.width = spannedDisplay.size.width;
       windowSettings.height = spannedDisplay.size.height;
-    } else {
-      // create a menu with an option to select the project directory
-      const menu:Electron.MenuItemConstructorOptions[] = [
-        {
-          label: 'File',
-          submenu: [
-            {
-              label: 'Select Project Directory',
-              click: async () => {
-                try {
-                  const selectedDirectory = await selectDirectory();
-                  argv.projectDirectory = selectedDirectory;
-                  console.log('Selected project directory:', selectedDirectory);
-                  mainWindow.close();
-                  startServer(argv);
-                  createWindows();
-                } catch (error) {
-                  console.error('Error selecting directory:', error);
-                }
-              }
-            },
-            {
-              label: 'Devtools',
-              click: () => {
-                if (BrowserWindow.getAllWindows().length > 0) {
-                  BrowserWindow.getAllWindows()[0].webContents.openDevTools();
-                }
-              }
-            },
-            {
-              label: 'Quit',
-              accelerator: 'CmdOrCtrl+Q',
-              role: 'quit',
-              click: () => {
-                app.quit();
-              }
-            }
-          ]
-        }
-      ];
-      const menuTemplate = Menu.buildFromTemplate(menu);
-      Menu.setApplicationMenu(menuTemplate);
     }
 
     const mainWindow = new BrowserWindow(windowSettings);
@@ -223,7 +197,6 @@ if (!isServerOnly) {
 
   app.whenReady().then(() => {
     argv.projectDirectory = resolveProjectDirectory(argv._[0], app);
-    startServer(argv);
     createWindows()
     if (argv.websocket) {
       globalShortcut.register('Right', () => {

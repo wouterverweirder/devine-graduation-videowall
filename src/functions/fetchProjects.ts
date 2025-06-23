@@ -225,7 +225,7 @@ export const processProjects = async (config:ApplicationConfig, projectsResult:a
             img.onerror = reject;
           });
         } catch (error) {
-          console.error(`Failed to load image for asset ${assetKeyName}`, error);
+          console.error(`Failed to load image for asset ${asset.url}`, error);
         }
       }
     }

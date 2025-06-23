@@ -6,6 +6,7 @@
   "scripts": {
     "start": "electron-forge start -- ../content/devine2025",
     "dev": "electron-forge start -- ../content/devine2025 --projection=single --devtools=true",
+    "dev:no-project": "electron-forge start -- --projection=single --devtools=true",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
