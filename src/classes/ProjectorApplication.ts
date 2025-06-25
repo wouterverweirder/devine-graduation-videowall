@@ -37,7 +37,10 @@ class ProjectorApplication extends Application {
     const outputCanvas = document.getElementById('output-canvas') as HTMLCanvasElement;
     outputCanvas.width = this.config.appDimensions.width;
     outputCanvas.height = this.config.appDimensions.height;
-    this.renderer = new THREE.WebGLRenderer({canvas: outputCanvas, powerPreference: "high-performance"});
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: outputCanvas,
+      powerPreference: "high-performance",
+    });
 
     THREE.ColorManagement.enabled = false;
     this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
@@ -76,6 +79,7 @@ class ProjectorApplication extends Application {
   }
 
   resetScreensaver() {
+    console.log('resetScreensaver');
     if (!isNaN(this.config.interactionTimeout) && this.config.interactionTimeout > 0) {
       clearTimeout(this.interactionTimeoutId);
       this.interactionTimeoutId = setTimeout(() => {
@@ -85,7 +89,12 @@ class ProjectorApplication extends Application {
   }
 
   startScreensaver() {
-    this.serverConnection.requestShowProjectsOverview();
+    console.log('startScreensaver');
+    if (this.isControlledThroughWebsocket()) {
+      this.serverConnection.requestShowProjectsOverview();
+    } else {
+      this.onRequestShowProjectsOverview();
+    }
   }
 
   applicationSpecificRender() {
@@ -121,7 +130,6 @@ class ProjectorApplication extends Application {
         this.renderer.setViewport( left, bottom, width, height );
         this.renderer.setScissor( left, bottom, width, height );
         this.renderer.setScissorTest( true );
-        this.renderer.setClearColor( BLACK );
 
         const origCameraProperties = {
           rotationZ: camera.object3D.rotation.z,
@@ -168,7 +176,6 @@ class ProjectorApplication extends Application {
       this.renderer.setViewport( left, bottom, width, height );
       this.renderer.setScissor( left + crop, bottom + crop, width - crop*2, height - crop*2 );
       this.renderer.setScissorTest( true );
-      this.renderer.setClearColor( BLACK );
 
       this.renderer.render( this.scene, camera.object3D );
     });
@@ -183,6 +190,7 @@ class ProjectorApplication extends Application {
   }
 
   onRequestKeyPressed = async () => {
+    console.log('onRequestKeyPressed');
     // reset the screen saver
     this.resetScreensaver();
   }
@@ -200,6 +208,7 @@ class ProjectorApplication extends Application {
     if (this.ambientAudio) {
       this.ambientAudio.pause();
     }
+    this.resetScreensaver();
     await super.onRequestShowProject(project);
     // auto next project? (autoNextProjectTimeout)
     console.log('autoNextProjectTimeout', this.config.autoNextProjectTimeout);
