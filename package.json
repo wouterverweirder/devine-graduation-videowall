@@ -4,14 +4,15 @@
   "version": "1.1.0",
   "main": ".vite/build/main.js",
   "scripts": {
-    "start": "electron-forge start -- ../content/devine2025",
-    "dev": "electron-forge start -- ../content/devine2025 --projection=single --devtools=true",
+    "start": "electron-forge start -- ../content/devine2026",
+    "dev": "electron-forge start -- ../content/devine2026 --projection=single --devtools=true",
     "dev:no-project": "electron-forge start -- --projection=single --devtools=true",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx ./src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "optimize-assets": "node scripts/optimize-assets.mjs"
   },
   "keywords": [],
   "author": {
